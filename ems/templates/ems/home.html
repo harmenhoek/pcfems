@@ -1,14 +1,14 @@
 {% extends "ems/base.html" %}
 {% block content %}
-   {% for post in posts %}
+   {% for item in object_list %}
        <article class="media content-section">
   <div class="media-body">
     <div class="article-metadata">
-      <a class="mr-2" href="#">{{ post.serial }}</a>
-      <small class="text-muted">{{ post.added_on|date:"F d, Y" }}</small>
+      <a class="mr-2" href="#">{{ item.serial }}</a>
+      <small class="text-muted">{{ item.added_on|date:"F d, Y" }}</small>
     </div>
-    <h2><a class="article-title" href="#">{{ post.brand }} {{ post.model }}</a></h2>
-    <p class="article-content">{{ post.description }}</p>
+    <h2><a class="article-title" href="{% url 'item-detail' item.id %}">{{ item.brand }} {{ item.model }}</a></h2>
+    <p class="article-content">{{ item.description }}</p>
   </div>
 </article>
 
