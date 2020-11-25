@@ -80,3 +80,6 @@ class ItemDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView): # TOD
 
 def about(request):
     return render(request, 'ems/about.html', {'title': 'About'})
+
+def test(request):
+    return render(request, 'ems/test.html')

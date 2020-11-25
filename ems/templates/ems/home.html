@@ -1,16 +1,49 @@
 {% extends "ems/base.html" %}
 {% block content %}
-   {% for item in object_list %}
-       <article class="media content-section">
-  <div class="media-body">
-    <div class="article-metadata">
-      <a class="mr-2" href="#">{{ item.serial }}</a>
-      <small class="text-muted">{{ item.added_on|date:"F d, Y" }}</small>
-    </div>
-    <h2><a class="article-title" href="{% url 'item-detail' item.id %}">{{ item.brand }} {{ item.model }}</a></h2>
-    <p class="article-content">{{ item.description }}</p>
-  </div>
-</article>
 
-   {% endfor %}
+<!--classes: table-bordered display cell-border compact hover order-column row-border stripe -->
+<!-- note use BOOTSTRAP CLASSES! table-hover -->
+
+<table id="example" class="table table-striped responsive nowrap table-hover" style="width:100%">
+    <thead>
+        <tr>
+            <th data-priority="10">ID</th>
+            <th data-priority="1">Brand</th>
+            <th data-priority="1">Model</th>
+            <th data-priority="1">Category</th>
+            <th data-priority="5">Location</th>
+            <th data-priority="2">Status</th>
+            <th data-priority="5">User</th>
+            <th data-priority="10">Added</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in object_list %}
+            <tr style="cursor:pointer;" onclick="window.location='{% url 'item-detail' item.id %}';">
+                <td>{{ item.pk }}</td>
+                <td>{{ item.brand }}</td>
+                <td>{{ item.model }}</td>
+                <td>{{ item.category }}</td>
+                <td>{{ item.location }}</td>
+                <td>{{ item.status }}</td>
+                <td>{{ item.user }}</td>
+                <td>{{ item.added_on|date:"F d, Y" }}</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+    <tfoot>
+        <tr>
+            <th>ID</th>
+            <th>Brand</th>
+            <th>Model</th>
+            <th>Category</th>
+            <th>Location</th>
+            <th>Status</th>
+            <th>User</th>
+            <th>Added</th>
+        </tr>
+    </tfoot>
+
+</table>
+
 {% endblock content %}

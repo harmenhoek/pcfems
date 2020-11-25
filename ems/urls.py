@@ -11,6 +11,7 @@ urlpatterns = [
     path('post/<int:pk>/update/', ItemUserUpdateView.as_view(), name='item-userupdate'),  # pk is primary key.
     path('post/<int:pk>/delete/', ItemDeleteView.as_view(), name='item-delete'),  # pk is primary key.
     path('about/', views.about, name='ems-about'),
+    path('test/', views.test, name='ems-test'),
 ]
 
 # path('user/<str:username>', UserPostListView.as_view(), name='user-posts'),
