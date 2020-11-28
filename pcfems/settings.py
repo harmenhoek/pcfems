@@ -38,8 +38,12 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
+    'django.contrib.humanize',
+
     # third-party apps
     'crispy_forms',
+    'activity_log',
+    'simple_history',
 
     # own apps
     'ems.apps.EmsConfig',
@@ -54,6 +58,10 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+
+    # third-party apps
+    'activity_log.middleware.ActivityLogMiddleware',
+    'simple_history.middleware.HistoryRequestMiddleware',
 ]
 
 ROOT_URLCONF = 'pcfems.urls'
@@ -139,3 +147,36 @@ MEDIA_URL = '/media/' # how we access the image in the browser. Location of the 
 
 
 # pcfems.utwente@gmail.com
+
+# activity_log app
+
+# For writing log to another DB
+DATABASE_ROUTERS = ['activity_log.router.DatabaseAppsRouter']
+DATABASE_APPS_MAPPING = {'activity_log': 'logs'}
+
+# Create DB automatically (for postgres, and may be mysql).
+# We create log database automatically using raw SQL in pre_migrate signal.
+# You must insure, that DB user has permissions for creation databases.
+# Tested only for postgresql
+ACTIVITYLOG_AUTOCREATE_DB = False
+
+# App settings
+
+# Log anonymous actions?
+ACTIVITYLOG_ANONYMOUS = True
+
+# Update last activity datetime in user profile. Needs updates for user model.
+ACTIVITYLOG_LAST_ACTIVITY = True
+
+# Only this methods will be logged
+ACTIVITYLOG_METHODS = ('POST', 'GET')
+
+# List of response statuses, which logged. By default - all logged.
+# Don't use with ACTIVITYLOG_EXCLUDE_STATUSES
+ACTIVITYLOG_STATUSES = (200, )
+
+# List of response statuses, which ignores. Don't use with ACTIVITYLOG_STATUSES
+# ACTIVITYLOG_EXCLUDE_STATUSES = (302, )
+
+# URL substrings, which ignores
+ACTIVITYLOG_EXCLUDE_URLS = ('/admin/activity_log/activitylog', )

@@ -1,0 +1,150 @@
+{% extends "ems/base.html" %}
+{% load humanize %}
+
+{% block content %}
+
+<!--     <article class="media content-section">-->
+
+<!--         <img class="rounded article-img float-right" src="{{ object.image.url }}">-->
+<!--            -->
+<!--     </article>-->
+
+
+<a class="btn btn-primary" href="{% url 'item-detail' item.id %}">BACK</a>
+
+<article class="media content-section">
+    <div class="row">
+        <div class="col col-lg-12 col-12">
+            {% for i in history %}
+
+            <!--
+            history_date
+            history_change_reason
+            history_type
+            history_object
+            history_user
+            history_user_id
+            instance
+            instance_type
+            next_record
+            prev_record
+            revert_url
+            __str__
+
+            -->
+
+            {{ i }} <br>
+
+            {{ i.history_id }}
+            {% if i.history_type == '~' %}
+            CHANGED
+            {% elif i.history_type == '+' %}
+            ADDED
+            {% else %}
+            UNKNOWN
+            {% endif %}
+            {{ i.history_date|date:"Y-m-d G:i:s" }}
+            {{ i.history_user }}
+            {{ i.history_delta }}
+            <br>
+            {% endfor %}
+        </div>
+    </div>
+    <div class="row">
+        <div class="col col-lg-12 col-12">
+
+
+        </div>
+    </div>
+</article>
+<article class="media content-section">
+
+
+    {% if history %}
+    <table class="table">
+        <tr>
+            <th>Date</th>
+            <th>User</th>
+            <th>Type</th>
+            <th>Field</th>
+            <th>Old value</th>
+            <th>New value</th>
+            <th>Revert to old</th>
+        </tr>
+
+
+        {% for idx in zipped_allhistory_alldelta %}
+
+        {% for jdx in idx.1.changes %}
+        <!-- One HistoryItem can have multiple changes (multiple fields that are changed) -->
+        <tr>
+            <td>
+                {{ idx.0.history_date|date:"Y-m-d G:i:s" }}
+            </td>
+            <td>
+                <b>{{ idx.0.history_user }}</b>
+            </td>
+            <td>
+                {% if idx.0.history_type == '~' %}
+                CHANGED
+                {% elif idx.0.history_type == '+' %}
+                ADDED
+                {% else %}
+                UNKNOWN
+                {% endif %}
+            </td>
+            <td>
+                <b>{{ jdx.field }}</b>
+            </td>
+            <td>
+                <b>{{ jdx.old }}</b>
+            </td>
+            <td>
+                <b>{{ jdx.new }}</b>
+            </td>
+            <td>
+                <a class="btn btn-primary" href="#">Revert</a> <!-- TODO make revert link here-->
+            </td>
+
+
+        </tr>
+
+
+        {% endfor %}
+        {% endfor %}
+        <tr>
+            <td>
+                {{ history.last.history_date|date:"Y-m-d G:i:s" }}
+            </td>
+            <td>
+                <b>{{ history.last.history_user }}</b>
+            </td>
+            <td>
+                {% if history.last.history_type == '~' %}
+                CHANGED
+                {% elif history.last.history_type == '+' %}
+                ADDED
+                {% else %}
+                UNKNOWN
+                {% endif %}
+            </td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td>
+                <a class="btn btn-primary" href="#">Revert</a> <!-- TODO make revert link here-->
+            </td>
+
+
+        </tr>
+
+
+    </table>
+    {% else %}
+    <p>No recent changes found.</p>
+    {% endif %}
+
+
+</article>
+
+{% endblock content %}

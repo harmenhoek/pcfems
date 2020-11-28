@@ -28,6 +28,9 @@ ul {
   font-weight: 500;
 }
 
+
+/* Content Section */
+
 .content-section {
   background: #ffffff;
   padding: 10px 20px;
@@ -35,6 +38,19 @@ ul {
   border-radius: 3px;
   margin-bottom: 20px;
 }
+
+/* Item */
+
+.item-metadata {
+    padding: 0;
+}
+
+hr {
+    margin: 0;
+    margin-top: 5px;
+}
+
+/* Article */
 
 .article-title {
   color: #444444;
@@ -50,9 +66,9 @@ a.article-title:hover {
 }
 
 .article-img {
-  height: 65px;
-  width: 65px;
-  margin-right: 16px;
+  height: 25%;
+  width: 25%;
+  padding-right: 20px;
 }
 
 .article-metadata {
@@ -71,6 +87,8 @@ a.article-title:hover {
   height: 25px;
   vertical-align: middle;
 }
+
+/* Account */
 
 .account-img {
   height: 125px;
@@ -100,9 +118,3 @@ body {
   line-height: 60px; /* Vertically center the text there */
   background-color: #f5f5f5;
 }
-
-tr input, tfoot input  {
-        width: 100%;
-        padding: 0px;
-        box-sizing: border-box;
-    }

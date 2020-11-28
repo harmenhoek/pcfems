@@ -1,26 +1,355 @@
 {% extends "ems/base.html" %}
+{% load humanize %}
+
 {% block content %}
-   <article class="media content-section">
-       <img class="rounded-circle article-img" src="{{ object.image.url }}">
-     <div class="media-body">
-       <div class="article-metadata">
-         <a class="mr-2" href="#">{{ object.brand }} {{ object.model }}</a>
-         <small class="text-muted">{{ object.added_on|date:"F d, Y" }}</small>
-               <div>
-                   {% if user.is_staff %}
-                        <a class="btn btn-secondary btn-sm mt-1 mb-1" href="{% url  'item-staffupdate' object.id %}">Update (staff)</a>
-                   {% endif %}
 
-                   {% if user.is_authenticated %}
-                    <a class="btn btn-secondary btn-sm mt-1 mb-1" href="{% url  'item-userupdate' object.id %}">Update</a>
-                   {% endif%}
+<!--     <article class="media content-section">-->
 
-                   <a class="btn btn-danger btn-sm mt-1 mb-1" href="{% url  'item-delete' object.id %}">Delete</a>
-               </div>
+<!--         <img class="rounded article-img float-right" src="{{ object.image.url }}">-->
+<!--            -->
+<!--     </article>-->
 
-       </div>
-       <h2 class="article-title">{{ object.serial }}</h2>
-       <p class="article-content">{{ object.description }}</p>
-     </div>
-   </article>
+
+<article class="media content-section">
+    <div class="row justify-content-md-center">
+        <div class="col col-lg-8 col-12">
+            <div class="row item-metadate my-2">
+                <div class="col col-lg-9 col-9">
+                    <h2 class="align-middle d-inline article-title pr-2">{{ object.brand }} {{ object.model }}</h2>
+                    {% if object.status %}
+                    <span class="align-middle badge badge-pill badge-success">Available</span>
+                    <!-- TODO Hiding elements -->
+                    {% else %}
+                    <span class="align-middle badge badge-pill badge-danger">In use</span> <!-- TODO Hiding elements -->
+                    {% endif %}
+                </div>
+
+                <div class="col col-lg-3 col-3">
+                    <div class="float-right">
+                        <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenu2"
+                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            Actions
+                        </button>
+                        <div class="dropdown-menu" aria-labelledby="dropdownMenu2">
+                            {% if user.is_authenticated %}
+                            <a class="dropdown-item" href="{% url  'item-userupdate' object.id %}">Update</a>
+                            {% endif%}
+
+
+                            {% if user.is_staff %}
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item" href="{% url  'item-staffupdate' object.id %}">Update (staff)</a>
+                            <a class="dropdown-item" href="{% url  'item-delete' object.id %}">Delete</a>
+                            <a class="dropdown-item" href="{% url  'item-history' object.id %}">Full history</a>
+                            {% endif %}
+
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            <hr>
+            <div class="row">
+                <div class="col col-lg-12 col-12">
+                    <small class="text-muted">ID: {{ object.qrid }}</small>
+                    <!-- {{ object.added_on|date:"F d, Y" }} -->
+
+                    <div class="shadow p-3 mb-5 bg-white rounded mt-3 mx-2">
+<!--                          <hr class="my-2">-->
+                        <table class="table table-borderless table-sm mb-0 w-auto">
+                            <tr>
+                                <td>
+                                    <i class="fas fa-check-circle"></i> Current status
+                                </td>
+                                <td class="pl-4">
+                                    <h5>
+                                        {% if object.status %}
+                    <span class="align-middle badge badge-pill badge-success">Available</span>
+                    <!-- TODO Hiding elements -->
+                    {% else %}
+                    <span class="align-middle badge badge-pill badge-danger">In use</span> <!-- TODO Hiding elements -->
+                    {% endif %}
+
+                                    </h5>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <i class="fas fa-map-marker"></i> Current Location
+                                </td>
+                                <td class="pl-4">
+                                    <h5><span class="badge badge-primary">{{ object.location }}</span></h5>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="th-sm">
+                                    <i class="fas fa-user"></i> Current User
+                                </td>
+                                <td class="pl-4">
+                                    <h5>
+                                        {% if object.user == None %}
+                                            <span class="badge badge-secondary">{{ object.user }}</span>
+                                        {% else %}
+                                            <span class="badge badge-primary">{{ object.user }}</span>
+                                        {% endif %}
+                                    </h5>
+                                </td>
+                            </tr>
+                        </table>
+</div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col col-lg-12 col-12">
+                    <h3>Details</h3>
+                    <table class="table mt-3">
+                        <tbody>
+                        <tr>
+                            <th scope="row">Brand</th>
+                            <td>{{ object.brand }}</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Model</th>
+                            <td>{{ object.model }}</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Serial number</th>
+                            <td>{{ object.serial }}</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Category</th>
+                            <td><span class="align-middle badge badge-secondary">{{ object.category }}</span></td>
+                        </tr>
+                        <tr style="min-height: 200px;">
+                            <th scope="row">Description</th>
+                            <td>
+                                <div style="min-height: 60px;">
+                                    {{ object.description }}
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Purchased by</th>
+                            <td>{{ object.purchased_by }}</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Purchased on</th>
+                            <td>{{ object.purchased_on|date:"F d, Y" }}</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Purchased price</th>
+                            <td>&euro; {{ object.purchased_price|intcomma }}</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Default storage location</th>
+                            <td><a href="#">{{ object.storage_location }}</a></td> <!-- TODO add map ext link -->
+                        </tr>
+                        <tr>
+                            <th scope="row">Manuals</th>
+                            <td>All manuals here</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+        </div>
+        <div class="col col-lg-4 col-12 pl-1">
+            <div class="row my-2">
+                <div class="col col-12">
+                    <img class="rounded mr-0" style="width:100%;" src="{{ object.image.url }}">
+                </div>
+            </div>
+            <div class="row my-2">
+                <div class="col col-12">
+                    <img class="rounded mr-0" style="width:100%;" src="{{ object.image.url }}">
+                </div>
+            </div>
+            <div class="row my-2">
+                <div class="col col-12">
+                    <img class="rounded mr-0" style="width:100%;" src="{{ object.image.url }}">
+                </div>
+            </div>
+<!--            <div class="row">-->
+<!--                <div class="col col-12 mt-2">-->
+<!--                    <div class="row">-->
+<!--                        <div class="col col-6 pr-1">-->
+<!--                            <img class="my-0" style="width:100%;" src="{{ object.image.url }}">-->
+<!--                        </div>-->
+<!--                        <div class="col col-6 pl-1">-->
+<!--                            <img class="my-0" style="width:100%;" src="{{ object.image.url }}">-->
+<!--                        </div>-->
+<!--                    </div>-->
+
+<!--                </div>-->
+<!--            </div>-->
+
+
+        </div>
+
+    </div>
+</article>
+
+<!--<article class="media content-section">-->
+<!--    <div class="row">-->
+<!--        <div class="col col-lg-12 col-12">-->
+<!--            {% for i in history %}-->
+
+<!--            &lt;!&ndash;-->
+<!--            history_date-->
+<!--            history_change_reason-->
+<!--            history_type-->
+<!--            history_object-->
+<!--            history_user-->
+<!--            history_user_id-->
+<!--            instance-->
+<!--            instance_type-->
+<!--            next_record-->
+<!--            prev_record-->
+<!--            revert_url-->
+<!--            __str__-->
+
+<!--            &ndash;&gt;-->
+
+<!--            {{ i }} <br>-->
+
+<!--            {{ i.history_id }}-->
+<!--            {% if i.history_type == '~' %}-->
+<!--            CHANGED-->
+<!--            {% elif i.history_type == '+' %}-->
+<!--            ADDED-->
+<!--            {% else %}-->
+<!--            UNKNOWN-->
+<!--            {% endif %}-->
+<!--            {{ i.history_date|date:"Y-m-d G:i:s" }}-->
+<!--            {{ i.history_user }}-->
+<!--            {{ i.history_delta }}-->
+<!--            <br>-->
+<!--            {% endfor %}-->
+<!--        </div>-->
+<!--    </div>-->
+<!--    <div class="row">-->
+<!--        <div class="col col-lg-12 col-12">-->
+
+
+<!--        </div>-->
+<!--    </div>-->
+<!--</article>-->
+<article class="media content-section">
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col col-lg-12 col-12">
+            <h3 class="d-inline">Notes, flags and manuals</h3>
+            <div class="float-right my-2">
+                <a class="btn btn-success" href="#"><i class="fas fa-plus"></i> Add note</a>
+            </div>
+            <table class="table" style="width:100%;">
+                <thead>
+                    <th>Date</th>
+                    <th>User</th>
+                    <th>Note</th>
+
+                </thead>
+                <tbody>
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+</article>
+
+<article class="media content-section">
+
+<div class="container-fluid">
+    {% if history %}
+    <div class="row">
+        <div class="col col-lg-12 col-12">
+            <h3>Item History</h3>
+            <table class="table" style="width:100%;">
+                <thead>
+                    <th>Date</th>
+                    <th>User</th>
+                    <th>Type</th>
+                    <th>Fields changed</th>
+
+                </thead>
+
+
+                {% for idx in zipped_allhistory_alldelta %}
+                <tr>
+                    <td>
+                        {{ idx.0.history_date|date:"Y-m-d G:i:s" }}
+                    </td>
+                    <td>
+                        <b>{{ idx.0.history_user }}</b>
+                    </td>
+                    <td>
+                        {% if idx.0.history_type == '~' %}
+                        CHANGED
+                        {% elif idx.0.history_type == '+' %}
+                        ADDED
+                        {% else %}
+                        UNKNOWN
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% for field in idx.1 %}
+                        <span class="align-middle badge badge-primary">{{ field }}</span>
+
+                        {% endfor %}
+                    </td>
+                </tr>
+
+
+                {% for jdx in idx.1.changes %}
+                <!-- One HistoryItem can have multiple changes (multiple fields that are changed) -->
+
+
+                {% endfor %}
+                {% endfor %}
+                <tr>
+                    <td>
+                        {{ history.last.history_date|date:"Y-m-d G:i:s" }}
+                    </td>
+                    <td>
+                        <b>{{ history.last.history_user }}</b>
+                    </td>
+                    <td>
+                        {% if history.last.history_type == '~' %}
+                        CHANGED
+                        {% elif history.last.history_type == '+' %}
+                        ADDED
+                        {% else %}
+                        UNKNOWN
+                        {% endif %}
+                    </td>
+                    <td>
+                        <b></b>
+                    </td>
+
+
+                </tr>
+
+
+            </table>
+        </div>
+    </div>
+    {% else %}
+    <p>No recent changes found.</p>
+    {% endif %}
+
+</div>
+</article>
+
 {% endblock content %}

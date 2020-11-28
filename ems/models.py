@@ -5,6 +5,10 @@ from django.urls import reverse # for redirect after adding item
 from PIL import Image
 import os
 import time
+from simple_history.models import HistoricalRecords
+from simple_history import register
+
+register(User) # to allow simple_history to track it
 
 # set __str__ for user
 def get_first_name(self):
@@ -16,6 +20,7 @@ class Lab(models.Model):
     number = models.CharField(max_length=5)
     manager = models.CharField(max_length=100, default='undefined')  # TODO make selectlist
     nickname = models.CharField(max_length=20, default='')
+    history = HistoricalRecords()
 
     def __str__(self):
         return f"{self.number} ({self.nickname})"
@@ -23,6 +28,7 @@ class Lab(models.Model):
 class Cabinet(models.Model):
     lab = models.ForeignKey(Lab, on_delete=models.CASCADE)
     number = models.CharField(max_length=10)
+    history = HistoricalRecords()
 
     def __str__(self):
         return f"{self.lab.number}-{self.number}"
@@ -31,6 +37,7 @@ class Setup(models.Model):
     lab = models.ForeignKey(Lab, on_delete=models.CASCADE)
     name = models.CharField(max_length=100)
     manager = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, default='undefined', limit_choices_to={'is_superuser': False})
+    history = HistoricalRecords()
 
     def __str__(self):
         return f"{self.lab.number} - {self.name}"
@@ -38,12 +45,15 @@ class Setup(models.Model):
 class Flag(models.Model):
     flag = models.CharField(max_length=100)
     description = models.TextField()
+    icon = models.CharField(max_length=100, default='bug')
+    history = HistoricalRecords()
 
     def __str__(self):
         return self.flag
 
 class Category(models.Model):
     name = models.CharField(max_length=100)
+    history = HistoricalRecords()
 
     def __str__(self):
         return self.name
@@ -54,7 +64,7 @@ class Category(models.Model):
 class Item(models.Model):  # inherit from models, all fields below
     # General details
     # id or pk automatically created
-    # qrid = models.CharField(max_length=5)
+    qrid = models.SlugField(max_length=10, null=True, blank=True)
     brand = models.CharField(max_length=100)
     model = models.CharField(max_length=100)
     serial = models.CharField(max_length=100, null=True, blank=True)
@@ -88,6 +98,7 @@ class Item(models.Model):  # inherit from models, all fields below
     # notes through time
     flag = models.ForeignKey(Flag, on_delete=models.SET_NULL, null=True, blank=True) #TODO only show when editing item
     image = models.ImageField(default='default.png', upload_to='item_pics')
+    history = HistoricalRecords()
 
 
     def __str__(self):
@@ -97,25 +108,26 @@ class Item(models.Model):  # inherit from models, all fields below
         return reverse('item-detail', kwargs={'pk': self.pk})
 
     def save(self, *args, **kwargs):
-        super().save(*args, **kwargs)
+        super().save(*args, **kwargs)  # initial save (incl image)
+        if self.qrid == '':
+            self.qrid = f"PCF{self.pk:04d}"
+            super().save(*args, **kwargs)
 
         img = Image.open(self.image.path)
         maxsize = 1000
         if img.height > maxsize or img.width > maxsize:
             output_size = (maxsize, maxsize)
             img.thumbnail(output_size)
-        # rename
-        path = os.path.dirname(self.image.path)
-        ext = os.path.splitext(self.image.path)[1]
-        shorthash = hash(time.time())
-        file_new = os.path.join(path, str(self.pk) + '_' + str(shorthash) + ext)
-        img.save(file_new)
-        os.remove(self.image.path)
-
-        file_new_short = os.path.join('item_pics/', str(self.pk) + '_' + str(shorthash) + ext)
-
-        self.image = file_new_short
-        super().save(*args, **kwargs)
+            # rename (TODO what if user uploads small image? Now no rename)
+            path = os.path.dirname(self.image.path)
+            ext = os.path.splitext(self.image.path)[1]
+            shorthash = hash(time.time())
+            file_new = os.path.join(path, str(self.pk) + '_' + str(shorthash) + ext)
+            img.save(file_new)
+            os.remove(self.image.path)
+            file_new_short: str = os.path.join('item_pics/', str(self.pk) + '_' + str(shorthash) + ext)
+            self.image = file_new_short
+            super().save(*args, **kwargs)
 
 
 # class Logs?

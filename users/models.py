@@ -2,6 +2,9 @@ from django.db import models
 from django.contrib.auth.models import User
 from PIL import Image
 
+from django.contrib.auth.models import AbstractUser
+from activity_log.models import UserMixin
+
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)  #one-to-one relationship: one profile per user, one user per profile
     image = models.ImageField(default='default.png', upload_to='profile_pics')
@@ -17,3 +20,9 @@ class Profile(models.Model):
             output_size = (300, 300)
             img.thumbnail(output_size)
             img.save(self.image.path)
+
+
+
+# # Only for LAST_ACTIVITY = True
+# class User(AbstractUser, UserMixin):
+#     pass
