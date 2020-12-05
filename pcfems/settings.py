@@ -25,7 +25,7 @@ SECRET_KEY = '!v3zr=nqlucany33r#x1o64y-71o9tdzn+48eu50r-q!10i!n-'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['10.10.10.110']
 
 
 # Application definition
@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'crispy_forms',
     'activity_log',
     'simple_history',
+    'sslserver',
 
     # own apps
     'ems.apps.EmsConfig',
@@ -180,3 +181,7 @@ ACTIVITYLOG_STATUSES = (200, )
 
 # URL substrings, which ignores
 ACTIVITYLOG_EXCLUDE_URLS = ('/admin/activity_log/activitylog', )
+
+
+# Max upload size
+DATA_UPLOAD_MAX_MEMORY_SIZE = 2621440*10

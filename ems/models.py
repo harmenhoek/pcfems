@@ -7,6 +7,8 @@ import os
 import time
 from simple_history.models import HistoricalRecords
 from simple_history import register
+from django.contrib.contenttypes.fields import GenericForeignKey
+from django.contrib.contenttypes.models import ContentType
 
 register(User) # to allow simple_history to track it
 
@@ -86,8 +88,14 @@ class Item(models.Model):  # inherit from models, all fields below
 #.objects.all().exclude(is_superuser=True)
 
     # Tracking details
-    status = models.BooleanField(default=False) #false is in storage, true is in use
+    status = models.BooleanField(default=False) #True is in storage (item is free), False is in use (assigned to)
     location = models.ForeignKey(Setup, on_delete=models.SET_NULL, null=True) # TODO current location is now ALWAYS a setup, should also be possible to be storage
+    # location = ForeignKey(Setup OR Cabinet)
+
+    # content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
+    # object_id = models.PositiveIntegerField()
+    # location2 = GenericForeignKey('content_type', 'object_id')
+
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name="itemuser", limit_choices_to={'is_superuser': False})
     date_inuse = models.DateField(null=True, blank=True) #TODO only show when editing item
     date_return = models.DateField(null=True, blank=True) #TODO only show when editing item
@@ -98,7 +106,7 @@ class Item(models.Model):  # inherit from models, all fields below
     # notes through time
     flag = models.ForeignKey(Flag, on_delete=models.SET_NULL, null=True, blank=True) #TODO only show when editing item
     image = models.ImageField(default='default.png', upload_to='item_pics')
-    history = HistoricalRecords()
+    history = HistoricalRecords() # excluded_fields=['pub_date']
 
 
     def __str__(self):
@@ -115,7 +123,7 @@ class Item(models.Model):  # inherit from models, all fields below
 
         img = Image.open(self.image.path)
         maxsize = 1000
-        if img.height > maxsize or img.width > maxsize:
+        if img.height > maxsize or img.width > maxsize:  # TODO move this to views?!
             output_size = (maxsize, maxsize)
             img.thumbnail(output_size)
             # rename (TODO what if user uploads small image? Now no rename)
@@ -130,6 +138,20 @@ class Item(models.Model):  # inherit from models, all fields below
             super().save(*args, **kwargs)
 
 
-# class Logs?
+class ItemImage(models.Model):
+    item = models.ForeignKey(Item, related_name='images', on_delete=models.CASCADE)
+    added_by = models.ForeignKey(User, on_delete=models.RESTRICT, limit_choices_to={'is_superuser': False})
+    added_on = models.DateTimeField(default=timezone.now)
+    image = models.ImageField(upload_to='item_pics')
+    caption = models.CharField(max_length=200, blank=True, null=True)
+    history = HistoricalRecords()
 
-# Have a timeline / log linked to each item. Different model just like Profile is to User
+    def __str__(self):
+        return f"{self.item.pk} - {self.image.name}"
+
+class ItemLog(models.Model):
+    item = models.ForeignKey(Item, related_name='logs', on_delete=models.CASCADE)
+    added_by = models.ForeignKey(User, on_delete=models.RESTRICT, limit_choices_to={'is_superuser': False})
+    added_on = models.DateTimeField(default=timezone.now)
+    log = models.TextField()
+    history = HistoricalRecords()

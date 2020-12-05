@@ -1,6 +1,6 @@
 from django.urls import path
 from . import views  # imports the functions from views.py
-from .views import ItemListView, ItemDetailView, ItemCreateView, ItemStaffUpdateView, ItemUserUpdateView, ItemDeleteView, ItemHistoryView
+from .views import ItemListView, ItemDetailView, ItemCreateView, ItemStaffUpdateView, ItemUserUpdateView, ItemDeleteView, ItemHistoryView, AssignCreateView
 
 urlpatterns = [
     path('', ItemListView.as_view(), name='ems-home'),
@@ -11,9 +11,12 @@ urlpatterns = [
     path('item/<int:pk>/update/', ItemUserUpdateView.as_view(), name='item-userupdate'),
     path('item/<int:pk>/delete/', ItemDeleteView.as_view(), name='item-delete'),
     path('item/<int:pk>/history/', ItemHistoryView.as_view(), name='item-history'),
+    path('item/<int:pk>/assign/new', AssignCreateView.as_view(), name='item-assign'),
+    path('item/<int:pk>/assign/remove', views.assignremove, name='item-assign-remove'),
     path('item/<slug:qrid>/', ItemDetailView.as_view(), name='item-detail'),
     path('about/', views.about, name='ems-about'),
     path('test/', views.test, name='ems-test'),
+    path('scanner/', views.scanner, name='ems-scanner'),
 ]
 
     # path('user/<str:username>', UserPostListView.as_view(), name='user-posts'),

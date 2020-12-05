@@ -1,6 +1,5 @@
 from django.shortcuts import render
 from .models import Lab, Cabinet, Setup, Item, Flag, Category
-from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from django.shortcuts import render, get_object_or_404
@@ -10,6 +9,11 @@ from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib.admin.views.decorators import staff_member_required
 from django.utils.decorators import method_decorator
 # for function-based views, decorator: staff_member_required @staff_member_required
+from .forms import ItemForm
+from django.urls import reverse
+from django.http import HttpResponse, HttpResponseRedirect
+from django.utils import timezone
+from django.forms import modelformset_factory
 
 # @login_required
 # def home(request):
@@ -63,6 +67,9 @@ class ItemDetailView(DetailView):
     slug_url_kwarg = 'qrid'
     slug_field = 'qrid'
 
+    # def get_object(self, queryset=None):
+    #     return Item.objects.get(qrid=self.kwargs.get("qrid"))
+
     def get_context_data(self, **kwargs): # to send extra data
         # Call the base implementation first to get a context
         context = super().get_context_data(**kwargs)
@@ -74,7 +81,13 @@ class ItemDetailView(DetailView):
         # this is because record can have multiple modeldelta (fields that are changed). Each of these
         # modeldelta have the same history_user. To iterate over them in the template, we create a history
         # record array with the same length as modeldelta (thus duplicates if modeldelta>1).
-        history = Item.history.filter(id=self.kwargs['pk'])
+
+        # dirty solution below!
+        try:
+            history = Item.history.filter(id=self.kwargs['pk'])
+        except:
+            history = Item.history.filter(qrid=self.kwargs['qrid'])
+
         all_delta = []
         all_history = [] #[-1] not supported in Django
         for record in history:
@@ -89,20 +102,58 @@ class ItemDetailView(DetailView):
         context['history'] = history
         context['zipped_allhistory_alldelta'] = zip(all_history, all_delta)
 
+
+        # return all images
+        try:
+            image_list = Item.objects.get(pk=self.kwargs['pk']).images.all()
+        except:
+            image_list = Item.objects.get(qrid=self.kwargs['qrid']).images.all()
+
+        context['image_list'] = image_list
+
         return context
 
 @method_decorator(staff_member_required, name='dispatch') #only staff can add new
 class ItemCreateView(LoginRequiredMixin, CreateView):
     model = Item
-    # form_class = ItemForm
-    # fields = ['title', 'content']
-    # fields = '__all__'
-    fields = ['brand', 'model', 'serial', 'category', 'description', 'purchased_by', 'purchased_on', 'purchased_price', 'storage_location', 'image']
-    # no need to add template_name since we use default names django expects.
+    form_class = ItemForm
+    success_url = None
+    # fields = ['brand', 'model', 'serial', 'category', 'description', 'purchased_by', 'purchased_on', 'purchased_price', 'storage_location', 'image']
 
     def form_valid(self, form):
         form.instance.added_by = self.request.user
         return super().form_valid(form)
+
+class AssignCreateView(LoginRequiredMixin, UpdateView):
+    model = Item
+    template_name = 'ems/assign_create.html'
+    fields = ['location', 'user', 'date_return']
+
+
+    def form_valid(self, form):
+        # form.instance.user = self.request.user
+        form.instance.status = False
+        form.instance.date_inuse = timezone.now()
+        # item = get_object_or_404(Item, pk=self.kwargs.get('pk'))
+        # item.status = True
+        # item.save(update_fields=['status'])
+        return super().form_valid(form)
+
+
+def assignremove(request, pk):
+    item = get_object_or_404(Item, pk=pk)
+    item.status = True
+    item.user = None
+    # item.location = item.storage_location
+    item.date_return = timezone.now()
+    item.save()
+    # do something here
+
+    # return HttpResponseRedirect(reverse('item:results', args=(item.pk,)))
+    # return render(request, 'polls/results.html', {'pk': pk})
+    return HttpResponseRedirect(reverse('item-detail', args=(pk,)))
+    # return reverse('item-detail', kwargs={'pk': pk})
+
 
 @method_decorator(staff_member_required, name='dispatch') #only staff can edit fully
 class ItemStaffUpdateView(LoginRequiredMixin, UpdateView): # TODO different update views for general users and managers. UserPassesTestMixin
@@ -145,3 +196,6 @@ def about(request):
 
 def test(request):
     return render(request, 'ems/test.html')
+
+def scanner(request):
+    return render(request, 'ems/scanner.html')

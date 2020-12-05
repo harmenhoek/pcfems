@@ -25,7 +25,7 @@ Current version: 0.1 (November 2020)
 
 ### Detail page
 - Timeline of recent activity of item
-- 
+- On side the quick actions: Add files, Edit item, Claim
 
 ### Custom admin interface
 - Allow to add categories, labs, etc.
@@ -35,6 +35,9 @@ Current version: 0.1 (November 2020)
 - QR code scanner
 - Logging of activity, showing this on timeline per item
 - QR code generator for new items. When adding, ask to enter pre-printed qr code, or scan it. Show a selection box with pre-printed QR-codes. Only those just printed can be added to the system.
+- Claim functionality
+- Admin environment: see all logs, add categories, etc. Add link to menubar. See recent activity. See flags in overview.
+- New model for images. Link images to model. How to add this to history as well.
 
 ## Changelog
 
