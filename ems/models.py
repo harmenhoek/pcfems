@@ -75,8 +75,9 @@ class Item(models.Model):  # inherit from models, all fields below
     purchased_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name="purchaseduser", limit_choices_to={'is_superuser': False})  # TODO make selectbox of users
     purchased_on = models.DateField(default="", null=True, blank=True)  # TODO not now
     purchased_price = models.DecimalField(decimal_places=2, max_digits=10, null=True, blank=True)
-    # warranty_expiration = models.DateField(null=True, blank=True)
-    # next_service_date = models.DateField(null=True, blank=True)
+    warranty = models.BooleanField(default=False)
+    warranty_expiration = models.DateField(null=True, blank=True)
+    next_service_date = models.DateField(null=True, blank=True)
     storage_location = models.ForeignKey(Cabinet, on_delete=models.SET_NULL, default="", null=True, blank=True)  # TODO make different model for storage locations
     added_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True,
                                  related_name="addeduser", limit_choices_to={'is_superuser': False})  # related_name is needed since the reverse releationship (user->item, which we don't need at at all) needs a unique name. TODO make selectbox of users
@@ -85,7 +86,7 @@ class Item(models.Model):  # inherit from models, all fields below
     added_on = models.DateTimeField(default=timezone.now)
     last_scanned = models.DateTimeField(default=timezone.now, null=True, blank=True)  # TODO link to model
 
-#.objects.all().exclude(is_superuser=True)
+    #.objects.all().exclude(is_superuser=True)
 
     # Tracking details
     status = models.BooleanField(default=False) #True is in storage (item is free), False is in use (assigned to)
@@ -155,3 +156,6 @@ class ItemLog(models.Model):
     added_on = models.DateTimeField(default=timezone.now)
     log = models.TextField()
     history = HistoricalRecords()
+
+    def __str__(self):
+        return f"{self.item.pk} - {self.item.added_on} - {self.item.added_by}"

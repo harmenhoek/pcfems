@@ -1,5 +1,6 @@
 {% extends "ems/base.html" %}
 {% load humanize %}
+{% load ems_customfilters %}
 
 {% block content %}
 
@@ -84,7 +85,11 @@
                                      Location
                                 </td>
                                 <td class="pl-4">
-                                    <h5><span class="badge badge-primary">{{ object.location }}</span></h5>
+                                    {% if object.status %}
+                                        <h5><span class="badge badge-primary">{{ object.storage_location }}</span></h5>
+                                    {% else %}
+                                         <h5><span class="badge badge-warning">{{ object.location }}</span></h5>
+                                    {% endif %}
                                 </td>
                             </tr>
                             <tr>
@@ -149,6 +154,26 @@
                             <th scope="row">Purchased price</th>
                             <td>&euro; {{ object.purchased_price|intcomma }}</td>
                         </tr>
+                        {% if object.warranty_expiration|in_the_future %}
+                        <tr>
+                            <th scope="row">Warranty</th>
+                            <td>Yes</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Warranty expiration</th>
+                            <td>{{ object.warranty_expiration|date:"F d, Y" }} ({{ object.warranty_expiration|timedelta }})</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Warranty next service date</th>
+                            <td>{{ object.next_service_date|date:"F d, Y" }} ({{ object.next_service_date|timedelta }})</td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <th scope="row">Warranty</th>
+                            <td>No</td>
+                        </tr>
+                        {% endif %}
+
                         <tr>
                             <th scope="row">Default storage location</th>
                             <td><a href="#">{{ object.storage_location }}</a></td> <!-- TODO add map ext link -->
