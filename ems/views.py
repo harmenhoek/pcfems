@@ -144,7 +144,7 @@ class LogCreateView(LoginRequiredMixin, CreateView):
 
     def form_valid(self, form):
         form.instance.added_by = self.request.user
-        item = get_object_or_404(Item, pk=self.kwargs['pk'])
+        item = get_object_or_404(Item, pk=self.kwargs['pk'])  # TODO FIX! No pk is sent to add.
         form.instance.item = item
         # form.instance.item = self.item.get_object()
 

@@ -17,7 +17,7 @@ urlpatterns = [
     # path('item/<int:pk>/log/new/', LogCreateView.as_view() , name='item-log-create'),
     # path('item/<int:pk>/log/<int:pk_2>/update/', LogUpdateView.as_view() , name='item-log-update'), #                             <a class="btn btn-secondary btn-sm mt-1 mb-1" href="{% url  'item-log-update' object.id log.id %}">Update</a>
     # path('item/<int:pk>/log/<int:pk_2>/delete/', LogDeleteView.as_view() , name='item-log-delete'),
-    path('log/new/', LogCreateView.as_view(), name='item-log-create'),
+    path('item/<int:pk>/log/new/', LogCreateView.as_view(), name='item-log-create'),
     path('log/<int:pk>/update/', LogUpdateView.as_view(), name='item-log-update'),
     path('log/<int:pk>/delete/', LogDeleteView.as_view(), name='item-log-delete'),
     path('item/<slug:qrid>/', ItemDetailView.as_view(), name='item-detail'),

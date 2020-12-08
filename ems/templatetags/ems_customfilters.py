@@ -29,4 +29,6 @@ def timedelta(value):
             dt = dt + ', '
     if (day != 0):
         dt = dt + str(int(math.ceil(day))) + ' days'
+    if (year == 0 and month == 0 and day == 0):
+        dt = 'today'
     return dt
