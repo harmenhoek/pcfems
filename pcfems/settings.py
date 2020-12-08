@@ -185,3 +185,22 @@ ACTIVITYLOG_EXCLUDE_URLS = ('/admin/activity_log/activitylog', )
 
 # Max upload size
 DATA_UPLOAD_MAX_MEMORY_SIZE = 2621440*10
+
+# LOGGING = {
+#     'version': 1,
+#     'disable_existing_loggers': False,
+#     'handlers': {
+#         'file': {
+#             'level': 'DEBUG',
+#             'class': 'logging.FileHandler',
+#             'filename': 'debug.log',
+#         },
+#     },
+#     'loggers': {
+#         'django': {
+#             'handlers': ['file'],
+#             'level': 'DEBUG',
+#             'propagate': True,
+#         },
+#     },
+# }

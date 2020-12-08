@@ -1,7 +1,7 @@
 from django.db import models
 from django.utils import timezone
 from django.contrib.auth.models import User
-from django.urls import reverse # for redirect after adding item
+from django.urls import reverse, reverse_lazy # for redirect after adding item
 from PIL import Image
 import os
 import time
@@ -107,6 +107,7 @@ class Item(models.Model):  # inherit from models, all fields below
     # notes through time
     flag = models.ForeignKey(Flag, on_delete=models.SET_NULL, null=True, blank=True) #TODO only show when editing item
     image = models.ImageField(default='default.png', upload_to='item_pics')
+    image2 = models.ImageField(default='default.png', upload_to='item_pics')
     history = HistoricalRecords() # excluded_fields=['pub_date']
 
 
@@ -147,6 +148,11 @@ class ItemImage(models.Model):
     caption = models.CharField(max_length=200, blank=True, null=True)
     history = HistoricalRecords()
 
+    # content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
+    # object_id = models.PositiveIntegerField()
+    # image = GenericForeignKey('content_type', 'object_id')
+
+
     def __str__(self):
         return f"{self.item.pk} - {self.image.name}"
 
@@ -155,7 +161,12 @@ class ItemLog(models.Model):
     added_by = models.ForeignKey(User, on_delete=models.RESTRICT, limit_choices_to={'is_superuser': False})
     added_on = models.DateTimeField(default=timezone.now)
     log = models.TextField()
+    file1 = models.FileField(blank=True, null=True)
+    file2 = models.FileField(blank=True, null=True)
     history = HistoricalRecords()
 
+    def get_absolute_url(self):
+        return reverse_lazy('item-detail', args=[str(self.item.pk)])
+
     def __str__(self):
-        return f"{self.item.pk} - {self.item.added_on} - {self.item.added_by}"
+        return f"{self.item.pk} - {self.added_on} - {self.added_by}"

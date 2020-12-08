@@ -144,15 +144,15 @@
                         </tr>
                         <tr>
                             <th scope="row">Purchased by</th>
-                            <td>{{ object.purchased_by }}</td>
+                            <td>{% if object.purchased_by %} &euro; {{ object.purchased_by }}{% else %}Unknown{% endif %}</td>
                         </tr>
                         <tr>
                             <th scope="row">Purchased on</th>
-                            <td>{{ object.purchased_on|date:"F d, Y" }}</td>
+                            <td>{% if object.purchased_on %} &euro; {{ object.purchased_on|date:"F d, Y" }}{% else %}Unknown{% endif %}</td>
                         </tr>
                         <tr>
                             <th scope="row">Purchased price</th>
-                            <td>&euro; {{ object.purchased_price|intcomma }}</td>
+                            <td>{% if object.purchased_price %} &euro; {{ object.purchased_price|intcomma }}{% else %}Unknown{% endif %}</td>
                         </tr>
                         {% if object.warranty_expiration|in_the_future %}
                         <tr>
@@ -178,10 +178,10 @@
                             <th scope="row">Default storage location</th>
                             <td><a href="#">{{ object.storage_location }}</a></td> <!-- TODO add map ext link -->
                         </tr>
-                        <tr>
-                            <th scope="row">Manuals</th>
-                            <td>All manuals here</td>
-                        </tr>
+<!--                        <tr>-->
+<!--                            <th scope="row">Manuals</th>-->
+<!--                            <td>All manuals here</td>-->
+<!--                        </tr>-->
                         </tbody>
                     </table>
                 </div>
@@ -299,28 +299,38 @@
 <div class="container-fluid">
     <div class="row">
         <div class="col col-lg-12 col-12">
-            <h3 class="d-inline">Notes, flags and manuals</h3>
+            <h3 class="d-inline">Logbook</h3>
             <div class="float-right my-2">
-                <a class="btn btn-outline-success" href="#"><i class="fas fa-plus"></i> Add note</a>
+                <a class="btn btn-outline-success" href="{% url 'item-log-create' %}"><i class="fas fa-plus"></i> Add log</a>
             </div>
             <table class="table" style="width:100%;">
                 <thead>
                     <th>Date</th>
                     <th>User</th>
                     <th>Note</th>
-
                 </thead>
                 <tbody>
-                <tr>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                </tr>
-                <tr>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                </tr>
+                {% for log in log_list %}
+                    <tr>
+                        <td>{{ log.added_on }}</td>
+                        <td>{{ log.added_by }}</td>
+                        <td>{{ log.log }}
+                            <br /><br />
+                            {% if log.file1 %}
+                                <hr>
+                                <a href="{{ log.file1.url }}" target="_blank" class="badge badge-secondary">{{ log.file1.name }}</a>
+                            {% endif %}
+                            <br />
+                            {% if log.file2 %}
+                                 <a href="{{ log.file2.url }}" target="_blank" class="badge badge-secondary">{{ log.file2.name }}</a>
+                            {% endif %}
+                            {% if log.added_by == user %}
+                            <a class="btn btn-secondary btn-sm mt-1 mb-1" href="{% url  'item-log-update' log.id %}">Update</a>
+                            <a class="btn btn-danger btn-sm mt-1 mb-1" href="{% url  'item-log-delete' log.id %}">Delete</a>
+                        {% endif %}
+                         </td>
+                    </tr>
+                {% endfor %}
                 </tbody>
             </table>
         </div>

@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from .models import Lab, Cabinet, Setup, Item, Flag, Category
+from .models import Lab, Cabinet, Setup, Item, Flag, Category, ItemLog
 from django.contrib.auth.decorators import login_required
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from django.shortcuts import render, get_object_or_404
@@ -10,10 +10,15 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.utils.decorators import method_decorator
 # for function-based views, decorator: staff_member_required @staff_member_required
 from .forms import ItemForm
-from django.urls import reverse
+from django.urls import reverse, reverse_lazy
 from django.http import HttpResponse, HttpResponseRedirect
 from django.utils import timezone
 from django.forms import modelformset_factory
+
+import logging
+
+# Get an instance of a logger
+# logger = logging.getLogger('django')
 
 # @login_required
 # def home(request):
@@ -111,6 +116,14 @@ class ItemDetailView(DetailView):
 
         context['image_list'] = image_list
 
+        # return logs
+        try:
+            log_list = Item.objects.get(pk=self.kwargs['pk']).logs.all()
+        except:
+            log_list = Item.objects.get(qrid=self.kwargs['qrid']).logs.all()
+
+        context['log_list'] = log_list
+
         return context
 
 @method_decorator(staff_member_required, name='dispatch') #only staff can add new
@@ -123,6 +136,45 @@ class ItemCreateView(LoginRequiredMixin, CreateView):
     def form_valid(self, form):
         form.instance.added_by = self.request.user
         return super().form_valid(form)
+
+class LogCreateView(LoginRequiredMixin, CreateView):
+    model = ItemLog
+    success_url = None
+    fields = ['log', 'file1', 'file2']
+
+    def form_valid(self, form):
+        form.instance.added_by = self.request.user
+        item = get_object_or_404(Item, pk=self.kwargs['pk'])
+        form.instance.item = item
+        # form.instance.item = self.item.get_object()
+
+        # form.instance.added_on = timezone.now()
+        return super().form_valid(form)
+
+class LogUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+    model = ItemLog
+    fields = ['log', 'file1', 'file2']
+
+    def test_func(self):
+        # log = get_object_or_404(ItemLog, pk=self.kwargs['pk'])  # can also be specific pk_2 eg when url has multiple
+        log = self.get_object()
+        # logger.error(f'CUSTOM log: {log}, pk_2: {self.kwargs["pk"]}, log.added_by: {log.added_by} == {self.request.user}, check: {self.request.user == log.added_by}')
+        if self.request.user == log.added_by:
+            return True
+        return False
+
+class LogDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
+    model = ItemLog
+
+    def get_success_url(self):
+        item = self.object.item
+        return reverse_lazy('item-detail', args=[str(item.pk)])
+
+    def test_func(self):
+        log = self.get_object()
+        if self.request.user == log.added_by:
+            return True
+        return False
 
 class AssignCreateView(LoginRequiredMixin, UpdateView):
     model = Item
@@ -139,7 +191,6 @@ class AssignCreateView(LoginRequiredMixin, UpdateView):
         # item.save(update_fields=['status'])
         return super().form_valid(form)
 
-
 def assignremove(request, pk):
     item = get_object_or_404(Item, pk=pk)
     item.status = True
@@ -153,7 +204,6 @@ def assignremove(request, pk):
     # return render(request, 'polls/results.html', {'pk': pk})
     return HttpResponseRedirect(reverse('item-detail', args=(pk,)))
     # return reverse('item-detail', kwargs={'pk': pk})
-
 
 @method_decorator(staff_member_required, name='dispatch') #only staff can edit fully
 class ItemStaffUpdateView(LoginRequiredMixin, UpdateView): # TODO different update views for general users and managers. UserPassesTestMixin
