@@ -162,7 +162,9 @@ class ItemLog(models.Model):
     added_on = models.DateTimeField(default=timezone.now)
     log = models.TextField()
     file1 = models.FileField(blank=True, null=True)
+    file1_name = models.CharField(max_length=20, null=True, blank=True)
     file2 = models.FileField(blank=True, null=True)
+    file2_name = models.CharField(max_length=20, null=True, blank=True)
     history = HistoricalRecords()
 
     def get_absolute_url(self):
@@ -170,3 +172,11 @@ class ItemLog(models.Model):
 
     def __str__(self):
         return f"{self.item.pk} - {self.added_on} - {self.added_by}"
+
+    def file1_extension(self):
+        name, extension = os.path.splitext(self.file1.name)
+        return extension
+
+    def file2_extension(self):
+        name, extension = os.path.splitext(self.file2.name)
+        return extension

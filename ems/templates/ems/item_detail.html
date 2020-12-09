@@ -21,7 +21,7 @@
                     <span class="align-middle badge badge-pill badge-success">Available</span>
                     <!-- TODO Hiding elements -->
                     {% else %}
-                    <span class="align-middle badge badge-pill badge-danger">In use</span> <!-- TODO Hiding elements -->
+<!--                    <span class="align-middle badge badge-pill badge-danger">In use</span> &lt;!&ndash; TODO Hiding elements &ndash;&gt;-->
                     {% endif %}
                 </div>
 
@@ -31,17 +31,18 @@
                                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                             Actions
                         </button>
-                        <div class="dropdown-menu" aria-labelledby="dropdownMenu2">
+                        <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenu2">
                             {% if user.is_authenticated %}
-                            <a class="dropdown-item" href="{% url  'item-userupdate' object.id %}">Update</a>
+                            <a class="dropdown-item" href="{% url  'item-userupdate' object.id %}"><i class="fas fa-edit"></i> Update</a>
                             {% endif%}
 
 
                             {% if user.is_staff %}
                             <div class="dropdown-divider"></div>
-                            <a class="dropdown-item" href="{% url  'item-staffupdate' object.id %}">Update (staff)</a>
-                            <a class="dropdown-item" href="{% url  'item-delete' object.id %}">Delete</a>
-                            <a class="dropdown-item" href="{% url  'item-history' object.id %}">Full history</a>
+                            <h6 class="dropdown-header">Staff only</h6>
+                            <a class="dropdown-item" href="{% url  'item-staffupdate' object.id %}"><i class="fas fa-edit"></i> Full update</a>
+                            <a class="dropdown-item" href="{% url  'item-delete' object.id %}"><i class="fas fa-trash"></i> Delete</a>
+                            <a class="dropdown-item" href="{% url  'item-history' object.id %}"><i class="fas fa-history"></i> Full history</a>
                             {% endif %}
 
                         </div>
@@ -144,11 +145,11 @@
                         </tr>
                         <tr>
                             <th scope="row">Purchased by</th>
-                            <td>{% if object.purchased_by %} &euro; {{ object.purchased_by }}{% else %}Unknown{% endif %}</td>
+                            <td>{% if object.purchased_by %}{{ object.purchased_by }}{% else %}Unknown{% endif %}</td>
                         </tr>
                         <tr>
                             <th scope="row">Purchased on</th>
-                            <td>{% if object.purchased_on %} &euro; {{ object.purchased_on|date:"F d, Y" }}{% else %}Unknown{% endif %}</td>
+                            <td>{% if object.purchased_on %}{{ object.purchased_on|date:"F d, Y" }}{% else %}Unknown{% endif %}</td>
                         </tr>
                         <tr>
                             <th scope="row">Purchased price</th>
@@ -220,14 +221,15 @@
                         <a class="btn btn-secondary btn-block" href="{% url 'item-assign' object.id %}"><i class="fas fa-stamp"></i> Assign To</a>
                     {% else %}
                         <a class="btn btn-secondary btn-block" href="{% url 'item-assign' object.id %}"><i class="fas fa-stamp"></i> Change Assign To</a>
-                        <a class="btn btn-outline-warning btn-block" href="{% url 'item-assign-remove' object.id %}"><i class="fas fa-stamp"></i> Return to Storage</a>
+                        <a class="btn btn-warning btn-block" href="{% url 'item-assign-remove' object.id %}"><i class="fas fa-stamp"></i> Return to Storage</a>
 
                     {% endif %}
                     <a class="btn btn-outline-secondary btn-block" href="#"><i class="fas fa-flag"></i> Flag</a>
-                    <a class="btn btn-outline-secondary btn-block" href="#"><i class="fas fa-upload"></i> Add files</a>
-                    <a class="btn btn-outline-secondary btn-block" href="#"><i class="fas fa-edit"></i> Update item</a><!-- btn-lg -->
+<!--                    <a class="btn btn-outline-secondary btn-block" href="#"><i class="fas fa-upload"></i> Add files</a>-->
+
                 </div>
             </div>
+
 
 <!--            <div class="row">-->
 <!--                <div class="col col-12 mt-2">-->
@@ -304,32 +306,49 @@
                 <a class="btn btn-outline-success" href="{% url 'item-log-create' object.id %}"><i class="fas fa-plus"></i> Add log</a>
             </div>
             <table class="table" style="width:100%;">
-                <thead>
-                    <th>Date</th>
-                    <th>User</th>
-                    <th>Note</th>
-                </thead>
+
                 <tbody>
                 {% for log in log_list %}
                     <tr>
-                        <td>{{ log.added_on }}</td>
-                        <td>{{ log.added_by }}</td>
-                        <td>{{ log.log }}
-                            <br /><br />
-                            {% if log.file1 %}
-                                <hr>
-                                <a href="{{ log.file1.url }}" target="_blank" class="badge badge-secondary">{{ log.file1.name }}</a>
-                            {% endif %}
-                            <br />
-                            {% if log.file2 %}
-                                 <a href="{{ log.file2.url }}" target="_blank" class="badge badge-secondary">{{ log.file2.name }}</a>
-                            {% endif %}
+<!--                        <td>{{ log.added_on|date:"d-m-Y H:i" }}</td>-->
+<!--                        <td>{{ log.added_by }}</td>-->
+                        <td>
+                            <h6 class="d-inline">{{ log.added_on|date:"d-m-Y H:i" }} by {{ log.added_by }}</h6>
+                            <div class="float-right">
                             {% if log.added_by == user %}
-                            <a class="btn btn-secondary btn-sm mt-1 mb-1" href="{% url  'item-log-update' log.id %}">Update</a>
-                            <a class="btn btn-danger btn-sm mt-1 mb-1" href="{% url  'item-log-delete' log.id %}">Delete</a>
-                        {% endif %}
+                                <a class="badge badge-secondary mt-1 mb-1" href="{% url  'item-log-update' log.id %}">Update</a>
+                                <a class="badge badge-danger mt-1 mb-1" href="{% url  'item-log-delete' log.id %}">Delete</a>
+                            {% endif %}
+                                </div>
+
+                            <p class="mt-2">{{ log.log }}</p>
+                            {% if log.file1 or log.file2 %}
+
+                            {% endif %}
+
+                            {% if log.file1 %}
+                                <a href="{{ log.file1.url }}" target="_blank" class="badge badge-secondary">
+                                    <i class="fas fa-paperclip"></i>
+                                    {% if log.file1_name %}{{ log.file1_name }}{% else %}{{ log.file1.name }}{% endif %}
+                                    ({{ log.file1.path|filesize|filesizeformat }})
+                                </a>
+                            {% endif %}
+
+                            {% if log.file2 %}
+                                 <a href="{{ log.file2.url }}" target="_blank" class="badge badge-secondary">
+                                     <i class="fas fa-paperclip"></i>
+                                    {% if log.file2_name %}{{ log.file2_name }}{% else %}{{ log.file2.name }}{% endif %}
+                                    ({{ log.file2.path|filesize|filesizeformat }})
+                                 </a>
+                            {% endif %}
                          </td>
-                    </tr>
+<!--                        <td align="right">-->
+<!--                            {% if log.added_by == user %}-->
+<!--                                <a class="badge badge-secondary mt-1 mb-1" href="{% url  'item-log-update' log.id %}">Update</a>-->
+<!--                                <a class="badge badge-danger mt-1 mb-1" href="{% url  'item-log-delete' log.id %}">Delete</a>-->
+<!--                            {% endif %}-->
+<!--                        </td>-->
+<!--                    </tr>-->
                 {% endfor %}
                 </tbody>
             </table>
@@ -349,7 +368,7 @@
                 <thead>
                     <th>Date</th>
                     <th>User</th>
-                    <th>Type</th>
+                    <th class="d-none d-md-block">Type</th>
                     <th>Fields changed</th>
 
                 </thead>
@@ -363,7 +382,7 @@
                     <td>
                         <b>{{ idx.0.history_user }}</b>
                     </td>
-                    <td>
+                    <td class="d-none d-md-block">
                         {% if idx.0.history_type == '~' %}
                         CHANGED
                         {% elif idx.0.history_type == '+' %}

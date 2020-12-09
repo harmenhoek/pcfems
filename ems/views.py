@@ -140,7 +140,7 @@ class ItemCreateView(LoginRequiredMixin, CreateView):
 class LogCreateView(LoginRequiredMixin, CreateView):
     model = ItemLog
     success_url = None
-    fields = ['log', 'file1', 'file2']
+    fields = ['log', 'file1', 'file1_name', 'file2', 'file2_name']
 
     def form_valid(self, form):
         form.instance.added_by = self.request.user
@@ -153,7 +153,7 @@ class LogCreateView(LoginRequiredMixin, CreateView):
 
 class LogUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = ItemLog
-    fields = ['log', 'file1', 'file2']
+    fields = ['log', 'file1', 'file1_name', 'file2', 'file2_name']
 
     def test_func(self):
         # log = get_object_or_404(ItemLog, pk=self.kwargs['pk'])  # can also be specific pk_2 eg when url has multiple

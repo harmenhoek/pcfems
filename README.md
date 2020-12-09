@@ -26,17 +26,31 @@ Current version: 0.1 (November 2020)
 ### Detail page
 - Timeline of recent activity of item
 - On side the quick actions: Add files, Edit item, Claim
+- Export to
+- Refined item history
+- Proper flagging
+- Image lightbox
+- Filter Notes and History. Notes e.g only with attachments, or only <1 month old.
 
 ### Custom admin interface
 - Allow to add categories, labs, etc.
 - Multi-image support, allow users to upload images and manual(s).
+- See soon due service dates and flags
+- Show users, add users, show items in use, items per user, statistics.
+
+### User page
+- Clickable username to page
+- Show items in use by this person
 
 ### Major functionality
-- QR code scanner
-- Logging of activity, showing this on timeline per item
 - QR code generator for new items. When adding, ask to enter pre-printed qr code, or scan it. Show a selection box with pre-printed QR-codes. Only those just printed can be added to the system.
-- Claim functionality
 - Admin environment: see all logs, add categories, etc. Add link to menubar. See recent activity. See flags in overview.
+- Password forget with emails
+- Continue Django Docs.
+- Header prevent collapse of Scan
+- Header dropdown for user with Profile and Log Out
+
+### For future
 - New model for images. Link images to model. How to add this to history as well.
 
 ## Changelog

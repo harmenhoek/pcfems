@@ -1,6 +1,7 @@
 from django import template
 from datetime import date
 import math
+import os
 
 register = template.Library()
 
@@ -32,3 +33,8 @@ def timedelta(value):
     if (year == 0 and month == 0 and day == 0):
         dt = 'today'
     return dt
+
+@register.filter
+def filesize(value):
+    """Returns the filesize of the filename given in value"""
+    return os.path.getsize(value)
