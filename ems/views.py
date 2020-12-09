@@ -209,7 +209,7 @@ def assignremove(request, pk):
 class ItemStaffUpdateView(LoginRequiredMixin, UpdateView): # TODO different update views for general users and managers. UserPassesTestMixin
     model = Item
     fields = ['brand', 'model', 'serial', 'category', 'description', 'purchased_by', 'purchased_on', 'purchased_price',
-              'warranty_expiration', 'next_service_date', 'storage_location', 'image']
+              'warranty_expiration', 'next_service_date', 'storage_location', 'image', 'image2']
 
     def form_valid(self, form):
         form.instance.updated_by = self.request.user
@@ -217,7 +217,7 @@ class ItemStaffUpdateView(LoginRequiredMixin, UpdateView): # TODO different upda
 
 class ItemUserUpdateView(LoginRequiredMixin, UpdateView): # TODO different update views for general users and managers. UserPassesTestMixin
     model = Item
-    fields = ['description', 'flag', 'image']
+    fields = ['description', 'flag', 'image', 'image2']
 
     def form_valid(self, form):
         form.instance.updated_by = self.request.user

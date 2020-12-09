@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     # own apps
     'ems.apps.EmsConfig',
     'users.apps.UsersConfig',
+    'ems_manage.apps.EmsManageConfig',
 ]
 
 MIDDLEWARE = [

@@ -2,6 +2,7 @@ from django.urls import path
 from . import views  # imports the functions from views.py
 from .views import ItemListView, ItemDetailView, ItemCreateView, ItemStaffUpdateView, ItemUserUpdateView, \
     ItemDeleteView, ItemHistoryView, AssignCreateView, LogCreateView, LogUpdateView, LogDeleteView
+
 urlpatterns = [
     path('', ItemListView.as_view(), name='ems-home'),
     path('item/<int:pk>/', ItemDetailView.as_view(), name='item-detail'),

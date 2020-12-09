@@ -24,8 +24,6 @@ Current version: 0.1 (November 2020)
 - Import of csv
 
 ### Detail page
-- Timeline of recent activity of item
-- On side the quick actions: Add files, Edit item, Claim
 - Export to
 - Refined item history
 - Proper flagging
@@ -47,8 +45,6 @@ Current version: 0.1 (November 2020)
 - Admin environment: see all logs, add categories, etc. Add link to menubar. See recent activity. See flags in overview.
 - Password forget with emails
 - Continue Django Docs.
-- Header prevent collapse of Scan
-- Header dropdown for user with Profile and Log Out
 
 ### For future
 - New model for images. Link images to model. How to add this to history as well.

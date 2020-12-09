@@ -57,9 +57,10 @@
                                     New Item
                                 </a>
                                 <div class="dropdown-divider"></div>
-                                <a class="dropdown-item disabled" href="#">
+                                <a class="dropdown-item" href="{% url 'manage-home' %}">
                                     <i class="fas fa-tools"></i>
-                                    Admin tools</a>
+                                    Manage
+                                </a>
                             </div>
                         </li>
                     {% endif %}
@@ -90,7 +91,10 @@
 
         </div>
     </nav>
+
 </header>
+    {% block secondheader %}{% endblock secondheader %}
+
 
 <main role="main" class="container">
     <div class="row">

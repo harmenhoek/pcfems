@@ -9,6 +9,7 @@ from simple_history.models import HistoricalRecords
 from simple_history import register
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
+from django.conf import settings
 
 register(User) # to allow simple_history to track it
 
@@ -89,7 +90,7 @@ class Item(models.Model):  # inherit from models, all fields below
     #.objects.all().exclude(is_superuser=True)
 
     # Tracking details
-    status = models.BooleanField(default=False) #True is in storage (item is free), False is in use (assigned to)
+    status = models.BooleanField(default=True) #True is in storage (item is free), False is in use (assigned to)
     location = models.ForeignKey(Setup, on_delete=models.SET_NULL, null=True) # TODO current location is now ALWAYS a setup, should also be possible to be storage
     # location = ForeignKey(Setup OR Cabinet)
 
@@ -106,8 +107,8 @@ class Item(models.Model):  # inherit from models, all fields below
     # images = FileField
     # notes through time
     flag = models.ForeignKey(Flag, on_delete=models.SET_NULL, null=True, blank=True) #TODO only show when editing item
-    image = models.ImageField(default='default.png', upload_to='item_pics')
-    image2 = models.ImageField(default='default.png', upload_to='item_pics')
+    image = models.ImageField(default='default.png', upload_to='item_pics', blank=True, null=True)
+    image2 = models.ImageField(upload_to='item_pics', blank=True, null=True)
     history = HistoricalRecords() # excluded_fields=['pub_date']
 
 
@@ -119,24 +120,28 @@ class Item(models.Model):  # inherit from models, all fields below
 
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)  # initial save (incl image)
-        if self.qrid == '':
+        if self.qrid == '' or self.qrid is None:
             self.qrid = f"PCF{self.pk:04d}"
             super().save(*args, **kwargs)
 
-        img = Image.open(self.image.path)
-        maxsize = 1000
-        if img.height > maxsize or img.width > maxsize:  # TODO move this to views?!
-            output_size = (maxsize, maxsize)
-            img.thumbnail(output_size)
-            # rename (TODO what if user uploads small image? Now no rename)
-            path = os.path.dirname(self.image.path)
-            ext = os.path.splitext(self.image.path)[1]
-            shorthash = hash(time.time())
-            file_new = os.path.join(path, str(self.pk) + '_' + str(shorthash) + ext)
-            img.save(file_new)
-            os.remove(self.image.path)
-            file_new_short: str = os.path.join('item_pics/', str(self.pk) + '_' + str(shorthash) + ext)
-            self.image = file_new_short
+        if self.image:
+            img = Image.open(self.image.path)
+            maxsize = 1000
+            if img.height > maxsize or img.width > maxsize:  # TODO move this to views?!
+                output_size = (maxsize, maxsize)
+                img.thumbnail(output_size)
+                # rename (TODO what if user uploads small image? Now no rename)
+                path = os.path.dirname(self.image.path)
+                ext = os.path.splitext(self.image.path)[1]
+                shorthash = hash(time.time())
+                file_new = os.path.join(path, str(self.pk) + '_' + str(shorthash) + ext)
+                img.save(file_new)
+                os.remove(self.image.path)
+                file_new_short: str = os.path.join('item_pics/', str(self.pk) + '_' + str(shorthash) + ext)
+                self.image = file_new_short
+                super().save(*args, **kwargs)
+        else:
+            self.image = 'default.png'
             super().save(*args, **kwargs)
 
 
