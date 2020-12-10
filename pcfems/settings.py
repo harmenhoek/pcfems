@@ -25,7 +25,7 @@ SECRET_KEY = '!v3zr=nqlucany33r#x1o64y-71o9tdzn+48eu50r-q!10i!n-'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['10.10.10.110']
+ALLOWED_HOSTS = ['10.10.10.110', 'localhost']
 
 
 # Application definition
@@ -186,6 +186,15 @@ ACTIVITYLOG_EXCLUDE_URLS = ('/admin/activity_log/activitylog', )
 
 # Max upload size
 DATA_UPLOAD_MAX_MEMORY_SIZE = 2621440*10
+
+# Email
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = os.environ.get('EMS_EMAIL_USER')
+EMAIL_HOST_PASSWORD = os.environ.get('EMS_EMAIL_PASS')
+
 
 # LOGGING = {
 #     'version': 1,
