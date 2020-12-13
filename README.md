@@ -43,7 +43,6 @@ Current version: 0.1 (November 2020)
 ### Major functionality
 - QR code generator for new items. When adding, ask to enter pre-printed qr code, or scan it. Show a selection box with pre-printed QR-codes. Only those just printed can be added to the system.
 - Admin environment: see all logs, add categories, etc. Add link to menubar. See recent activity. See flags in overview.
-- Password forget with emails
 - Continue Django Docs.
 - Page restrictions: whole system when logged in, several pages only staff
 

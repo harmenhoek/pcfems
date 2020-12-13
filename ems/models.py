@@ -1,7 +1,7 @@
 from django.db import models
 from django.utils import timezone
 from django.contrib.auth.models import User
-from django.urls import reverse, reverse_lazy # for redirect after adding item
+from django.urls import reverse, reverse_lazy  # for redirect after adding item
 from PIL import Image
 import os
 import time
@@ -11,7 +11,7 @@ from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.conf import settings
 
-register(User) # to allow simple_history to track it
+register(User)  # to allow simple_history to track it
 
 # set __str__ for user
 def get_first_name(self):

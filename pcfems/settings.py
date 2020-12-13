@@ -94,6 +94,10 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
+    },
+    'logs': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3_logs',
     }
 }
 
@@ -146,9 +150,6 @@ LOGIN_URL = 'login'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media') # full path to the folder where Django saves the files on the file system
 MEDIA_URL = '/media/' # how we access the image in the browser. Location of the url.
 
-
-
-# pcfems.utwente@gmail.com
 
 # activity_log app
 

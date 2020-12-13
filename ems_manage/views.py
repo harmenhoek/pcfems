@@ -6,6 +6,8 @@ from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.urls import reverse_lazy, reverse
 from django.contrib.auth.models import User
 from django.http import HttpResponseRedirect
+from activity_log.models import ActivityLog
+
 
 def manage(request):
     return render(request, 'ems_manage/manage.html')
@@ -13,6 +15,19 @@ def manage(request):
 class UsersView(ListView):
     model = get_user_model()
     template_name = 'ems_manage/user_list.html'  # Custom otherwise auth/user_list.html
+
+    # def get_context_data(self, **kwargs): # to send extra data
+    #     # Call the base implementation first to get a context
+    #     context = super().get_context_data(**kwargs)
+    #     logs = ActivityLog.objects.using('logs').all().order_by('-id')[:25]      # get from logs db  activity_log_activitylog: id, user_id, user, request_url, request_method, datetime, ip_address, extra_data, response_code
+    #     context['logs'] = logs
+    #     return context
+
+class UsersActivityView(ListView):
+    model = ActivityLog
+    template_name = 'ems_manage/activity_list.html'
+    paginate_by = 25
+    ordering = ['-id']
 
 class FlagsView(ListView):
     model = Flag  # TODO we also need Item later on to show al the current flagged items.
