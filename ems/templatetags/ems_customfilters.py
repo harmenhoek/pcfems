@@ -20,18 +20,21 @@ def timedelta(value):
     month = (diff.days - year * 365.25) // (365.25 / 12)
     day = ((diff.days - year * 365.25) - month * (365.25 / 12))
     dt = ''
-    if (year != 0):
-        dt = dt + str(int(year)) + ' years'
-        if (month != 0 or day != 0):
-            dt = dt + ', '
-    if (month != 0):
-        dt = dt + str(int(month)) + ' months'
+    if (year < 0):
+        dt = 'overdue'
+    else:
+        if (year != 0):
+            dt = dt + str(int(year)) + ' years'
+            if (month != 0 or day != 0):
+                dt = dt + ', '
+        if (month != 0):
+            dt = dt + str(int(month)) + ' months'
+            if (day != 0):
+                dt = dt + ', '
         if (day != 0):
-            dt = dt + ', '
-    if (day != 0):
-        dt = dt + str(int(math.ceil(day))) + ' days'
-    if (year == 0 and month == 0 and day == 0):
-        dt = 'today'
+            dt = dt + str(int(math.ceil(day))) + ' days'
+        if (year == 0 and month == 0 and day == 0):
+            dt = 'today'
     return dt
 
 @register.filter

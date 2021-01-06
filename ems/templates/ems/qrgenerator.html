@@ -1,0 +1,31 @@
+{% extends "ems/base.html" %}
+{% load static %}
+{% load qr_code %}
+{% block content %}
+
+{{ img }}
+
+
+<!--django-qr-code-->
+<div class="row">
+    <div class="col col-12">
+        <div class="float-left my-2">
+            <h3>QR code ({{ qrid }})</h3><a href="{% url  'item-detail' id %}">Go back to item</a>
+        </div>
+
+
+    </div>
+</div>
+<div class="row">
+    <div class="col col-12">
+        {% qr_from_text qrid size="t" image_format="png" error_correction="L" micro=False %}<br>
+        {% qr_from_text qrid size="s"  image_format="png" error_correction="L" %}<br>
+        {% qr_from_text qrid size="m" image_format="png" error_correction="L" %}<br>
+        {% qr_from_text qrid size="l" image_format="png" error_correction="H" %}
+<!-- micro=True, format: svg, txt, pdf, latex, eps-->
+    </div>
+</div>
+
+
+
+{% endblock content %}

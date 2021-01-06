@@ -45,6 +45,9 @@ INSTALLED_APPS = [
     'activity_log',
     'simple_history',
     'sslserver',
+    'bootstrap_datepicker_plus',
+    'bootstrap4',
+    'qr_code',
 
     # own apps
     'ems.apps.EmsConfig',
@@ -215,3 +218,7 @@ EMAIL_HOST_PASSWORD = os.environ.get('EMS_EMAIL_PASS')
 #         },
 #     },
 # }
+
+BOOTSTRAP4 = {
+    'include_jquery': True,
+}

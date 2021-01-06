@@ -88,8 +88,6 @@ add flag functionality
 ### Staff: add a new item
 To add a new item to the database, select `Add item` from the `Admin` menu in the header. Fill in at least the mandatory fields marked by a '*'. Press `Add` to add the item. In the background several fields are added automatically, including the unique item ID (or slug).
 
-TODO: date selector. Check everything
-TODO: category adder
 TODO: mandatory fields
 TODO: QR code printer when done.
 
@@ -144,6 +142,9 @@ ALLOW CAMERA ALWAYS
 
 ## Further development
 
+- Hide Scan when logged out
+
+
 ### Insert form
 - Add related widget wrapper to add categories on the go (http://dashdrum.com/blog/2012/07/relatedfieldwidgetwrapper/)
 - Auto-complete for faster entering?
@@ -184,6 +185,15 @@ ALLOW CAMERA ALWAYS
 ### Release v0.1 (not released yet)
 Changes here
 
+2020-01-05
+- Added bootstrap_datepicker_plus for createview.
+- Installed bootstrap via pip, loaded into base.html, commented the old links, beware this works perfectly everywhere.
+- Updated manage: locations (setup, lab and cabinets), categories and flags.
+- DataTables to item detail page: logbook and item history
+
+2020-01-06
+- Deprecated qrgenerator.html, now in-view QR generation (using qrcode-6.1) with PIL processing for caption. Now HttpResponse of image insteafd of render html.
+- Created qrbatchgenerator to create batch pdf files with qr codes.
 
 ## History
 

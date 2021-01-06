@@ -21,8 +21,9 @@ User.add_to_class("__str__", get_first_name)
 
 class Lab(models.Model):
     number = models.CharField(max_length=5)
-    manager = models.CharField(max_length=100, default='undefined')  # TODO make selectlist
-    nickname = models.CharField(max_length=20, default='')
+    # manager = models.CharField(max_length=100, default='undefined')  # TODO make selectlist
+    manager = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, default=2, limit_choices_to={'is_superuser': False})
+    nickname = models.CharField(max_length=20, default='', null=True, blank=True)
     history = HistoricalRecords()
 
     def __str__(self):
@@ -48,14 +49,14 @@ class Setup(models.Model):
 class Flag(models.Model):
     flag = models.CharField(max_length=100)
     description = models.TextField()
-    icon = models.CharField(max_length=100, default='bug')
+    icon = models.CharField(max_length=100, default='bug', help_text='Set a icon from <a target="_blank" href="https://fontawesome.com/icons?m=free">this library</a>.')
     history = HistoricalRecords()
 
     def __str__(self):
         return self.flag
 
 class Category(models.Model):
-    name = models.CharField(max_length=100)
+    name = models.CharField(max_length=100, help_text='Please verify that no such category already exists.')
     history = HistoricalRecords()
 
     def __str__(self):
@@ -71,7 +72,7 @@ class Item(models.Model):  # inherit from models, all fields below
     brand = models.CharField(max_length=100)
     model = models.CharField(max_length=100)
     serial = models.CharField(max_length=100, null=True, blank=True)
-    category = models.ForeignKey(Category, on_delete=models.SET_DEFAULT, default='uncategorized')  # TODO make selectbox
+    category = models.ForeignKey(Category, on_delete=models.SET_DEFAULT, default='uncategorized', help_text='New categories can be added in Admin/Manage/Categories.')  # TODO make selectbox
     description = models.TextField()  # longer than CharField, unrestricted text.
     purchased_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name="purchaseduser", limit_choices_to={'is_superuser': False})  # TODO make selectbox of users
     purchased_on = models.DateField(default="", null=True, blank=True)  # TODO not now
@@ -79,7 +80,7 @@ class Item(models.Model):  # inherit from models, all fields below
     warranty = models.BooleanField(default=False)
     warranty_expiration = models.DateField(null=True, blank=True)
     next_service_date = models.DateField(null=True, blank=True)
-    storage_location = models.ForeignKey(Cabinet, on_delete=models.SET_NULL, default="", null=True, blank=True)  # TODO make different model for storage locations
+    storage_location = models.ForeignKey(Cabinet, on_delete=models.SET_NULL, default="", null=True, blank=True, help_text='New storage locations can be added in Admin/Manage/Locations.')  # TODO make different model for storage locations
     added_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True,
                                  related_name="addeduser", limit_choices_to={'is_superuser': False})  # related_name is needed since the reverse releationship (user->item, which we don't need at at all) needs a unique name. TODO make selectbox of users
     updated_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True,

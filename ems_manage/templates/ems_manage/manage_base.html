@@ -13,17 +13,20 @@
   </button>
   <div class="collapse navbar-collapse" id="navbarNavDropdown">
     <ul class="navbar-nav">
-      <li class="nav-item">
-        <a class="nav-link" href="{% url 'manage-flags' %}"><i class="fas fa-flag"></i> Flags</a>
+        <li class="nav-item">
+        <a class="nav-link" href="{% url 'manage-users' %}"><i class="fas fa-user"></i> Users</a>
       </li>
       <li class="nav-item">
-        <a class="nav-link" href="{% url 'manage-users' %}"><i class="fas fa-user"></i> Users</a>
+        <a class="nav-link" href="{% url 'manage-flags' %}"><i class="fas fa-flag"></i> Flags</a>
       </li>
         <li class="nav-item">
         <a class="nav-link" href="{% url 'manage-useractivity' %}"><i class="fas fa-history"></i> Activity</a>
       </li>
       <li class="nav-item">
         <a class="nav-link" href="{% url 'manage-categories' %}"><i class="fas fa-align-justify"></i> Categories</a>
+      </li>
+        <li class="nav-item">
+        <a class="nav-link" href="{% url 'manage-locations' %}"><i class="fas fa-map-marker"></i> Locations</a>
       </li>
 
     </ul>

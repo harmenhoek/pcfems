@@ -15,6 +15,8 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.utils import timezone
 from django.forms import modelformset_factory
 
+from bootstrap_datepicker_plus import DateTimePickerInput
+
 import logging
 
 # Get an instance of a logger
@@ -137,6 +139,19 @@ class ItemCreateView(LoginRequiredMixin, CreateView):
         form.instance.added_by = self.request.user
         return super().form_valid(form)
 
+    # def get_form(self):
+    #     '''add date picker in forms'''
+    #     from django.forms.widgets import SelectDateWidget
+    #     form = super(ItemCreateView, self).get_form()
+    #     form.fields['purchased_on'].widget = SelectDateWidget()
+    #     return form
+
+    # def get_form(self):
+    #     form = super().get_form()
+    #     form.fields['purchased_on'].widget = DateTimePickerInput()
+    #     return form
+
+
 class LogCreateView(LoginRequiredMixin, CreateView):
     model = ItemLog
     success_url = None
@@ -249,3 +264,72 @@ def test(request):
 
 def scanner(request):
     return render(request, 'ems/scanner.html')
+
+def createqr(text):
+    import qrcode
+    from PIL import Image, ImageFont, ImageDraw, ImageOps
+    qr = qrcode.QRCode(
+        version=1,
+        error_correction=qrcode.constants.ERROR_CORRECT_L,
+        box_size=15,
+        border=1,
+    )
+    qr.add_data(text)
+    qr.make(fit=True)
+    img = qr.make_image(fill_color="black", back_color="white").convert("RGBA")
+    img = ImageOps.expand(img, border=(0, 0, 0, 60), fill='white')
+    txt = Image.new("RGBA", img.size, (255, 255, 255, 0))
+    from django.contrib.staticfiles.storage import staticfiles_storage
+    fontfile = staticfiles_storage.url('ems/Arial.ttf')
+    font = ImageFont.truetype(fontfile, 60)
+    d = ImageDraw.Draw(txt)
+    d.text((img.size[0] / 2, img.size[1] - 10), text, anchor="ms", font=font, fill=(0, 0, 0, 256))
+    out = Image.alpha_composite(img, txt)
+    return out
+
+def qrgenerator(request, pk):
+    item = get_object_or_404(Item, pk=pk)
+
+    out = createqr(item.qrid)
+
+    response = HttpResponse(content_type='image/png')
+    out.save(response, "PNG")
+
+    return response
+
+def qrbatchgenerator(request, pk1, pk2):
+
+    import io
+    from django.http import FileResponse
+    from reportlab.pdfgen import canvas
+    from reportlab.lib.utils import ImageReader
+    buffer = io.BytesIO()
+
+    p = canvas.Canvas(buffer)
+
+    for pk in range(pk1, pk2+1):
+        try:
+            item = get_object_or_404(Item, pk=pk)
+            out = createqr(item.qrid)
+            scale = 1
+            (wdt, hgt) = (out.width // scale, out.height // scale)
+            p.drawImage(ImageReader(out.resize((wdt, hgt))), 10, 10, mask='auto')
+            scale = 2
+            (wdt, hgt) = (out.width // scale, out.height // scale)
+            p.drawImage(ImageReader(out.resize((wdt, hgt))), 10, hgt * 2 + 10, mask='auto')
+            scale = 4
+            (wdt, hgt) = (out.width // scale, out.height // scale)
+            p.drawImage(ImageReader(out.resize((wdt, hgt))), 10, hgt * 6 + 10, mask='auto')
+            scale = 6
+            (wdt, hgt) = (out.width // scale, out.height // scale)
+            p.drawImage(ImageReader(out.resize((wdt, hgt))), 10, hgt * 11 + 5, mask='auto')
+            p.showPage()
+
+        except:
+            pass
+    p.save()
+
+    # FileResponse sets the Content-Disposition header so that browsers
+    # present the option to save the file.
+    buffer.seek(0)
+    return FileResponse(buffer, as_attachment=True, filename='hello.pdf')

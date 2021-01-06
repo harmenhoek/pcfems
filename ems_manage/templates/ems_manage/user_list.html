@@ -1,66 +1,82 @@
 {% extends "ems_manage/manage_base.html" %}
 {% block content %}
 
-<div class="float-left my-2">
-    <h3 class="d-inline">Users</h3>
+<div class="row">
+    <div class="col col-12">
+        <div class="float-left my-2">
+            <h3 class="d-inline">Users</h3>
+        </div>
+        <div class="float-right my-2">
+            <a class="btn btn-success" href="{% url 'manage-users-add' %}"><i class="fas fa-plus"></i> Add new user</a>
+        </div>
+    </div>
 </div>
-<div class="float-right my-2">
-    <a class="btn btn-success" href="{% url 'manage-users-add' %}"><i class="fas fa-plus"></i> Add new user</a>
+<div class="row">
+    <table id="user_list" class="table table-striped table-bordered table">
+        <thead>
+        <tr>
+            <th data-priority="10">ID</th>
+            <th data-priority="10">Username</th>
+            <th data-priority="10">First name</th>
+            <th data-priority="10">Last name</th>
+            <th data-priority="10">Email</th>
+            <th data-priority="10">Type</th>
+    <!--        <th data-priority="10">Admin?</th>-->
+            <th data-priority="10">Status</th>
+            <th data-priority="10">Last login</th>
+            <th data-priority="10">Joined</th>
+            <th data-priority="10"></th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for item in object_list %}
+    <!--    <tr style="cursor:pointer;" onclick="window.location='#';">-->
+        <tr>
+            <td>{{ item.pk }}</td>
+            <td>{{ item.username }}</td>
+            <td>{{ item.first_name }}</td>
+            <td>{{ item.last_name }}</td>
+            <td>{{ item.email }}</td>
+            <td>
+                {% if item.is_staff %}
+                    <span class="badge badge-pill badge-info">Staff</span>
+                {% else %}
+                    <span class="badge badge-pill badge-secondary">Normal</span>
+                {% endif %}
+            </td>
+    <!--        <td>{{ item.is_superuser }}</td>-->
+            <td>
+                {% if item.is_active %}
+                    <span class="badge badge-pill badge-success">Active</span>
+                {% else %}
+                    <span class="badge badge-pill badge-danger">Inactive</span>
+                {% endif %}
+            </td>
+            <td>{{ item.last_login|date:"Y-m-d G:i:s" }}</td>
+            <td>{{ item.date_joined|date:"Y-m-d G:i:s" }}</td>
+            <td>
+                {% if item.is_superuser %}
+                    <a href="{% url 'manage-users-update' item.pk %}" class="btn btn-secondary disabled">Edit</a>
+                {% else %}
+                    <a href="{% url 'manage-users-update' item.pk %}" class="btn btn-secondary">Edit</a>
+                {% endif %}
+            </td>
+
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
 </div>
-<table class="table">
-    <thead>
-    <tr>
-        <th data-priority="10">ID</th>
-        <th data-priority="10">Username</th>
-        <th data-priority="10">First name</th>
-        <th data-priority="10">Last name</th>
-        <th data-priority="10">Email</th>
-        <th data-priority="10">Type</th>
-<!--        <th data-priority="10">Admin?</th>-->
-        <th data-priority="10">Status</th>
-        <th data-priority="10">Last login</th>
-        <th data-priority="10">Joined</th>
-        <th data-priority="10"></th>
-    </tr>
-    </thead>
-    <tbody>
-    {% for item in object_list %}
-<!--    <tr style="cursor:pointer;" onclick="window.location='#';">-->
-    <tr>
-        <td>{{ item.pk }}</td>
-        <td>{{ item.username }}</td>
-        <td>{{ item.first_name }}</td>
-        <td>{{ item.last_name }}</td>
-        <td>{{ item.email }}</td>
-        <td>
-            {% if item.is_staff %}
-                <span class="badge badge-pill badge-info">Staff</span>
-            {% else %}
-                <span class="badge badge-pill badge-secondary">Normal</span>
-            {% endif %}
-        </td>
-<!--        <td>{{ item.is_superuser }}</td>-->
-        <td>
-            {% if item.is_active %}
-                <span class="badge badge-pill badge-success">Active</span>
-            {% else %}
-                <span class="badge badge-pill badge-danger">Inactive</span>
-            {% endif %}
-        </td>
-        <td>{{ item.last_login|date:"Y-m-d G:i:s" }}</td>
-        <td>{{ item.date_joined|date:"Y-m-d G:i:s" }}</td>
-        <td>
-            {% if item.is_superuser %}
-                <a href="{% url 'manage-users-update' item.pk %}" class="btn btn-secondary disabled">Edit</a>
-            {% else %}
-                <a href="{% url 'manage-users-update' item.pk %}" class="btn btn-secondary">Edit</a>
-            {% endif %}
-        </td>
-
-    </tr>
-    {% endfor %}
-    </tbody>
-</table>
-
 
 {% endblock content %}
+
+{% block tablescript %}
+{# Code block for javascript table #}
+
+<script>
+    $(document).ready(function() {
+        $('#user_list').DataTable();
+    } );
+</script>
+
+{% endblock tablescript %}

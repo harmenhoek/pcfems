@@ -24,6 +24,8 @@ urlpatterns = [
     path('about/', views.about, name='ems-about'),
     path('test/', views.test, name='ems-test'),
     path('scanner/', views.scanner, name='ems-scanner'),
+    path('qrgenerator/<int:pk>/', views.qrgenerator, name='ems-qrgenerator'),
+    path('qrbatchgenerator/<int:pk1>/<int:pk2>/', views.qrbatchgenerator, name='ems-qrbatchgenerator'),
 ]
 
     # path('user/<str:username>', UserPostListView.as_view(), name='user-posts'),

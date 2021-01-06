@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.contrib.auth import get_user_model
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
-from ems.models import Item, Category, Flag
+from ems.models import Item, Category, Flag, Lab, Setup, Cabinet
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.urls import reverse_lazy, reverse
 from django.contrib.auth.models import User
@@ -31,11 +31,86 @@ class UsersActivityView(ListView):
 
 class FlagsView(ListView):
     model = Flag  # TODO we also need Item later on to show al the current flagged items.
-    template_name = 'ems_manage/flags_list.html'
+    template_name = 'ems_manage/flag_list.html'
+
+class FlagsCreateView(LoginRequiredMixin, CreateView):
+    model = Flag
+    success_url = reverse_lazy('manage-flags')
+    fields = ['flag', 'description', 'icon']
+    template_name = 'ems_manage/flag_form.html'
+
+class FlagsUpdateView(LoginRequiredMixin, UpdateView):
+    model = Flag
+    success_url = reverse_lazy('manage-flags')
+    fields = ['flag', 'description', 'icon']
+    template_name = 'ems_manage/flag_form.html'
 
 class CategoriesView(ListView):
     model = Category  # TODO we also need Item later on to show al the current flagged items.
-    template_name = 'ems_manage/categories_list.html'
+    template_name = 'ems_manage/category_list.html'
+
+class LocationsView(ListView):
+    model = Lab
+    template_name = 'ems_manage/location_list.html'
+
+    def get_context_data(self, **kwargs): # to send extra data
+        # Call the base implementation first to get a context
+        context = super().get_context_data(**kwargs)
+        setups = Setup.objects.all()
+        context['setups'] = setups
+        cabinets = Cabinet.objects.all()
+        context['cabinets'] = cabinets
+
+        return context
+
+class SetupCreateView(LoginRequiredMixin, CreateView):
+    model = Setup
+    success_url = reverse_lazy('manage-locations')
+    fields = ['lab', 'name', 'manager']
+    template_name = 'ems_manage/setup_form.html'
+
+class SetupUpdateView(LoginRequiredMixin, UpdateView):
+    model = Setup
+    success_url = reverse_lazy('manage-locations')
+    fields = ['lab', 'name', 'manager']
+    template_name = 'ems_manage/setup_form.html'
+
+class LabCreateView(LoginRequiredMixin, CreateView):
+    model = Lab
+    success_url = reverse_lazy('manage-locations')
+    fields = ['number', 'manager', 'nickname']
+    template_name = 'ems_manage/lab_form.html'
+
+class LabUpdateView(LoginRequiredMixin, UpdateView):
+    model = Lab
+    success_url = reverse_lazy('manage-locations')
+    fields = ['number', 'manager', 'nickname']
+    template_name = 'ems_manage/lab_form.html'
+
+class CabinetCreateView(LoginRequiredMixin, CreateView):
+    model = Cabinet
+    success_url = reverse_lazy('manage-locations')
+    fields = ['lab', 'number']
+    template_name = 'ems_manage/cabinet_form.html'
+
+class CabinetUpdateView(LoginRequiredMixin, UpdateView):
+    model = Cabinet
+    success_url = reverse_lazy('manage-locations')
+    fields = ['lab', 'number']
+    template_name = 'ems_manage/cabinet_form.html'
+
+
+class CategoryCreateView(LoginRequiredMixin, CreateView):
+    model = Category
+    success_url = reverse_lazy('manage-categories')
+    fields = ['name']
+    template_name = 'ems_manage/category_form.html'
+
+class CategoryUpdateView(LoginRequiredMixin, UpdateView):
+    model = Category
+    success_url = reverse_lazy('manage-categories')
+    fields = ['name']
+    template_name = 'ems_manage/category_form.html'
 
 class UserCreateView(LoginRequiredMixin, CreateView):
     model = get_user_model()
