@@ -25,6 +25,8 @@ The application is built in Django with (currently) a SQLite database.
 - simple_history
 - crispy_forms
 - qr-scanner
+- qrcode-6.1
+- reportlab.pdfgen
 
 
 ## Workflow
@@ -148,7 +150,6 @@ ALLOW CAMERA ALWAYS
 ### Insert form
 - Add related widget wrapper to add categories on the go (http://dashdrum.com/blog/2012/07/relatedfieldwidgetwrapper/)
 - Auto-complete for faster entering?
-- Date selectors
 - Extra information around to guide (widgets to custom form https://docs.djangoproject.com/en/3.1/ref/forms/fields/)
 - Multi-add option
 - Import of csv
@@ -162,8 +163,6 @@ ALLOW CAMERA ALWAYS
 - date selector assignto, addto and edit
 
 ### Custom admin interface
-- Allow to add categories, labs, etc.
-- Multi-image support, allow users to upload images and manual(s).
 - See soon due service dates and flags
 - Show users, add users, show items in use, items per user, statistics.
 
@@ -177,8 +176,16 @@ ALLOW CAMERA ALWAYS
 - Continue Django Docs.
 - Page restrictions: whole system when logged in, several pages only staff
 
+### Scanner
+- Add to history of item to see when item was scanned.
+
 ### For future
 - New model for images. Link images to model. How to add this to history as well.
+
+
+TODO add flag functionality, finish manage interface. Confirmation messages.
+
+RESOLVE BUG: when adding/updating item to warranty and ONLY exp date is given, not service date.
 
 ## Changelog
 
@@ -197,6 +204,10 @@ Changes here
 
 2020-01-07
 - @login_required, @staff_member_required fixed for all views. Only about and login now accessible without login.
+- date selector in StaffUpdateView and AssignForm.
+- Help texts in forms.
+- Manage interface: open flags (with resolve), assigned items (with return) and items under warranty (with remove warranty) overview added.
+- Success messages on all Manage pages when creating, updating or pressing a single action button.
 
 ## History
 

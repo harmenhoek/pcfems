@@ -9,7 +9,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib.admin.views.decorators import staff_member_required
 from django.utils.decorators import method_decorator
 # for function-based views, decorator: staff_member_required @staff_member_required
-from .forms import ItemForm
+from .forms import ItemForm, AssignForm
 from django.urls import reverse, reverse_lazy
 from django.http import HttpResponse, HttpResponseRedirect
 from django.utils import timezone
@@ -191,17 +191,12 @@ class LogDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
 
 class AssignCreateView(LoginRequiredMixin, UpdateView):
     model = Item
+    form_class = AssignForm  # needed to add date selector widget
     template_name = 'ems/assign_create.html'
-    fields = ['location', 'user', 'date_return']
-
 
     def form_valid(self, form):
-        # form.instance.user = self.request.user
         form.instance.status = False
         form.instance.date_inuse = timezone.now()
-        # item = get_object_or_404(Item, pk=self.kwargs.get('pk'))
-        # item.status = True
-        # item.save(update_fields=['status'])
         return super().form_valid(form)
 
 @login_required
@@ -222,8 +217,10 @@ def assignremove(request, pk):
 @method_decorator(staff_member_required, name='dispatch') #only staff can edit fully
 class ItemStaffUpdateView(LoginRequiredMixin, UpdateView): # TODO different update views for general users and managers. UserPassesTestMixin
     model = Item
-    fields = ['brand', 'model', 'serial', 'category', 'description', 'purchased_by', 'purchased_on', 'purchased_price',
-              'warranty_expiration', 'next_service_date', 'storage_location', 'image', 'image2']
+    form_class = ItemForm
+    # fields = ['brand', 'model', 'serial', 'category', 'description', 'purchased_by', 'purchased_on', 'purchased_price',
+    #           'warranty_expiration', 'next_service_date', 'storage_location', 'image', 'image2']
+
 
     def form_valid(self, form):
         form.instance.updated_by = self.request.user

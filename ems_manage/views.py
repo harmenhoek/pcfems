@@ -9,11 +9,23 @@ from django.urls import reverse_lazy, reverse
 from django.contrib.auth.models import User
 from django.http import HttpResponseRedirect
 from activity_log.models import ActivityLog
+from django.shortcuts import get_object_or_404
+from django.utils import timezone
+from django.contrib import messages
+from django.contrib.messages.views import SuccessMessageMixin
 
+@method_decorator(staff_member_required, name='dispatch') #only staff can add new
+class ManageView(LoginRequiredMixin, ListView):
+    model = Item
+    template_name = 'ems_manage/manage.html'
 
-@staff_member_required
-def manage(request):
-    return render(request, 'ems_manage/manage.html')
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['openflags'] = Item.objects.all().filter(flag__isnull=False)
+        context['assgineditems'] = Item.objects.all().filter(status=False).order_by('date_return')
+        context['warrantyitems'] = Item.objects.all().filter(warranty=True).order_by('warranty_expiration')
+        context['scanneditems'] = Item.objects.all().order_by('last_scanned')[:100]
+        return context
 
 @method_decorator(staff_member_required, name='dispatch') #only staff can add new
 class UsersView(LoginRequiredMixin, ListView):
@@ -40,18 +52,48 @@ class FlagsView(LoginRequiredMixin, ListView):
     template_name = 'ems_manage/flag_list.html'
 
 @method_decorator(staff_member_required, name='dispatch') #only staff can add new
-class FlagsCreateView(LoginRequiredMixin, CreateView):
+class FlagsCreateView(SuccessMessageMixin, LoginRequiredMixin, CreateView):
     model = Flag
+    success_message = "Flag <b><i class='fas fa-%(icon)s'></i> %(flag)s</b> was created successfully."
     success_url = reverse_lazy('manage-flags')
     fields = ['flag', 'description', 'icon']
     template_name = 'ems_manage/flag_form.html'
 
 @method_decorator(staff_member_required, name='dispatch') #only staff can add new
-class FlagsUpdateView(LoginRequiredMixin, UpdateView):
+class FlagsUpdateView(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
     model = Flag
+    success_message = "Flag <b><i class='fas fa-%(icon)s'></i> %(flag)s</b> was updated successfully."
     success_url = reverse_lazy('manage-flags')
     fields = ['flag', 'description', 'icon']
     template_name = 'ems_manage/flag_form.html'
+
+@staff_member_required
+def flagresolve(request, pk):
+    item = get_object_or_404(Item, pk=pk)
+    messages.success(request, f'Item <b>{item.brand} {item.model}</b> (flagged as "<i class="fas fa-{item.flag.icon}"></i> {item.flag.flag}") was <b>unflagged</b>.')
+    item.flag = None
+    item.save()
+    return HttpResponseRedirect(reverse('manage-home'))
+
+@staff_member_required
+def assignremove(request, pk):  # note that this function is similar to assignremove in ems/views, but with different response. In future combine.
+    item = get_object_or_404(Item, pk=pk)
+    messages.success(request, f'Item <b>{item.brand} {item.model}</b> (assigned to {item.user} at {item.location}) was <b>unassigned.</b> Make sure it is in storage cabinet <b>{item.storage_location}</b>.')
+    item.status = True
+    item.user = None
+    item.date_return = timezone.now()
+    item.save()
+    return HttpResponseRedirect(reverse('manage-home'))
+
+@staff_member_required
+def warrantyremove(request, pk):  # note that this function is similar to assignremove in ems/views, but with different response. In future combine.
+    item = get_object_or_404(Item, pk=pk)
+    messages.success(request, f'The warranty of item <b>{item.brand} {item.model}</b> (warranty till {item.warranty_expiration}) was <b>removed</b>.')
+    item.warranty = False
+    item.warranty_expiration = None
+    item.next_service_date = None
+    item.save()
+    return HttpResponseRedirect(reverse('manage-home'))
 
 @method_decorator(staff_member_required, name='dispatch') #only staff can add new
 class CategoriesView(LoginRequiredMixin, ListView):
@@ -74,63 +116,72 @@ class LocationsView(LoginRequiredMixin, ListView):
         return context
 
 @method_decorator(staff_member_required, name='dispatch') #only staff can add new
-class SetupCreateView(LoginRequiredMixin, CreateView):
+class SetupCreateView(SuccessMessageMixin, LoginRequiredMixin, CreateView):
     model = Setup
+    success_message = "Setup <b>%(lab)s - %(name)s</b> was created successfully."
     success_url = reverse_lazy('manage-locations')
     fields = ['lab', 'name', 'manager']
     template_name = 'ems_manage/setup_form.html'
 
 @method_decorator(staff_member_required, name='dispatch') #only staff can add new
-class SetupUpdateView(LoginRequiredMixin, UpdateView):
+class SetupUpdateView(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
     model = Setup
+    success_message = "Setup <b>%(lab)s - %(name)s</b> was updated successfully."
     success_url = reverse_lazy('manage-locations')
     fields = ['lab', 'name', 'manager']
     template_name = 'ems_manage/setup_form.html'
 
 @method_decorator(staff_member_required, name='dispatch') #only staff can add new
-class LabCreateView(LoginRequiredMixin, CreateView):
+class LabCreateView(SuccessMessageMixin, LoginRequiredMixin, CreateView):
     model = Lab
+    success_message = "Lab <b>%(number)s (%(nickname)s)</b> was created successfully."
     success_url = reverse_lazy('manage-locations')
     fields = ['number', 'manager', 'nickname']
     template_name = 'ems_manage/lab_form.html'
 
 @method_decorator(staff_member_required, name='dispatch') #only staff can add new
-class LabUpdateView(LoginRequiredMixin, UpdateView):
+class LabUpdateView(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
     model = Lab
+    success_message = "Lab <b>%(number)s (%(nickname)s)</b> was updated successfully."
     success_url = reverse_lazy('manage-locations')
     fields = ['number', 'manager', 'nickname']
     template_name = 'ems_manage/lab_form.html'
 
 @method_decorator(staff_member_required, name='dispatch') #only staff can add new
-class CabinetCreateView(LoginRequiredMixin, CreateView):
+class CabinetCreateView(SuccessMessageMixin, LoginRequiredMixin, CreateView):
     model = Cabinet
+    success_message = "Cabinet <b>%(number)s</b> in lab %(lab)s was created successfully."
     success_url = reverse_lazy('manage-locations')
     fields = ['lab', 'number']
     template_name = 'ems_manage/cabinet_form.html'
 
-class CabinetUpdateView(LoginRequiredMixin, UpdateView):
+class CabinetUpdateView(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
     model = Cabinet
+    success_message = "Cabinet <b>%(number)s</b> in lab %(lab)s was updated successfully."
     success_url = reverse_lazy('manage-locations')
     fields = ['lab', 'number']
     template_name = 'ems_manage/cabinet_form.html'
 
 @method_decorator(staff_member_required, name='dispatch') #only staff can add new
-class CategoryCreateView(LoginRequiredMixin, CreateView):
+class CategoryCreateView(SuccessMessageMixin, LoginRequiredMixin, CreateView):
     model = Category
+    success_message = "Category <b>%(name)s</b> was created successfully."
     success_url = reverse_lazy('manage-categories')
     fields = ['name']
     template_name = 'ems_manage/category_form.html'
 
 @method_decorator(staff_member_required, name='dispatch') #only staff can add new
-class CategoryUpdateView(LoginRequiredMixin, UpdateView):
+class CategoryUpdateView(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
     model = Category
+    success_message = "Category <b>%(name)s</b> was updated successfully."
     success_url = reverse_lazy('manage-categories')
     fields = ['name']
     template_name = 'ems_manage/category_form.html'
 
 @method_decorator(staff_member_required, name='dispatch') #only staff can add new
-class UserCreateView(LoginRequiredMixin, CreateView):
+class UserCreateView(SuccessMessageMixin, LoginRequiredMixin, CreateView):
     model = get_user_model()
+    success_message = "User <b>%(first_name)s %(last_name)s (%(email)s)</b> was created successfully."
     success_url = reverse_lazy('manage-users')  # not even needed for CreateView
     fields = ['first_name', 'last_name', 'email', 'is_staff']
     template_name = 'ems_manage/user_form.html'
@@ -140,8 +191,9 @@ class UserCreateView(LoginRequiredMixin, CreateView):
         return super(UserCreateView, self).form_valid(form)
 
 @method_decorator(staff_member_required, name='dispatch') #only staff can add new
-class UserUpdateView(LoginRequiredMixin, UpdateView):
+class UserUpdateView(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
     model = get_user_model()  # get_user_model() will work in more cases, when Auth model has changed. User will otherwise work.
+    success_message = "User <b>%(first_name)s %(last_name)s (%(email)s)</b> was updated successfully."
     success_url = reverse_lazy('manage-users')  # not even needed for CreateView
     fields = ['first_name', 'last_name', 'email', 'is_staff', 'is_active']
     template_name = 'ems_manage/user_form.html'

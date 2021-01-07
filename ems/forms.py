@@ -13,6 +13,14 @@ class ItemForm(forms.ModelForm):
             'next_service_date': DatePickerInput(format='%Y-%m-%d'),
         }
 
+class AssignForm(forms.ModelForm):  # added to include date selector widget
+    class Meta:
+        model = Item
+        fields = ['location', 'user', 'date_return']
+        widgets = {
+            'date_return': DatePickerInput(format='%Y-%m-%d'),
+        }
+
 class ItemImageForm(forms.ModelForm):
     class Meta:
         model = ItemImage

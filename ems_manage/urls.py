@@ -2,10 +2,10 @@ from django.urls import path
 from . import views  # imports the functions from views.py
 from .views import UsersView, FlagsView, CategoriesView, UserCreateView, UserUpdateView, UsersActivityView, \
     CategoryCreateView, CategoryUpdateView, FlagsCreateView, FlagsUpdateView, LocationsView, LabCreateView, \
-    LabUpdateView, SetupCreateView, SetupUpdateView, CabinetCreateView, CabinetUpdateView
+    LabUpdateView, SetupCreateView, SetupUpdateView, CabinetCreateView, CabinetUpdateView, ManageView
 
 urlpatterns = [
-    path('', views.manage, name='manage-home'),
+    path('', ManageView.as_view(), name='manage-home'),
 
     path('user/', UsersView.as_view(), name='manage-users'),
     path('user/add/', UserCreateView.as_view(), name='manage-users-add'),
@@ -28,6 +28,11 @@ urlpatterns = [
     path('setup/<int:pk>/update/', SetupUpdateView.as_view(), name='manage-setups-update'),
     path('cabinet/add/', CabinetCreateView.as_view(), name='manage-cabinets-add'),
     path('cabinet/<int:pk>/update/', CabinetUpdateView.as_view(), name='manage-cabinets-update'),
+
+    path('flags/<int:pk>/resolve/', views.flagresolve, name='manage-flags-resolve'),
+    path('item/<int:pk>/assign/remove/', views.assignremove, name='manage-assign-remove'),
+    path('item/<int:pk>/warranty/remove/', views.warrantyremove, name='manage-warranty-remove'),
+
 ]
 
     # path('user/<str:username>', UserPostListView.as_view(), name='user-posts'),

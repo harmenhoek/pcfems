@@ -28,7 +28,7 @@
             <td>{{ item.pk }}</td>
             <td>{{ item.flag }}</td>
             <td>{{ item.description }}</td>
-            <td>{{ item.icon }}</td>
+            <td><i class="fas fa-{{ item.icon }}"></i> ({{ item.icon }})</td>
             <td>
                 <a href="{% url 'manage-flags-update' item.pk %}" class="btn btn-secondary">Edit</a>
             </td>

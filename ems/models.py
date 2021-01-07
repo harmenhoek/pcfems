@@ -21,7 +21,6 @@ User.add_to_class("__str__", get_first_name)
 
 class Lab(models.Model):
     number = models.CharField(max_length=5)
-    # manager = models.CharField(max_length=100, default='undefined')  # TODO make selectlist
     manager = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, default=2, limit_choices_to={'is_superuser': False})
     nickname = models.CharField(max_length=20, default='', null=True, blank=True)
     history = HistoricalRecords()
@@ -72,42 +71,42 @@ class Item(models.Model):  # inherit from models, all fields below
     brand = models.CharField(max_length=100)
     model = models.CharField(max_length=100)
     serial = models.CharField(max_length=100, null=True, blank=True)
-    category = models.ForeignKey(Category, on_delete=models.SET_DEFAULT, default='uncategorized', help_text='New categories can be added in Admin/Manage/Categories.')  # TODO make selectbox
+    category = models.ForeignKey(Category, on_delete=models.SET_DEFAULT, default='uncategorized', help_text='New categories can be added in Admin/Manage/Categories.')
     description = models.TextField()  # longer than CharField, unrestricted text.
-    purchased_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name="purchaseduser", limit_choices_to={'is_superuser': False})  # TODO make selectbox of users
-    purchased_on = models.DateField(default="", null=True, blank=True)  # TODO not now
+    purchased_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name="purchaseduser", limit_choices_to={'is_superuser': False})
+    purchased_on = models.DateField(default="", null=True, blank=True)
     purchased_price = models.DecimalField(decimal_places=2, max_digits=10, null=True, blank=True)
     warranty = models.BooleanField(default=False)
     warranty_expiration = models.DateField(null=True, blank=True)
     next_service_date = models.DateField(null=True, blank=True)
-    storage_location = models.ForeignKey(Cabinet, on_delete=models.SET_NULL, default="", null=True, blank=True, help_text='New storage locations can be added in Admin/Manage/Locations.')  # TODO make different model for storage locations
+    storage_location = models.ForeignKey(Cabinet, on_delete=models.SET_NULL, default="", null=True, blank=True, help_text='New storage locations can be added in Admin/Manage/Locations.')
     added_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True,
-                                 related_name="addeduser", limit_choices_to={'is_superuser': False})  # related_name is needed since the reverse releationship (user->item, which we don't need at at all) needs a unique name. TODO make selectbox of users
+                                 related_name="addeduser", limit_choices_to={'is_superuser': False})  # related_name is needed since the reverse releationship (user->item, which we don't need at at all) needs a unique name.
     updated_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True,
                                  related_name="updateduser", limit_choices_to={'is_superuser': False})
     added_on = models.DateTimeField(default=timezone.now)
-    last_scanned = models.DateTimeField(default=timezone.now, null=True, blank=True)  # TODO link to model
+    last_scanned = models.DateTimeField(default=timezone.now, null=True, blank=True)  # TODO link to model and add to history.
 
     #.objects.all().exclude(is_superuser=True)
 
     # Tracking details
     status = models.BooleanField(default=True) #True is in storage (item is free), False is in use (assigned to)
-    location = models.ForeignKey(Setup, on_delete=models.SET_NULL, null=True) # TODO current location is now ALWAYS a setup, should also be possible to be storage
+    location = models.ForeignKey(Setup, on_delete=models.SET_NULL, null=True)
     # location = ForeignKey(Setup OR Cabinet)
 
     # content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
     # object_id = models.PositiveIntegerField()
     # location2 = GenericForeignKey('content_type', 'object_id')
 
-    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name="itemuser", limit_choices_to={'is_superuser': False})
-    date_inuse = models.DateField(null=True, blank=True) #TODO only show when editing item
-    date_return = models.DateField(null=True, blank=True) #TODO only show when editing item
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name="itemuser", limit_choices_to={'is_superuser': False}, help_text="Optional, only the location is mandatory.")
+    date_inuse = models.DateField(null=True, blank=True)
+    date_return = models.DateField(null=True, blank=True, help_text="Optional, but recommended.")
 
     # Editable details
     # manual = FileField
     # images = FileField
     # notes through time
-    flag = models.ForeignKey(Flag, on_delete=models.SET_NULL, null=True, blank=True) #TODO only show when editing item
+    flag = models.ForeignKey(Flag, on_delete=models.SET_NULL, null=True, blank=True)
     image = models.ImageField(default='default.png', upload_to='item_pics', blank=True, null=True)
     image2 = models.ImageField(upload_to='item_pics', blank=True, null=True)
     history = HistoricalRecords() # excluded_fields=['pub_date']
