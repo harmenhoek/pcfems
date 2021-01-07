@@ -193,7 +193,10 @@ Changes here
 
 2020-01-06
 - Deprecated qrgenerator.html, now in-view QR generation (using qrcode-6.1) with PIL processing for caption. Now HttpResponse of image insteafd of render html.
-- Created qrbatchgenerator to create batch pdf files with qr codes.
+- Created qrbatchgenerator to create batch pdf files with qr codes using reportlab.pdfgen and io.
+
+2020-01-07
+- @login_required, @staff_member_required fixed for all views. Only about and login now accessible without login.
 
 ## History
 

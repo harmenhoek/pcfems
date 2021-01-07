@@ -30,15 +30,13 @@ import logging
 #    return render(request, 'ems/home.html', content)
 
 
-def about(request):
-   return render(request, 'ems/about.html', {'title': 'About'})
 
-class ItemListView(ListView):
+class ItemListView(LoginRequiredMixin, ListView):
    model = Item
    template_name = 'ems/home.html'  # <app>/<model>_<viewtype>.html
    ordering = ['-added_on']  # minus sign to get oldest first.
 
-class ItemHistoryView(DetailView):
+class ItemHistoryView(LoginRequiredMixin, DetailView):
     model = Item
     template_name = 'ems/item_history.html'
 
@@ -69,7 +67,7 @@ class ItemHistoryView(DetailView):
 
         return context
 
-class ItemDetailView(DetailView):
+class ItemDetailView(LoginRequiredMixin, DetailView):
     model = Item
     slug_url_kwarg = 'qrid'
     slug_field = 'qrid'
@@ -206,6 +204,7 @@ class AssignCreateView(LoginRequiredMixin, UpdateView):
         # item.save(update_fields=['status'])
         return super().form_valid(form)
 
+@login_required
 def assignremove(request, pk):
     item = get_object_or_404(Item, pk=pk)
     item.status = True
@@ -259,12 +258,15 @@ class ItemDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView): # TOD
 def about(request):
     return render(request, 'ems/about.html', {'title': 'About'})
 
+@login_required
 def test(request):
     return render(request, 'ems/test.html')
 
+@login_required
 def scanner(request):
     return render(request, 'ems/scanner.html')
 
+# Regular function
 def createqr(text):
     import qrcode
     from PIL import Image, ImageFont, ImageDraw, ImageOps
@@ -287,6 +289,7 @@ def createqr(text):
     out = Image.alpha_composite(img, txt)
     return out
 
+@login_required
 def qrgenerator(request, pk):
     item = get_object_or_404(Item, pk=pk)
 
@@ -297,6 +300,7 @@ def qrgenerator(request, pk):
 
     return response
 
+@login_required
 def qrbatchgenerator(request, pk1, pk2):
 
     import io
