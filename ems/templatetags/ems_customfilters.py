@@ -2,6 +2,7 @@ from django import template
 from datetime import date
 import math
 import os
+from django.conf import settings
 
 register = template.Library()
 
@@ -41,3 +42,8 @@ def timedelta(value):
 def filesize(value):
     """Returns the filesize of the filename given in value"""
     return os.path.getsize(value)
+
+# settings value
+@register.simple_tag
+def settings_value(name):
+    return getattr(settings, name, "")

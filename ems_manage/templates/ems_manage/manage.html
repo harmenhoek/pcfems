@@ -23,11 +23,12 @@
                 <th>Status</th>
                 <th>User</th>
                 <th>Flag</th>
-                <th></th>
+                <th>Flagged by</th>
+                <th>Flagged on</th>
                 <th></th>
             </thead>
             <tbody>
-                {% for item in openflags %}
+                {% for item, item2 in openflags %}
                     <tr>
                         <td>{{ item.id }}</td>
                         <td>{{ item.brand }} {{ item.model }}</td>
@@ -45,8 +46,12 @@
                         </td>
                         <td>{{ item.user }}</td>
                         <td><i class="fas fa-{{ item.flag.icon }}"></i> {{ item.flag.flag }}</td>
-                        <td><a href="{% url 'manage-flags-resolve' item.pk %}" class="btn btn-success">Unflag</a></td>
-                        <td><a href="{% url 'item-detail' item.pk %}" class="btn btn-secondary">Go To</a></td>
+                        <td>{{ item2.flagged_by }}</td>
+                        <td>{{ item2.flagged_on|date:'d-m-Y H:i' }}</td>
+                        <td>
+                            <a href="{% url 'item-detail' item.pk %}" class="btn btn-secondary mb-2">Go To</a>
+                            <a href="{% url 'manage-flags-resolve' item.pk %}" class="btn btn-success">Unflag</a>
+                        </td>
                     </tr>
         {% endfor %}
             </tbody>
@@ -166,6 +171,9 @@
         </table>
     </div>
 </div>
+<br><br>
+
+
 {% endblock content %}
 
 {% block tablescript %}

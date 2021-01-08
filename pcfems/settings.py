@@ -222,3 +222,5 @@ EMAIL_HOST_PASSWORD = os.environ.get('EMS_EMAIL_PASS')
 BOOTSTRAP4 = {
     'include_jquery': True,
 }
+
+DEFAULT_IMAGE = 'default.png'

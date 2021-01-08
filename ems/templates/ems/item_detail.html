@@ -4,7 +4,7 @@
 
 {% block content %}
 
-
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ekko-lightbox/5.3.0/ekko-lightbox.css" integrity="sha512-Velp0ebMKjcd9RiCoaHhLXkR1sFoCCWXNp6w4zj1hfMifYB5441C+sKeBl/T/Ka6NjBiRfBBQRaQq65ekYz3UQ==" crossorigin="anonymous" />
 
 <article class="media content-section">
     <div class="row justify-content-md-center">
@@ -29,8 +29,8 @@
                         <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenu2">
                             {% if user.is_authenticated %}
                             <a class="dropdown-item" href="{% url 'item-userupdate' object.id %}"><i class="fas fa-edit"></i> Update</a>
-                            <a class="dropdown-item" target="_blank" href="{% url 'ems-qrgenerator' object.id %}"><i class="fas fa-qrcode"></i> Get QR code</a>
-                            <a class="dropdown-item disabled" href="#"><i class="fas fa-file-export"></i> Export to PDF</a>
+                            <a class="dropdown-item" target="_blank" href="{% url 'ems-qrgenerator' object.id %}"><i class="fas fa-qrcode"></i> Generate QR code</a>
+<!--                            <a class="dropdown-item disabled" href="#"><i class="fas fa-file-export"></i> Export to PDF</a>-->
                             {% endif%}
 
 
@@ -107,6 +107,21 @@
                                     </h5>
                                 </td>
                             </tr>
+                            {% if object.flag != None %}
+                                <tr>
+                                    <td>
+                                        <i class="fas fa-flag"></i>
+                                    </td>
+                                    <td class="th-sm">
+                                         Flag
+                                    </td>
+                                    <td class="pl-4">
+                                        <h5>
+                                            <span class="badge badge-danger"><i class="fas fa-{{ object.flag.icon }}"></i>  {{ object.flag.flag }}</span>
+                                        </h5>
+                                    </td>
+                                </tr>
+                            {% endif %}
                         </table>
 </div>
                 </div>
@@ -188,25 +203,23 @@
         </div>
         <div class="col col-lg-4 col-12 pl-1">
 
-                <div class="row my-2">
-                    <div class="col col-12">
-                        {% if object.image %}
-                            <img class="rounded mr-0" style="width:100%;" src="{{ object.image.url }}">
-                        {% else %}
-                        <img class="rounded mr-0" style="width:100%;" src="DEFAULT_IMAGE">
-                        {% endif %}
-                    </div>
-                </div>
-
-
-
+            <div class="row my-2">
+                <div class="col col-12">
+                    {% if object.image != DEFAULT_IMAGE %}
+                        <a href="{{ object.image.url }}" data-toggle="lightbox"><img class="rounded mr-0 w-100" src="{{ object.image.url }}"></a>
+                    {% else %}
+                        <img class="rounded mr-0 w-100" src="{{ object.image.url }}">
+                    {% endif %}
+                 </div>
+            </div>
             {% if object.image2 %}
                 <div class="row my-2">
                     <div class="col col-12">
-                        <img class="rounded mr-0" style="width:100%;" src="{{ object.image2.url }}">
+                        <a href="{{ object.image2.url }}" data-toggle="lightbox"><img class="rounded mr-0 w-100" src="{{ object.image2.url }}"></a>
                     </div>
                 </div>
             {% endif %}
+
             <hr class="my-2">
             <div class="row">
                 <div class="col col-12">
@@ -218,8 +231,14 @@
                         <a class="btn btn-warning btn-block" href="{% url 'item-assign-remove' object.id %}"><i class="fas fa-stamp"></i> Return to Storage</a>
 
                     {% endif %}
-                    <a class="btn btn-outline-secondary btn-block" href="#"><i class="fas fa-flag"></i> Flag</a>
-<!--                    <a class="btn btn-outline-secondary btn-block" href="#"><i class="fas fa-upload"></i> Add files</a>-->
+                    {% if object.flag %}
+                        <a class="btn btn-outline-success btn-block" href="{% url 'item-flag-remove' object.id %}"><i class="fas fa-flag"></i> Resolve Flag</a>
+                    {% else %}
+                        <a class="btn btn-outline-secondary btn-block" href="{% url 'item-flag' object.id %}"><i class="fas fa-flag"></i> Flag</a>
+                    {% endif %}
+
+
+<!--                  <span class="badge badge-secondary"><i class="fas fa-{{ object.flag.icon }}"></i>  {{ object.flag.flag }}</span>-->
 
                 </div>
             </div>
@@ -441,6 +460,7 @@
 <script>
     $(document).ready(function() {
         $('#logbook_list').DataTable({
+            "aaSorting": [],
             "pagingType": "full_numbers",
             "bLengthChange": false,
             responsive: true,
@@ -485,6 +505,15 @@
         },
         } );
     } );
+</script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/ekko-lightbox/5.3.0/ekko-lightbox.min.js" integrity="sha512-Y2IiVZeaBwXG1wSV7f13plqlmFOx8MdjuHyYFVoYzhyRr3nH/NMDjTBSswijzADdNzMyWNetbLMfOpIPl6Cv9g==" crossorigin="anonymous"></script>
+
+<script>
+    $(document).on('click', '[data-toggle="lightbox"]', function(event) {
+        event.preventDefault();
+        $(this).ekkoLightbox();
+    });
 </script>
 
 {% endblock tablescript %}

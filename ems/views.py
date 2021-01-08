@@ -15,21 +15,10 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.utils import timezone
 from django.forms import modelformset_factory
 
-from bootstrap_datepicker_plus import DateTimePickerInput
+from django.contrib.messages.views import SuccessMessageMixin
+from django.contrib import messages
 
-import logging
-
-# Get an instance of a logger
-# logger = logging.getLogger('django')
-
-# @login_required
-# def home(request):
-#    content = {
-#        'posts': Item.objects.all()
-#    }
-#    return render(request, 'ems/home.html', content)
-
-
+from django.conf import settings
 
 class ItemListView(LoginRequiredMixin, ListView):
    model = Item
@@ -118,40 +107,39 @@ class ItemDetailView(LoginRequiredMixin, DetailView):
 
         # return logs
         try:
-            log_list = Item.objects.get(pk=self.kwargs['pk']).logs.all()
+            log_list = Item.objects.get(pk=self.kwargs['pk']).logs.all().order_by('-added_on')
         except:
-            log_list = Item.objects.get(qrid=self.kwargs['qrid']).logs.all()
+            log_list = Item.objects.get(qrid=self.kwargs['qrid']).logs.all().order_by('-added_on')
 
         context['log_list'] = log_list
+
+        context['DEFAULT_IMAGE'] = settings.DEFAULT_IMAGE
 
         return context
 
 @method_decorator(staff_member_required, name='dispatch') #only staff can add new
-class ItemCreateView(LoginRequiredMixin, CreateView):
+class ItemCreateView(SuccessMessageMixin, LoginRequiredMixin, CreateView):
     model = Item
+    success_message = "Item <b>%(brand)s %(model)s (%(qrid)s)</b> was created successfully."
     form_class = ItemForm
     success_url = None
-    # fields = ['brand', 'model', 'serial', 'category', 'description', 'purchased_by', 'purchased_on', 'purchased_price', 'storage_location', 'image']
 
     def form_valid(self, form):
         form.instance.added_by = self.request.user
         return super().form_valid(form)
 
-    # def get_form(self):
-    #     '''add date picker in forms'''
-    #     from django.forms.widgets import SelectDateWidget
-    #     form = super(ItemCreateView, self).get_form()
-    #     form.fields['purchased_on'].widget = SelectDateWidget()
-    #     return form
+    # For ModelForms, if you need access to fields from the saved object override the get_success_message() method.
+    def get_success_message(self, cleaned_data):
+        return self.success_message % dict(
+            cleaned_data,
+            model=self.object.model,
+            brand=self.object.brand,
+            qrid=self.object.qrid,
+        )
 
-    # def get_form(self):
-    #     form = super().get_form()
-    #     form.fields['purchased_on'].widget = DateTimePickerInput()
-    #     return form
-
-
-class LogCreateView(LoginRequiredMixin, CreateView):
+class LogCreateView(SuccessMessageMixin, LoginRequiredMixin, CreateView):
     model = ItemLog
+    success_message = "Log was added successfully."
     success_url = None
     fields = ['log', 'file1', 'file1_name', 'file2', 'file2_name']
 
@@ -164,8 +152,9 @@ class LogCreateView(LoginRequiredMixin, CreateView):
         # form.instance.added_on = timezone.now()
         return super().form_valid(form)
 
-class LogUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+class LogUpdateView(SuccessMessageMixin, LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = ItemLog
+    success_message = "Log was updated successfully."
     fields = ['log', 'file1', 'file1_name', 'file2', 'file2_name']
 
     def test_func(self):
@@ -176,8 +165,9 @@ class LogUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
             return True
         return False
 
-class LogDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
+class LogDeleteView(SuccessMessageMixin, LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     model = ItemLog
+    success_message = "Log was deleted successfully."
 
     def get_success_url(self):
         item = self.object.item
@@ -189,9 +179,10 @@ class LogDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
             return True
         return False
 
-class AssignCreateView(LoginRequiredMixin, UpdateView):
+class AssignCreateView(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
     model = Item
     form_class = AssignForm  # needed to add date selector widget
+    success_message = "Item <b>%(brand)s %(model)s (%(qrid)s)</b> was assigned to user <b>%(user)s</b> at location <b>%(location)s</b> successfully."
     template_name = 'ems/assign_create.html'
 
     def form_valid(self, form):
@@ -199,40 +190,77 @@ class AssignCreateView(LoginRequiredMixin, UpdateView):
         form.instance.date_inuse = timezone.now()
         return super().form_valid(form)
 
+    # For ModelForms, if you need access to fields from the saved object override the get_success_message() method.
+    def get_success_message(self, cleaned_data):
+        return self.success_message % dict(
+            cleaned_data,
+            model=self.object.model,
+            brand=self.object.brand,
+            qrid=self.object.qrid,
+            user=self.object.user,
+            location=self.object.location,
+        )
+
 @login_required
 def assignremove(request, pk):
     item = get_object_or_404(Item, pk=pk)
+    messages.warning(request, f'Item <b>{item.brand} {item.model}</b> (assigned to {item.user} at {item.location}) was <b>unassigned.</b> Make sure it is in storage cabinet <b>{item.storage_location}</b>.')
     item.status = True
     item.user = None
-    # item.location = item.storage_location
     item.date_return = timezone.now()
     item.save()
-    # do something here
 
-    # return HttpResponseRedirect(reverse('item:results', args=(item.pk,)))
-    # return render(request, 'polls/results.html', {'pk': pk})
-    return HttpResponseRedirect(reverse('item-detail', args=(pk,)))
-    # return reverse('item-detail', kwargs={'pk': pk})
+    return HttpResponseRedirect(reverse('item-detail', args=(pk,)))  # get pk from the url
+
+@login_required
+def flagremove(request, pk):
+    item = get_object_or_404(Item, pk=pk)
+    messages.success(request, f'Flag resolved.')
+    item.flag = None
+    item.save()
+    return HttpResponseRedirect(reverse('item-detail', args=(pk,)))  # get pk from the url
+
+class FlagCreateView(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
+    model = Item
+    success_message = "Item flagged as <b>%(flag)s</b> successfully."
+    fields = ['flag']
 
 @method_decorator(staff_member_required, name='dispatch') #only staff can edit fully
-class ItemStaffUpdateView(LoginRequiredMixin, UpdateView): # TODO different update views for general users and managers. UserPassesTestMixin
+class ItemStaffUpdateView(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
     model = Item
     form_class = ItemForm
-    # fields = ['brand', 'model', 'serial', 'category', 'description', 'purchased_by', 'purchased_on', 'purchased_price',
-    #           'warranty_expiration', 'next_service_date', 'storage_location', 'image', 'image2']
-
+    success_message = "Item <b>%(brand)s %(model)s (%(qrid)s)</b> was updated successfully."
 
     def form_valid(self, form):
         form.instance.updated_by = self.request.user
         return super().form_valid(form)
 
-class ItemUserUpdateView(LoginRequiredMixin, UpdateView): # TODO different update views for general users and managers. UserPassesTestMixin
+    # For ModelForms, if you need access to fields from the saved object override the get_success_message() method.
+    def get_success_message(self, cleaned_data):
+        return self.success_message % dict(
+            cleaned_data,
+            model=self.object.model,
+            brand=self.object.brand,
+            qrid=self.object.qrid,
+        )
+
+class ItemUserUpdateView(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
     model = Item
-    fields = ['description', 'flag', 'image', 'image2']
+    success_message = "Item <b>%(brand)s %(model)s (%(qrid)s)</b> was updated successfully."
+    fields = ['description', 'image', 'image2']
 
     def form_valid(self, form):
         form.instance.updated_by = self.request.user
         return super().form_valid(form)
+
+    # For ModelForms, if you need access to fields from the saved object override the get_success_message() method.
+    def get_success_message(self, cleaned_data):  # TODO check if needed here. Prob not. 8-1-2021
+        return self.success_message % dict(
+            cleaned_data,
+            model=self.object.model,
+            brand=self.object.brand,
+            qrid=self.object.qrid,
+        )
 
     # def test_func(self):
     #     post = self.get_object()
@@ -241,8 +269,9 @@ class ItemUserUpdateView(LoginRequiredMixin, UpdateView): # TODO different updat
     #     return False
 
 @method_decorator(staff_member_required, name='dispatch') #only staff can edit fully
-class ItemDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView): # TODO only for managers allow delete
+class ItemDeleteView(SuccessMessageMixin, LoginRequiredMixin, UserPassesTestMixin, DeleteView): # TODO only for managers allow delete
     model = Item
+    success_message = "Item <b>%(brand)s %(model)s (%(qrid)s)</b> was deleted successfully."
     success_url = '/'
 
     def test_func(self):

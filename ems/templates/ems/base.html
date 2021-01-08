@@ -38,8 +38,10 @@
                 PCF EMS v0.1
             </a>
             <div class="navbar-nav mr-auto"> <!-- Above collapse to control custom behavior on <md devices, i.e. hide Home, but always show Scan.-->
-                <a class="nav-item nav-link d-none d-md-block" href="{% url 'ems-home' %}"><i class="fas fa-home"></i> Home</a>
-                <a class="nav-item nav-link" href="{% url 'ems-scanner' %}"><i class="fas fa-qrcode"></i> Scan</a>
+                {% if user.is_authenticated %}
+                    <a class="nav-item nav-link d-none d-md-block" href="{% url 'ems-home' %}"><i class="fas fa-home"></i> Home</a>
+                    <a class="nav-item nav-link" href="{% url 'ems-scanner' %}"><i class="fas fa-qrcode"></i> Scan</a>
+                {% endif %}
             </div>
             <!--fa options: layer-group, boxes, archive, warehouse, database -->
             <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarToggle"

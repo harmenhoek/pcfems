@@ -1,7 +1,7 @@
 from django.urls import path
 from . import views  # imports the functions from views.py
 from .views import ItemListView, ItemDetailView, ItemCreateView, ItemStaffUpdateView, ItemUserUpdateView, \
-    ItemDeleteView, ItemHistoryView, AssignCreateView, LogCreateView, LogUpdateView, LogDeleteView
+    ItemDeleteView, ItemHistoryView, AssignCreateView, LogCreateView, LogUpdateView, LogDeleteView, FlagCreateView
 
 urlpatterns = [
     path('', ItemListView.as_view(), name='ems-home'),
@@ -14,6 +14,10 @@ urlpatterns = [
     path('item/<int:pk>/history/', ItemHistoryView.as_view(), name='item-history'),
     path('item/<int:pk>/assign/new', AssignCreateView.as_view(), name='item-assign'),
     path('item/<int:pk>/assign/remove', views.assignremove, name='item-assign-remove'),
+
+    path('item/<int:pk>/flag/new', FlagCreateView.as_view(), name='item-flag'),
+    path('item/<int:pk>/flag/remove', views.flagremove, name='item-flag-remove'),
+
     # path('item/<int:pk>/log/new/', LogCreateView.as_view() , name='item-log-create'),
     # path('item/<int:pk>/log/<int:pk_2>/update/', LogUpdateView.as_view() , name='item-log-update'), #                             <a class="btn btn-secondary btn-sm mt-1 mb-1" href="{% url  'item-log-update' object.id log.id %}">Update</a>
     # path('item/<int:pk>/log/<int:pk_2>/delete/', LogDeleteView.as_view() , name='item-log-delete'),

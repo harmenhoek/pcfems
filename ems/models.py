@@ -107,6 +107,7 @@ class Item(models.Model):  # inherit from models, all fields below
     # images = FileField
     # notes through time
     flag = models.ForeignKey(Flag, on_delete=models.SET_NULL, null=True, blank=True)
+    # flagged_by = models.ForeignKey(User, default=2, on_delete=models.SET_NULL, null=True, blank=True, related_name="flaggedbyuser")
     image = models.ImageField(default='default.png', upload_to='item_pics', blank=True, null=True)
     image2 = models.ImageField(upload_to='item_pics', blank=True, null=True)
     history = HistoricalRecords() # excluded_fields=['pub_date']

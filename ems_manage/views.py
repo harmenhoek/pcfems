@@ -21,10 +21,33 @@ class ManageView(LoginRequiredMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['openflags'] = Item.objects.all().filter(flag__isnull=False)
+
         context['assgineditems'] = Item.objects.all().filter(status=False).order_by('date_return')
         context['warrantyitems'] = Item.objects.all().filter(warranty=True).order_by('warranty_expiration')
         context['scanneditems'] = Item.objects.all().order_by('last_scanned')[:100]
+
+        # Open flags
+        # we can get the open flags from Item, but the history contains the person that flagged it and when.
+
+        openflags = Item.objects.all().filter(flag__isnull=False)  # get items with open flag
+
+        openflags_extra = []
+        import numpy as np
+        for item in openflags:  # iterate over the items with open flags
+            id = item.id
+            history = Item.history.filter(id=id).order_by('history_id')  # for each of these items, get full history
+            flag_ids = [i.flag_id for i in history]  # get list of the flag_id of that item (eg. 2 4 4 4 4)
+            history_ids = [i.history_id for i in history]  # get similar list with history_ids (unique)
+            # get locations in flag_ids list where the flag_id changed, e.g. [2 4 4 3 3] will give [1 3], from that get
+            # last one, thus [3] (most recent flag change, since we order by history_id)
+            history_flagged_loc = np.where(np.roll(flag_ids, 1) != flag_ids)[0][-1]
+            history_flagged_id = history_ids[history_flagged_loc]  # get corresponding history_id
+
+            # since history_id is unique we can get corresponding history_user and history_date from history
+            openflags_extra.append({'flagged_by': history.get(history_id=history_flagged_id).history_user,
+                                    'flagged_on': history.get(history_id=history_flagged_id).history_date})
+
+        context['openflags'] = zip(openflags, openflags_extra)
         return context
 
 @method_decorator(staff_member_required, name='dispatch') #only staff can add new

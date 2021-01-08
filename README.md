@@ -27,7 +27,7 @@ The application is built in Django with (currently) a SQLite database.
 - qr-scanner
 - qrcode-6.1
 - reportlab.pdfgen
-
+- ekko-lightbox 5.3.0
 
 ## Workflow
 
@@ -53,10 +53,6 @@ To search for an item, a user has to be logged in.
 SCREENSHOT
 2. To search or filter a specific field, use the searchbar or selection list at the top of the field column.
 
-
-TO DO:
-hidden search fields
-
 ### Assign item to or return to storage
 When an item changes location, i.e. either moves from storage to a user or experimental setup, it has to be assigned to the new user or location. To assign an item, select `Assign To` on the item detail page. If an item is currently in use, the assignment can be changes by selecting `Change Assign To`. Next, select the new location and optionally the user and date of return and press `Assign`. The item availability will change from `Available` to `In use`.
 
@@ -68,15 +64,12 @@ If basic item details are missing or incorrect, the item can be updated by selec
 All users can update the description and images. Staff members can update all the item details ((see <a href="#staf:-update-an-item-fully-or-delete">Staff: update an item fully or delete</a>).
 
 
-TO DO: remove flag from here, add to different view.
-
 ### Add or update a log
 Logs are meant to add time-specific information to an item, such as current problems or custom manuals. To add a log, select `Add log` on the item detail page. Add the log in the log-field and optionally add up to 2 attachments (any type of file) and set a custom names to displayed for the files in the log. If no name is entered, the filename will be displayed. 
 Logs are meant to add time-specific information to an item, such as current problems or custom manuals. To add a log, select `Add log` on the item detail page. Add the log in the log-field and optionally add up to 2 attachments (any type of file) and set a custom names to displayed for the files in the log. If no name is entered, the filename will be displayed.<br />
 
 To update or delete a log, select `Update` or `Delete` next to the log. You can only update or delete your own logs.
 
-- [ ] To do: file size limit.
 
 ### Flag an item
 An item can be flagged if an action is required. Examples of flags are 'item needs repair', 'item needs cleaning' and 'item is missing'.<br>
@@ -84,14 +77,9 @@ To add flag, select `Flag` on the item detail page, and select the flag, and sav
 
 **Note**: In the current version the flag only shows up in the Flag overview in the staff manage overview. No notifications are send.  
 
-TO DO:
-add flag functionality
 
 ### Staff: add a new item
 To add a new item to the database, select `Add item` from the `Admin` menu in the header. Fill in at least the mandatory fields marked by a '*'. Press `Add` to add the item. In the background several fields are added automatically, including the unique item ID (or slug).
-
-TODO: mandatory fields
-TODO: QR code printer when done.
 
 **Note:** In the current version it is not possible to add a category when adding a new item (no widget wrapper). Categories ca be managed in the manage overview (see 'Staff: manage users, flags, categories, monitor user activity' below.)
 
@@ -140,52 +128,19 @@ ALLOW CAMERA ALWAYS
 ## Screenshots (version 0.1)
 
 
-
-
-## Further development
-
-- Hide Scan when logged out
-
-
-### Insert form
-- Add related widget wrapper to add categories on the go (http://dashdrum.com/blog/2012/07/relatedfieldwidgetwrapper/)
-- Auto-complete for faster entering?
-- Extra information around to guide (widgets to custom form https://docs.djangoproject.com/en/3.1/ref/forms/fields/)
-- Multi-add option
-- Import of csv
-
-### Detail page
-- Export to
-- Refined item history
-- Proper flagging
-- Image lightbox
-- Filter Notes and History. Notes e.g only with attachments, or only <1 month old.
-- date selector assignto, addto and edit
-
-### Custom admin interface
-- See soon due service dates and flags
-- Show users, add users, show items in use, items per user, statistics.
-
-### User page
-- Clickable username to page
-- Show items in use by this person
-
-### Major functionality
-- QR code generator for new items. When adding, ask to enter pre-printed qr code, or scan it. Show a selection box with pre-printed QR-codes. Only those just printed can be added to the system.
-- Admin environment: see all logs, add categories, etc. Add link to menubar. See recent activity. See flags in overview.
-- Continue Django Docs.
-- Page restrictions: whole system when logged in, several pages only staff
-
-### Scanner
-- Add to history of item to see when item was scanned.
-
-### For future
-- New model for images. Link images to model. How to add this to history as well.
-
-
-TODO add flag functionality, finish manage interface. Confirmation messages.
+Known bugs
 
 RESOLVE BUG: when adding/updating item to warranty and ONLY exp date is given, not service date.
+
+TODO
+- bulk import csv
+- Scan log 
+- TODO: mandatory fields when adding / updating
+- hidden search fields
+wha
+
+
+
 
 ## Changelog
 
@@ -208,6 +163,14 @@ Changes here
 - Help texts in forms.
 - Manage interface: open flags (with resolve), assigned items (with return) and items under warranty (with remove warranty) overview added.
 - Success messages on all Manage pages when creating, updating or pressing a single action button.
+
+2020-01-08
+- In manage openflags, flagged_by and flagged_on is retrieved by querying the item history. 
+- Added success messages to ems views. Not fully tested.
+- Added flag functionality to item-detail: show current flag and button to flag / resolve flag.
+- Added Lightbox to detail page (ekko-lightbox 5.3.0). When default image (now SETTING), no lightbox.
+- Hide Home and Scan when logged out
+
 
 ## History
 
