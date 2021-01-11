@@ -61,12 +61,16 @@ class ItemDetailView(LoginRequiredMixin, DetailView):
     slug_url_kwarg = 'qrid'
     slug_field = 'qrid'
 
-    # def get_object(self, queryset=None):
-    #     return Item.objects.get(qrid=self.kwargs.get("qrid"))
-
-    def get_context_data(self, **kwargs): # to send extra data
+    def get_context_data(self, **kwargs):  # to send extra data
         # Call the base implementation first to get a context
         context = super().get_context_data(**kwargs)
+
+        # update last_scanned in model if refered from scanner
+        from urllib import parse
+        if parse.urlparse(self.request.META.get('HTTP_REFERER')).path == reverse('ems-scanner'):
+            item = get_object_or_404(Item, pk=self.kwargs['pk'])
+            item.last_scanned = timezone.now()
+            item.save()
 
 
         # Get all the changes of this specific item.

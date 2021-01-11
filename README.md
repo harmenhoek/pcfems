@@ -134,7 +134,6 @@ RESOLVE BUG: when adding/updating item to warranty and ONLY exp date is given, n
 
 TODO
 - bulk import csv
-- Scan log 
 - TODO: mandatory fields when adding / updating
 - hidden search fields
 wha
@@ -147,30 +146,33 @@ wha
 ### Release v0.1 (not released yet)
 Changes here
 
-2020-01-05
+2021-01-05
 - Added bootstrap_datepicker_plus for createview.
 - Installed bootstrap via pip, loaded into base.html, commented the old links, beware this works perfectly everywhere.
 - Updated manage: locations (setup, lab and cabinets), categories and flags.
 - DataTables to item detail page: logbook and item history
 
-2020-01-06
+2021-01-06
 - Deprecated qrgenerator.html, now in-view QR generation (using qrcode-6.1) with PIL processing for caption. Now HttpResponse of image insteafd of render html.
 - Created qrbatchgenerator to create batch pdf files with qr codes using reportlab.pdfgen and io.
 
-2020-01-07
+2021-01-07
 - @login_required, @staff_member_required fixed for all views. Only about and login now accessible without login.
 - date selector in StaffUpdateView and AssignForm.
 - Help texts in forms.
 - Manage interface: open flags (with resolve), assigned items (with return) and items under warranty (with remove warranty) overview added.
 - Success messages on all Manage pages when creating, updating or pressing a single action button.
 
-2020-01-08
+2021-01-08
 - In manage openflags, flagged_by and flagged_on is retrieved by querying the item history. 
 - Added success messages to ems views. Not fully tested.
 - Added flag functionality to item-detail: show current flag and button to flag / resolve flag.
 - Added Lightbox to detail page (ekko-lightbox 5.3.0). When default image (now SETTING), no lightbox.
 - Hide Home and Scan when logged out
 
+2020-01-11
+- Logging scanning. In DetailView item last_scanned is updated when refered from ems-scanner. historicalitem takes care of logging. To fix: when refreshing after redirect, referer is still the same and logging happens multiple times.
+- Bug fix: item-detail tables 100% on rescale
 
 ## History
 
