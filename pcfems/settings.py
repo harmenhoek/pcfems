@@ -16,18 +16,6 @@ import os
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
-
-# SECURITY WARNING: keep the secret key used in production secret!
-# SECRET_KEY = '!v3zr=nqlucany33r#x1o64y-71o9tdzn+48eu50r-q!10i!n-'
-
-# SECURITY WARNING: don't run with debug turned on in production!
-# DEBUG = True
-
-# ALLOWED_HOSTS = ['10.10.10.110', 'localhost']
-
-
 # Application definition
 
 INSTALLED_APPS = [
@@ -88,22 +76,6 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'pcfems.wsgi.application'
-
-
-# Database
-# https://docs.djangoproject.com/en/3.1/ref/settings/#databases
-
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': BASE_DIR / 'db_development.sqlite3',
-#     },
-#     'logs': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': BASE_DIR / 'db.sqlite3_logs',
-#     }
-# }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/3.1/ref/settings/#auth-password-validators
@@ -196,8 +168,7 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = os.environ.get('EMS_EMAIL_USER')
-EMAIL_HOST_PASSWORD = os.environ.get('EMS_EMAIL_PASS')
+
 
 
 # LOGGING = {

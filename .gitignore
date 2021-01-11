@@ -11,3 +11,4 @@ test.py
 db_development.sqlite3
 local_settings.py
 venv/
+db_development.sqlite3_logs
