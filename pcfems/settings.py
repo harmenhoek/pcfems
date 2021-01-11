@@ -20,12 +20,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = '!v3zr=nqlucany33r#x1o64y-71o9tdzn+48eu50r-q!10i!n-'
+# SECRET_KEY = '!v3zr=nqlucany33r#x1o64y-71o9tdzn+48eu50r-q!10i!n-'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+# DEBUG = True
 
-ALLOWED_HOSTS = ['10.10.10.110', 'localhost']
+# ALLOWED_HOSTS = ['10.10.10.110', 'localhost']
 
 
 # Application definition
@@ -93,16 +93,16 @@ WSGI_APPLICATION = 'pcfems.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    },
-    'logs': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3_logs',
-    }
-}
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db_development.sqlite3',
+#     },
+#     'logs': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3_logs',
+#     }
+# }
 
 
 # Password validation
@@ -224,3 +224,8 @@ BOOTSTRAP4 = {
 }
 
 DEFAULT_IMAGE = 'default.png'
+
+try:
+    from pcfems.local_settings import *
+except ImportError as e:
+    raise Exception(e)
