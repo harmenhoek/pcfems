@@ -311,8 +311,13 @@ def createqr(text):
     img = qr.make_image(fill_color="black", back_color="white").convert("RGBA")
     img = ImageOps.expand(img, border=(0, 0, 0, 60), fill='white')
     txt = Image.new("RGBA", img.size, (255, 255, 255, 0))
-    from django.contrib.staticfiles.storage import staticfiles_storage
-    fontfile = staticfiles_storage.url('ems/Arial.ttf')
+
+    # from django.conf.urls.static import static
+    from django.templatetags.static import static
+    fontfile = static('ems/Arial.ttf')
+
+    # from django.contrib.staticfiles.storage import staticfiles_storage
+    # fontfile = staticfiles_storage.url('ems/Arial.ttf')1
     font = ImageFont.truetype(fontfile, 60)
     d = ImageDraw.Draw(txt)
     d.text((img.size[0] / 2, img.size[1] - 10), text, anchor="ms", font=font, fill=(0, 0, 0, 256))
