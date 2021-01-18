@@ -43,6 +43,13 @@ def filesize(value):
     """Returns the filesize of the filename given in value"""
     return os.path.getsize(value)
 
+@register.filter
+def nonevalue(value):
+    if value:
+        return value
+    else:
+        return f"<em class='text-muted'>{value}</em>"
+
 # settings value
 @register.simple_tag
 def settings_value(name):

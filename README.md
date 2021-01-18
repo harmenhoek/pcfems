@@ -1,6 +1,6 @@
 Harmen Hoek<br />
-December 2020<br />
-Current version: 0.1 (december 2020) <br />
+January 2021<br />
+Current version: 0.2 (14 January 2021) <br />
 Created for: Physics of Complex Fluids, University of Twente.<br />
 Current development phase: beta-testing, not usable.
 

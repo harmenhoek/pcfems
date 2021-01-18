@@ -27,3 +27,19 @@ Version 0.1
 2021-01-11
 - Logging scanning. In DetailView item last_scanned is updated when refered from ems-scanner. historicalitem takes care of logging. To fix: when refreshing after redirect, referer is still the same and logging happens multiple times.
 - Bug fix: item-detail tables 100% on rescale
+
+Version 0.2
+2021-01-14
+- Timezone fixed
+- Added log_comment, in item-detail also showing who flagged it and when
+- Added images to homeview. Redid some fields. Did JS filtering to show options menu correctly. BUT NOTE: a lot is still hard-coded (which columns get special filtering). Needs to be optimized in the future!
+- homeview: hidden fields for qrid and description
+- Models changes: Item.title, Cabinet.image, .nickname, .main_content, .owner, Setup.image, Lab.image,
+- Added filter nonvalue for None display in manage and home.
+- redid full look of home, with image, title, and more.
+
+2021-01-18
+- Added option to disable tracking of an item, if object.tracking is False, User=Unknown, Location=Unknown. Flagging is still possible. Update home, item-detail and manage.
+- In manage, updated locations with interactive table, and new model changes from last week.
+- Added image compression to upload of images of Cabinet, Setup and Lab.
+- More hidden fields in home for search

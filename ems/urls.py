@@ -25,7 +25,6 @@ urlpatterns = [
     path('log/<int:pk>/update/', LogUpdateView.as_view(), name='item-log-update'),
     path('log/<int:pk>/delete/', LogDeleteView.as_view(), name='item-log-delete'),
     path('item/<slug:qrid>/', ItemDetailView.as_view(), name='item-detail'),
-    path('about/', views.about, name='ems-about'),
     path('test/', views.test, name='ems-test'),
     path('scanner/', views.scanner, name='ems-scanner'),
     path('qrgenerator/<int:pk>/', views.qrgenerator, name='ems-qrgenerator'),

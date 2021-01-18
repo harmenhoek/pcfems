@@ -12,11 +12,8 @@
             <div class="row item-metadate my-2">
                 <div class="col col-lg-9 col-9">
                     <h2 class="align-middle d-inline article-title pr-2">{{ object.brand }} {{ object.model }}</h2>
-                    {% if object.status %}
-                    <span class="align-middle badge badge-pill badge-success">Available</span>
-                    <!-- TODO Hiding elements -->
-                    {% else %}
-<!--                    <span class="align-middle badge badge-pill badge-danger">In use</span> &lt;!&ndash; TODO Hiding elements &ndash;&gt;-->
+                    {% if object.title %}
+                    <p class="text-muted my-0">{{ object.title }}</p>
                     {% endif %}
                 </div>
 
@@ -65,49 +62,52 @@
                                 </td>
                                 <td class="pl-4">
                                     <h5>
-                                        {% if object.status %}
-                    <span class="align-middle badge badge-pill badge-success">Available</span>
-                    <!-- TODO Hiding elements -->
-                    {% else %}
-                    <span class="align-middle badge badge-pill badge-danger">In use</span> <!-- TODO Hiding elements -->
-                    {% endif %}
+                                        {% if object.status and object.tracking %}
+                                            <span class="align-middle badge badge-pill badge-success">Available</span>
+                                        {% elif object.tracking and not object.status %}
+                                            <span class="align-middle badge badge-pill badge-danger">In use</span> <!-- TODO Hiding elements -->
+                                        {% else %}
+                                            <span class="align-middle badge badge-pill badge-secondary" data-toggle="tooltip" data-placement="right" title="This item cannot be assigned to a user or location.">No tracking</span>
+                                        {% endif %}
 
                                     </h5>
                                 </td>
                             </tr>
-                            <tr>
-                                <td>
-                                    <i class="fas fa-map-marker"></i>
-                                </td>
-                                <td>
-                                     Location
-                                </td>
-                                <td class="pl-4">
-                                    {% if object.status %}
-                                        <h5><span class="badge badge-primary">{{ object.storage_location }}</span></h5>
-                                    {% else %}
-                                         <h5><span class="badge badge-warning">{{ object.location }}</span></h5>
-                                    {% endif %}
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <i class="fas fa-user"></i>
-                                </td>
-                                <td class="th-sm">
-                                     User
-                                </td>
-                                <td class="pl-4">
-                                    <h5>
-                                        {% if object.user == None %}
-                                            <span class="badge badge-secondary">{{ object.user }}</span>
+                            {% if object.tracking %}
+                                <tr>
+                                    <td>
+                                        <i class="fas fa-map-marker"></i>
+                                    </td>
+                                    <td>
+                                         Location
+                                    </td>
+                                    <td class="pl-4">
+                                        {% if object.status %}
+                                            <h5><span class="badge badge-warning">{{ object.storage_location }}</span></h5>
                                         {% else %}
-                                            <span class="badge badge-primary">{{ object.user }}</span>
+                                             <h5><span class="badge badge-primary">{{ object.location }}</span></h5>
                                         {% endif %}
-                                    </h5>
-                                </td>
-                            </tr>
-                            {% if object.flag != None %}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <i class="fas fa-user"></i>
+                                    </td>
+                                    <td class="th-sm">
+                                         User
+                                    </td>
+                                    <td class="pl-4">
+                                        <h5>
+                                            {% if object.user == None %}
+                                                <span class="badge badge-secondary">{{ object.user }}</span>
+                                            {% else %}
+                                                <span class="badge badge-primary">{{ object.user }}</span>
+                                            {% endif %}
+                                        </h5>
+                                    </td>
+                                </tr>
+                            {% endif %}
+                            {% if object.flag %}
                                 <tr>
                                     <td>
                                         <i class="fas fa-flag"></i>
@@ -119,6 +119,13 @@
                                         <h5>
                                             <span class="badge badge-danger"><i class="fas fa-{{ object.flag.icon }}"></i>  {{ object.flag.flag }}</span>
                                         </h5>
+                                        <p class="text-muted small my-0">{{ flagged_by }} | {{ flagged_on|date:"d-m-Y" }}</p>
+                                        <p class="text-muted my-0">
+                                            {% if object.flag_comment %}
+                                            {{ object.flag_comment }}
+                                            {% endif %}
+                                        </p>
+
                                     </td>
                                 </tr>
                             {% endif %}
@@ -141,7 +148,7 @@
                         </tr>
                         <tr>
                             <th scope="row">Serial number</th>
-                            <td>{{ object.serial }}</td>
+                            <td>{{ object.serial|nonevalue|safe }}</td>
                         </tr>
                         <tr>
                             <th scope="row">Category</th>
@@ -151,21 +158,21 @@
                             <th scope="row">Description</th>
                             <td>
                                 <div style="min-height: 60px;">
-                                    {{ object.description }}
+                                    {{ object.description|nonevalue|safe }}
                                 </div>
                             </td>
                         </tr>
                         <tr>
                             <th scope="row">Purchased by</th>
-                            <td>{% if object.purchased_by %}{{ object.purchased_by }}{% else %}Unknown{% endif %}</td>
+                            <td>{% if object.purchased_by %}{{ object.purchased_by }}{% else %}<em class="text-muted">Unknown</em>{% endif %}</td>
                         </tr>
                         <tr>
                             <th scope="row">Purchased on</th>
-                            <td>{% if object.purchased_on %}{{ object.purchased_on|date:"F d, Y" }}{% else %}Unknown{% endif %}</td>
+                            <td>{% if object.purchased_on %}{{ object.purchased_on|date:"F d, Y" }}{% else %}<em class="text-muted">Unknown</em>{% endif %}</td>
                         </tr>
                         <tr>
                             <th scope="row">Purchased price</th>
-                            <td>{% if object.purchased_price %} &euro; {{ object.purchased_price|intcomma }}{% else %}Unknown{% endif %}</td>
+                            <td>{% if object.purchased_price %} &euro; {{ object.purchased_price|intcomma }}{% else %}<em class="text-muted">Unknown</em>{% endif %}</td>
                         </tr>
                         {% if object.warranty_expiration|in_the_future %}
                         <tr>
@@ -188,8 +195,9 @@
                         {% endif %}
 
                         <tr>
-                            <th scope="row">Default storage location</th>
-                            <td><a href="#">{{ object.storage_location }}</a></td> <!-- TODO add map ext link -->
+                            <th scope="row">Storage location</th>
+<!--                            <td><a href="#">{{ object.storage_location }}</a></td> &lt;!&ndash; TODO add map ext link &ndash;&gt;-->
+                            <td>{{ object.storage_location|nonevalue|safe }}</td>
                         </tr>
 <!--                        <tr>-->
 <!--                            <th scope="row">Manuals</th>-->
@@ -224,18 +232,20 @@
             <div class="row">
                 <div class="col col-12">
                     <h3>Quick actions</h3>
-                    {% if object.status %}
-                        <a class="btn btn-secondary btn-block" href="{% url 'item-assign' object.id %}"><i class="fas fa-stamp"></i> Assign To</a>
-                    {% else %}
-                        <a class="btn btn-secondary btn-block" href="{% url 'item-assign' object.id %}"><i class="fas fa-stamp"></i> Change Assign To</a>
-                        <a class="btn btn-warning btn-block" href="{% url 'item-assign-remove' object.id %}"><i class="fas fa-stamp"></i> Return to Storage</a>
-
+                    {% if object.tracking %}
+                        {% if object.status %}
+                            <a class="btn btn-secondary btn-block" href="{% url 'item-assign' object.id %}"><i class="fas fa-stamp"></i> Assign To</a>
+                        {% else %}
+                            <a class="btn btn-secondary btn-block" href="{% url 'item-assign' object.id %}"><i class="fas fa-stamp"></i> Change Assign To</a>
+                            <a class="btn btn-warning btn-block" href="{% url 'item-assign-remove' object.id %}"><i class="fas fa-stamp"></i> Return to Storage</a>
+                        {% endif %}
                     {% endif %}
                     {% if object.flag %}
-                        <a class="btn btn-outline-success btn-block" href="{% url 'item-flag-remove' object.id %}"><i class="fas fa-flag"></i> Resolve Flag</a>
+                        <a class="btn btn-success btn-block" href="{% url 'item-flag-remove' object.id %}"><i class="fas fa-flag"></i> Resolve Flag</a>
                     {% else %}
-                        <a class="btn btn-outline-secondary btn-block" href="{% url 'item-flag' object.id %}"><i class="fas fa-flag"></i> Flag</a>
+                        <a class="btn btn-secondary btn-block" href="{% url 'item-flag' object.id %}"><i class="fas fa-flag"></i> Flag</a>
                     {% endif %}
+
 
 
 <!--                  <span class="badge badge-secondary"><i class="fas fa-{{ object.flag.icon }}"></i>  {{ object.flag.flag }}</span>-->
@@ -373,7 +383,7 @@
     {% if history %}
     <div class="row">
         <div class="col col-lg-12 col-12">
-            <h3>Item History</h3>
+            <h3 class="d-inline">Item History</h3> <span class="align-middle badge badge-pill badge-secondary d-inline align-text-top">Beta</span>
 
             <table id="history_list" class="table table-striped table-bordered w-100">
 
@@ -396,11 +406,11 @@
                     </td>
                     <td class="d-none d-md-block">
                         {% if idx.0.history_type == '~' %}
-                        CHANGED
+                            CHANGED
                         {% elif idx.0.history_type == '+' %}
-                        ADDED
+                            ADDED
                         {% else %}
-                        UNKNOWN
+                            UNKNOWN
                         {% endif %}
                     </td>
                     <td>

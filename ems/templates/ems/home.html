@@ -1,5 +1,6 @@
 {% extends "ems/base.html" %}
 {% block content %}
+{% load ems_customfilters %}
 
 <!--classes: table-bordered display cell-border compact hover order-column row-border stripe -->
 <!-- note use BOOTSTRAP CLASSES! table-hover -->
@@ -10,49 +11,201 @@
     <thead>
     <tr>
         <th data-priority="10">ID</th>
-        <th data-priority="1">Brand</th>
-        <th data-priority="1">Model</th>
+        <th data-priority="1">Image</th>
+        <th data-priority="1">Item</th>
         <th data-priority="1">Category</th>
         <th data-priority="5">Location</th>
         <th data-priority="2">Status</th>
         <th data-priority="5">User</th>
         <th data-priority="10">Flag</th>
+        <th class="d-none">Description</th>
+        <th class="d-none">Serial</th>
+        <th class="d-none">Storage Location</th>
     </tr>
     </thead>
     <tbody>
     {% for item in object_list %}
     <tr style="cursor:pointer;" onclick="window.location='{% url 'item-detail' item.id %}';">
-        <td>{{ item.pk }}</td>
-        <td>{{ item.brand }}</td>
-        <td>{{ item.model }}</td>
-        <td>{{ item.category }}</td>
-        <td>{{ item.location }}</td>
+        <td>{{ item.pk }} <p class="d-none">{{ item.qrid }}</p></td>
         <td>
-            {% if item.status %}
-            <span class="align-middle badge badge-pill badge-success">Available</span>
-            <!-- TODO Hiding elements -->
+            <div class="image">
+                <img class="rounded img-fluid thumb-img" src="{{ item.image.url }}" />
+<!--                <img class="thumb-img" src="{{ item.image.url }}" />-->
+            </div>
+        </td>
+        <td><b>{{ item.brand }}</b> <br> {{ item.model }} <br> {% if item.title %}<p class=" my-0 text-muted">{{ item.title }}</p>{% endif %}</td>
+        <td>{{ item.category }}</td>
+        <td>
+            {% if item.status and item.tracking %}
+                {% if item.storage_location %}
+                    <span class="align-middle badge badge-pill badge-warning">{{ item.storage_location }}</span>
+                {% endif %}
+            {% elif item.tracking and not item.status %}
+                <span class="align-middle badge badge-pill badge-primary">{{ item.location }}</span>
             {% else %}
-            <span class="align-middle badge badge-pill badge-danger">In use</span> <!-- TODO Hiding elements -->
+                <em class="text-muted">Unknown</em>
             {% endif %}
         </td>
-        <td>{{ item.user }}</td>
-        <td><i class="fas fa-{{ item.flag.icon }}"></i> {{ item.flag.flag }}</td> <!-- item.added_on|date:"F d, Y" -->
+        <td>
+            {% if item.status and item.tracking %}
+                <span class="align-middle badge badge-pill badge-success">Available</span>
+            {% elif item.tracking and not item.status %}
+                <span class="align-middle badge badge-pill badge-danger">In use</span>
+            {% else %}
+                <span class="align-middle badge badge-pill badge-secondary">No tracking</span>
+            {% endif %}
+        </td>
+        <td>
+            {% if item.tracking %}
+                {{ item.user|nonevalue|safe }}
+            {% else %}
+                <em class="text-muted">Unknown</em>
+            {% endif %}
+        </td>
+        <td style="max-width: 100px;">
+            {% if item.flag %}
+<!--                <span class="align-middle badge badge-pill badge-danger"><i class="fas fa-{{ item.flag.icon }}"></i> {{ item.flag.flag }}</span>-->
+                <h5>
+                    <span class="align-middle badge badge-pill badge-danger" data-toggle="tooltip" data-placement="bottom" data-html="true"  title="<i class='fas fa-{{ item.flag.icon }}'></i> {{ item.flag.flag }}">
+
+                        <i class="fas fa-{{ item.flag.icon }}"></i>
+                    </span>
+                </h5>
+            {% endif %}
+        </td> <!-- item.added_on|date:"F d, Y" -->
+        <td class="d-none"><span>{{ item.description }}</span></td>
+        <td class="d-none"><span>{{ item.serial }}</span></td>
+        <td class="d-none"><span>{{ item.storage_location }}</span></td>
     </tr>
     {% endfor %}
     </tbody>
     <tfoot>
     <tr class="searchbar">
         <th>ID</th>
-        <th>Brand</th>
-        <th>Model</th>
+        <th>Image</th>
+        <th>Type</th>
         <th>Category</th>
         <th>Location</th>
         <th>Status</th>
         <th>User</th>
         <th>Added</th>
+        <th class="d-none">Description</th>
+        <th class="d-none">Serial</th>
+        <th class="d-none">Storage Location</th>
     </tr>
     </tfoot>
 
 </table>
 
 {% endblock content %}
+
+{% block tablescript %}
+{# Code block for javascript table #}
+
+<script>
+$(document).ready(function(){
+
+var filterColumns = [3, 4, 5, 6, 7]; // columns with options
+var noColumn = [1, 7];
+
+    // Setup - add a text input to each footer cell
+    $('#example tfoot th').each(
+        function(i) {
+            if ((filterColumns.includes(i)) || (noColumn.includes(i)))  {
+                var title = '';
+                $(this).html( '' );
+            } else {
+                var title = $(this).text();
+                $(this).html( '<input class="form-control form-control-sm" type="text" placeholder=" '+title+'" />' );
+            }
+        }
+    );
+
+    // DataTable
+    $('#example').DataTable({
+        "order": [[ 2, "asc" ]],
+        "pagingType": "full_numbers",
+        responsive: true,
+        responsive: {
+            details: false
+        },
+        "language": {
+            "lengthMenu": "Show _MENU_ items per page",
+            "zeroRecords": "No matching items found.",
+            "infoFiltered": "(filtered from _MAX_ total items)",
+            "info":           "Showing _START_ to _END_ of _TOTAL_ items",
+            "paginate": {
+                "first":      "First",
+                "last":       "Last",
+                "next":       "Next",
+                "previous":   "Previous"
+            },
+        },
+        initComplete: function () {
+    this.api().columns().every( function (i) {
+    if ((filterColumns.includes(i)) && !(noColumn.includes(i))) {
+        var column = this;
+        var select = $('<select aria-controls="example" class="custom-select custom-select-sm form-control form-control-sm"><option value=""></option></select>')
+            .appendTo( $(column.footer()).empty() )
+            .on( 'change', function () {
+                var val = $.fn.dataTable.util.escapeRegex(
+                    $(this).val()
+                );
+
+                column
+                    .search( val ? '^'+val+'$' : '', true, false )
+                    .draw();
+            } );
+
+        column.data().unique().sort().each( function ( d, j ) {
+        if (i == 7) { // Flag <-- skipped above
+            select.append( '<option class="form-control" value="' + d + '">' + d + 'test</option>' )
+        } else if (i == 5) { // Status
+            var d_str = d.split(/[><]/)[2]; // since cell is html, get value between > and < (span).
+            select.append( '<option class="form-control" value="' + d_str + '">' + d_str + '</option>')
+        } else if (i == 4) { // Location
+            var d_str = d.split(/[><]/)[2]; // since cell is html, get value between > and < (span).
+            if (d_str != null) {
+                select.append( '<option class="form-control" value="' + d_str + '">' + d_str + '</option>')
+            }
+        } else {
+            select.append( '<option class="form-control" value="' + d + '">' + d + '</option>')
+        }
+
+        } );
+        }
+    } );
+
+            // Apply the search
+
+            this.api().columns().every( function () {
+                var that = this;
+
+                $( 'input', this.footer() ).on( 'keyup change clear', function () {
+                    if ( that.search() !== this.value ) {
+                        that
+                            .search( this.value )
+                            .draw();
+                    }
+                } );
+            } );
+        }
+    });
+
+    $('#example tfoot tr').appendTo('#example thead');
+
+});
+
+
+</script>
+
+<style>
+
+    table.dataTable > thead > tr.searchbar > th:not(.sorting_disabled) {
+        padding: .5rem;
+    }
+
+
+</style>
+
+{% endblock tablescript %}

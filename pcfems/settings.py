@@ -115,6 +115,7 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
+
 # CUSTOM SETTINGS
 
 CRISPY_TEMPLATE_PACK = 'bootstrap4'
@@ -195,6 +196,10 @@ BOOTSTRAP4 = {
 }
 
 DEFAULT_IMAGE = 'default.png'
+
+EMS_VERSION = '0.2'
+
+TIME_ZONE = 'Europe/Amsterdam'
 
 try:
     from pcfems.local_settings import *

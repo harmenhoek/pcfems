@@ -143,7 +143,7 @@ class SetupCreateView(SuccessMessageMixin, LoginRequiredMixin, CreateView):
     model = Setup
     success_message = "Setup <b>%(lab)s - %(name)s</b> was created successfully."
     success_url = reverse_lazy('manage-locations')
-    fields = ['lab', 'name', 'manager']
+    fields = ['lab', 'name', 'manager', 'image']
     template_name = 'ems_manage/setup_form.html'
 
 @method_decorator(staff_member_required, name='dispatch') #only staff can add new
@@ -151,7 +151,7 @@ class SetupUpdateView(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
     model = Setup
     success_message = "Setup <b>%(lab)s - %(name)s</b> was updated successfully."
     success_url = reverse_lazy('manage-locations')
-    fields = ['lab', 'name', 'manager']
+    fields = ['lab', 'name', 'manager', 'image']
     template_name = 'ems_manage/setup_form.html'
 
 @method_decorator(staff_member_required, name='dispatch') #only staff can add new
@@ -159,7 +159,7 @@ class LabCreateView(SuccessMessageMixin, LoginRequiredMixin, CreateView):
     model = Lab
     success_message = "Lab <b>%(number)s (%(nickname)s)</b> was created successfully."
     success_url = reverse_lazy('manage-locations')
-    fields = ['number', 'manager', 'nickname']
+    fields = ['number', 'manager', 'nickname', 'image']
     template_name = 'ems_manage/lab_form.html'
 
 @method_decorator(staff_member_required, name='dispatch') #only staff can add new
@@ -167,7 +167,7 @@ class LabUpdateView(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
     model = Lab
     success_message = "Lab <b>%(number)s (%(nickname)s)</b> was updated successfully."
     success_url = reverse_lazy('manage-locations')
-    fields = ['number', 'manager', 'nickname']
+    fields = ['number', 'manager', 'nickname', 'image']
     template_name = 'ems_manage/lab_form.html'
 
 @method_decorator(staff_member_required, name='dispatch') #only staff can add new
@@ -175,14 +175,14 @@ class CabinetCreateView(SuccessMessageMixin, LoginRequiredMixin, CreateView):
     model = Cabinet
     success_message = "Cabinet <b>%(number)s</b> in lab %(lab)s was created successfully."
     success_url = reverse_lazy('manage-locations')
-    fields = ['lab', 'number']
+    fields = ['lab', 'number', 'nickname', 'main_content', 'owner', 'image']
     template_name = 'ems_manage/cabinet_form.html'
 
 class CabinetUpdateView(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
     model = Cabinet
     success_message = "Cabinet <b>%(number)s</b> in lab %(lab)s was updated successfully."
     success_url = reverse_lazy('manage-locations')
-    fields = ['lab', 'number']
+    fields = ['lab', 'number', 'nickname', 'main_content', 'owner', 'image']
     template_name = 'ems_manage/cabinet_form.html'
 
 @method_decorator(staff_member_required, name='dispatch') #only staff can add new

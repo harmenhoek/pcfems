@@ -23,7 +23,16 @@ class Lab(models.Model):
     number = models.CharField(max_length=5)
     manager = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, default=2, limit_choices_to={'is_superuser': False})
     nickname = models.CharField(max_length=20, default='', null=True, blank=True)
+    image = models.ImageField(upload_to='lab_pics', blank=True, null=True)
     history = HistoricalRecords()
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)  # initial save (incl image)
+        if self.image:
+            instance = super(Lab, self).save(*args, **kwargs)
+            image = Image.open(self.image.path)
+            image.save(self.image.path, quality=15, optimize=True)
+            super().save(*args, **kwargs)
 
     def __str__(self):
         return f"{self.number} ({self.nickname})"
@@ -31,16 +40,37 @@ class Lab(models.Model):
 class Cabinet(models.Model):
     lab = models.ForeignKey(Lab, on_delete=models.CASCADE)
     number = models.CharField(max_length=10)
+    nickname = models.CharField(max_length=25, blank=True, null=True)
+    main_content = models.CharField(max_length=50, blank=True, null=True)
+    owner = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True, help_text="Cabinet owner is person whose stuff is stored in it.")
+    image = models.ImageField(upload_to='cabinet_pics', blank=True, null=True)
     history = HistoricalRecords()
 
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)  # initial save (incl image)
+        if self.image:
+            instance = super(Lab, self).save(*args, **kwargs)
+            image = Image.open(self.image.path)
+            image.save(self.image.path, quality=15, optimize=True)
+            super().save(*args, **kwargs)
+
     def __str__(self):
-        return f"{self.lab.number}-{self.number}"
+        return f"{self.lab.number} - {self.number}"
 
 class Setup(models.Model):
     lab = models.ForeignKey(Lab, on_delete=models.CASCADE)
     name = models.CharField(max_length=100)
     manager = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, default='undefined', limit_choices_to={'is_superuser': False})
+    image = models.ImageField(upload_to='setup_pics', blank=True, null=True)
     history = HistoricalRecords()
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)  # initial save (incl image)
+        if self.image:
+            instance = super(Lab, self).save(*args, **kwargs)
+            image = Image.open(self.image.path)
+            image.save(self.image.path, quality=15, optimize=True)
+            super().save(*args, **kwargs)
 
     def __str__(self):
         return f"{self.lab.number} - {self.name}"
@@ -70,6 +100,7 @@ class Item(models.Model):  # inherit from models, all fields below
     qrid = models.SlugField(max_length=10, null=True, blank=True)
     brand = models.CharField(max_length=100)
     model = models.CharField(max_length=100)
+    title = models.CharField(max_length=25, null=True, blank=True, help_text="Add short title that describes the item. E.g. 'Multimeter 0-1000V'.")
     serial = models.CharField(max_length=100, null=True, blank=True)
     category = models.ForeignKey(Category, on_delete=models.SET_DEFAULT, default='uncategorized', help_text='New categories can be added in Admin/Manage/Categories.')
     description = models.TextField()  # longer than CharField, unrestricted text.
@@ -90,6 +121,7 @@ class Item(models.Model):  # inherit from models, all fields below
     #.objects.all().exclude(is_superuser=True)
 
     # Tracking details
+    tracking = models.BooleanField(default=True, help_text="Tracking allows for assigning an item to a user and location, common items such as multimeters are not tracked.")
     status = models.BooleanField(default=True) #True is in storage (item is free), False is in use (assigned to)
     location = models.ForeignKey(Setup, on_delete=models.SET_NULL, null=True)
     # location = ForeignKey(Setup OR Cabinet)
@@ -107,6 +139,7 @@ class Item(models.Model):  # inherit from models, all fields below
     # images = FileField
     # notes through time
     flag = models.ForeignKey(Flag, on_delete=models.SET_NULL, null=True, blank=True)
+    flag_comment = models.CharField(max_length=100, null=True, blank=True)
     # flagged_by = models.ForeignKey(User, default=2, on_delete=models.SET_NULL, null=True, blank=True, related_name="flaggedbyuser")
     image = models.ImageField(default='default.png', upload_to='item_pics', blank=True, null=True)
     image2 = models.ImageField(upload_to='item_pics', blank=True, null=True)
@@ -146,7 +179,7 @@ class Item(models.Model):  # inherit from models, all fields below
             super().save(*args, **kwargs)
 
 
-class ItemImage(models.Model):
+class ItemImage(models.Model): # currently not in use
     item = models.ForeignKey(Item, related_name='images', on_delete=models.CASCADE)
     added_by = models.ForeignKey(User, on_delete=models.RESTRICT, limit_choices_to={'is_superuser': False})
     added_on = models.DateTimeField(default=timezone.now)

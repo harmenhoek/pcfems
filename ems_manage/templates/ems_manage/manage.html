@@ -32,20 +32,32 @@
                     <tr>
                         <td>{{ item.id }}</td>
                         <td>{{ item.brand }} {{ item.model }}</td>
-                        {% if item.status %}
-                            <td>{{ item.location }}</td>
-                        {% else %}
-                            <td>{{ item.storage_location }}</td>
-                        {% endif %}
                         <td>
-                            {% if item.status %}
-                                <span class="align-middle badge badge-pill badge-success">Available</span>
+                            {% if item.status and item.tracking %}
+                                {{ item.location|nonevalue|safe }}
+                            {% elif item.tracking and not item.status %}
+                                {{ item.storage_location|nonevalue|safe }}
                             {% else %}
-                                <span class="align-middle badge badge-pill badge-danger">In use</span>
+                                <em class="text-muted">Unknown</em>
                             {% endif %}
                         </td>
-                        <td>{{ item.user }}</td>
-                        <td><i class="fas fa-{{ item.flag.icon }}"></i> {{ item.flag.flag }}</td>
+                        <td>
+                            {% if item.status and item.tracking %}
+                                <span class="align-middle badge badge-pill badge-success">Available</span>
+                            {% elif item.tracking and not item.status %}
+                                <span class="align-middle badge badge-pill badge-danger">In use</span>
+                            {% else %}
+                                <span class="align-middle badge badge-pill badge-secondary">No tracking</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if item.tracking %}
+                                {{ item.user|nonevalue|safe }}
+                            {% else %}
+                                <em class="text-muted">Unknown</em>
+                            {% endif %}
+                        </td>
+                        <td><span class="badge badge-danger"><i class="fas fa-{{ item.flag.icon }}"></i> {{ item.flag.flag }}</span> <br> {% if item.flag_comment %}{{ item.flag_comment }}{% endif %}</td>
                         <td>{{ item2.flagged_by }}</td>
                         <td>{{ item2.flagged_on|date:'d-m-Y H:i' }}</td>
                         <td>
@@ -83,11 +95,13 @@
                     <tr>
                         <td>{{ item.id }}</td>
                         <td>{{ item.brand }} {{ item.model }}</td>
-                        {% if item.status %}
-                            <td>{{ item.location }}</td>
-                        {% else %}
-                            <td>{{ item.storage_location }}</td>
-                        {% endif %}
+                        <td>
+                            {% if item.status %}
+                                {{ item.location|nonevalue|safe }}
+                            {% else %}
+                                {{ item.storage_location|nonevalue|safe }}
+                            {% endif %}
+                        </td>
                         <td>
                             {% if item.status %}
                                 <span class="align-middle badge badge-pill badge-success">Available</span>
@@ -95,7 +109,7 @@
                                 <span class="align-middle badge badge-pill badge-danger">In use</span>
                             {% endif %}
                         </td>
-                        <td>{{ item.user }}</td>
+                        <td>{{ item.user|nonevalue|safe }}</td>
                         <td>{{ item.date_inuse|date:"d-m-Y" }}</td>
                         {% if item.date_return|date:"Y-m-d" > todays_date or item.date_return == None %}
                             <td>{{ item.date_return|date:"d-m-Y" }}</td>
@@ -137,9 +151,9 @@
                         <td>{{ item.id }}</td>
                         <td>{{ item.brand }} {{ item.model }}</td>
                         {% if item.status %}
-                            <td>{{ item.location }}</td>
+                            <td>{{ item.location|nonevalue|safe }}</td>
                         {% else %}
-                            <td>{{ item.storage_location }}</td>
+                            <td>{{ item.storage_location|nonevalue|safe }}</td>
                         {% endif %}
                         <td>
                             {% if item.status %}
@@ -148,7 +162,7 @@
                                 <span class="align-middle badge badge-pill badge-danger">In use</span>
                             {% endif %}
                         </td>
-                        <td>{{ item.user }}</td>
+                        <td>{{ item.user|nonevalue|safe }}</td>
                         {% if item.warranty_expiration|date:"Y-m-d" > todays_date %}
                             <td>{{ item.warranty_expiration|date:"d-m-Y" }}</td>
                         {% else %}

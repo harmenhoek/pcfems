@@ -24,7 +24,7 @@
     <link rel="stylesheet" type="text/css" href="{% static 'ems/main.css' %}">
 
 
-    <title>PCF EMS v0.1</title>
+    <title>PCF EMS v{{ EMS_VERSION }}</title>
 
 </head>
 <body>
@@ -35,7 +35,7 @@
             <a class="navbar-brand mr-4" href="/">
 <!--                <i class="fas fa-boxes"></i> -->
                 <img class="align-middle" style="height:1em;" src="{% static 'ems/favicon_white_192x192.png' %}" />
-                PCF EMS v0.1
+                PCF EMS v{{ EMS_VERSION }}
             </a>
             <div class="navbar-nav mr-auto"> <!-- Above collapse to control custom behavior on <md devices, i.e. hide Home, but always show Scan.-->
                 {% if user.is_authenticated %}
@@ -135,7 +135,9 @@
 
 <footer class="footer">
     <div class="container text-center">
-        <span class="text-muted"><a class="text-muted" href="{% url 'ems-about' %}">About EMS</a></span>
+        <span class="text-muted">
+            <a class="text-muted" href="https://github.com/harmenhoek/pcfems/" target="_blank">About EMS <i class="fas fa-external-link-alt"></i></a>
+        </span>
     </div>
 </footer>
 
@@ -164,98 +166,13 @@
 <!-- fa-icons -->
 <script src="https://kit.fontawesome.com/e599ec3b64.js" crossorigin="anonymous"></script>
 
-{% block tablescript %}{% endblock tablescript %}
-
-
 <script>
-$(document).ready(function(){
-
-var filterColumns = [3, 4, 5, 6, 7];
-
-    // Setup - add a text input to each footer cell
-    $('#example tfoot th').each(
-        function(i) {
-            if (filterColumns.includes(i)) {
-            } else {
-            var title = $(this).text();
-            $(this).html( '<input class="form-control form-control-sm" type="text" placeholder=" '+title+'" />' );
-            }
-        }
-    );
-
-    // DataTable
-    $('#example').DataTable({
-        "order": [[ 1, "asc" ]],
-        "pagingType": "full_numbers",
-        responsive: true,
-        responsive: {
-            details: false
-        },
-        "language": {
-            "lengthMenu": "Show _MENU_ items per page",
-            "zeroRecords": "No matching items found.",
-            "infoFiltered": "(filtered from _MAX_ total items)",
-            "info":           "Showing _START_ to _END_ of _TOTAL_ items",
-            "paginate": {
-                "first":      "First",
-                "last":       "Last",
-                "next":       "Next",
-                "previous":   "Previous"
-            },
-        },
-        initComplete: function () {
-    this.api().columns().every( function (i) {
-    if (filterColumns.includes(i)) {
-        var column = this;
-        var select = $('<select aria-controls="example" class="custom-select custom-select-sm form-control form-control-sm"><option value=""></option></select>')
-            .appendTo( $(column.footer()).empty() )
-            .on( 'change', function () {
-                var val = $.fn.dataTable.util.escapeRegex(
-                    $(this).val()
-                );
-
-                column
-                    .search( val ? '^'+val+'$' : '', true, false )
-                    .draw();
-            } );
-
-        column.data().unique().sort().each( function ( d, j ) {
-            select.append( '<option class="form-control" value="'+d+'">'+d+'</option>' )
-        } );
-        }
-    } );
-
-            // Apply the search
-
-            this.api().columns().every( function () {
-                var that = this;
-
-                $( 'input', this.footer() ).on( 'keyup change clear', function () {
-                    if ( that.search() !== this.value ) {
-                        that
-                            .search( this.value )
-                            .draw();
-                    }
-                } );
-            } );
-        }
-    });
-
-    $('#example tfoot tr').appendTo('#example thead');
-
-});
-
-
+    $(function () {
+  $('[data-toggle="tooltip"]').tooltip()
+})
 </script>
 
-<style>
-
-    table.dataTable > thead > tr.searchbar > th:not(.sorting_disabled) {
-        padding: .5rem;
-    }
-
-
-</style>
+{% block tablescript %}{% endblock tablescript %}
 
 
 <!--

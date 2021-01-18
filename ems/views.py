@@ -21,9 +21,14 @@ from django.contrib import messages
 from django.conf import settings
 
 class ItemListView(LoginRequiredMixin, ListView):
-   model = Item
-   template_name = 'ems/home.html'  # <app>/<model>_<viewtype>.html
-   ordering = ['-added_on']  # minus sign to get oldest first.
+    model = Item
+    template_name = 'ems/home.html'  # <app>/<model>_<viewtype>.html
+    ordering = ['-added_on']  # minus sign to get oldest first.
+
+    def get_context_data(self, **kwargs):  # to send extra data
+        context = super().get_context_data(**kwargs)
+        context['EMS_VERSION'] = settings.EMS_VERSION
+        return context
 
 class ItemHistoryView(LoginRequiredMixin, DetailView):
     model = Item
@@ -65,10 +70,14 @@ class ItemDetailView(LoginRequiredMixin, DetailView):
         # Call the base implementation first to get a context
         context = super().get_context_data(**kwargs)
 
+        try:
+            item = get_object_or_404(Item, pk=self.kwargs['pk'])
+        except:
+            item = get_object_or_404(Item, qrid=self.kwargs['qrid'])
+
         # update last_scanned in model if refered from scanner
         from urllib import parse
         if parse.urlparse(self.request.META.get('HTTP_REFERER')).path == reverse('ems-scanner'):
-            item = get_object_or_404(Item, pk=self.kwargs['pk'])
             item.last_scanned = timezone.now()
             item.save()
 
@@ -118,6 +127,23 @@ class ItemDetailView(LoginRequiredMixin, DetailView):
         context['log_list'] = log_list
 
         context['DEFAULT_IMAGE'] = settings.DEFAULT_IMAGE
+        context['EMS_VERSION'] = settings.EMS_VERSION
+
+        # get flag history information  (adapted from ems_manage/views)
+        if item.flag:
+            import numpy as np
+            id = item.id
+            history = Item.history.filter(id=id).order_by('history_id')  # for each of these items, get full history
+            flag_ids = [i.flag_id for i in history]  # get list of the flag_id of that item (eg. 2 4 4 4 4)
+            history_ids = [i.history_id for i in history]  # get similar list with history_ids (unique)
+            # get locations in flag_ids list where the flag_id changed, e.g. [2 4 4 3 3] will give [1 3], from that get
+            # last one, thus [3] (most recent flag change, since we order by history_id)
+            history_flagged_loc = np.where(np.roll(flag_ids, 1) != flag_ids)[0][-1]
+            history_flagged_id = history_ids[history_flagged_loc]  # get corresponding history_id
+
+            # since history_id is unique we can get corresponding history_user and history_date from history
+            context['flagged_by'] = history.get(history_id=history_flagged_id).history_user
+            context['flagged_on'] = history.get(history_id=history_flagged_id).history_date
 
         return context
 
@@ -189,6 +215,9 @@ class AssignCreateView(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
     success_message = "Item <b>%(brand)s %(model)s (%(qrid)s)</b> was assigned to user <b>%(user)s</b> at location <b>%(location)s</b> successfully."
     template_name = 'ems/assign_create.html'
 
+    def get_initial(self):
+        return {'user': self.request.user}
+
     def form_valid(self, form):
         form.instance.status = False
         form.instance.date_inuse = timezone.now()
@@ -221,13 +250,14 @@ def flagremove(request, pk):
     item = get_object_or_404(Item, pk=pk)
     messages.success(request, f'Flag resolved.')
     item.flag = None
+    item.flag_comment = None
     item.save()
     return HttpResponseRedirect(reverse('item-detail', args=(pk,)))  # get pk from the url
 
 class FlagCreateView(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
     model = Item
     success_message = "Item flagged as <b>%(flag)s</b> successfully."
-    fields = ['flag']
+    fields = ['flag', 'flag_comment']
 
 @method_decorator(staff_member_required, name='dispatch') #only staff can edit fully
 class ItemStaffUpdateView(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
@@ -285,9 +315,6 @@ class ItemDeleteView(SuccessMessageMixin, LoginRequiredMixin, UserPassesTestMixi
         #     return True
         # return False
 
-def about(request):
-    return render(request, 'ems/about.html', {'title': 'About'})
-
 @login_required
 def test(request):
     return render(request, 'ems/test.html')
@@ -312,13 +339,13 @@ def createqr(text):
     img = ImageOps.expand(img, border=(0, 0, 0, 60), fill='white')
     txt = Image.new("RGBA", img.size, (255, 255, 255, 0))
 
-    # from django.conf.urls.static import static
     from django.templatetags.static import static
     fontfile = static('ems/Arial.ttf')
+    font = ImageFont.truetype(fontfile)
+    # font = ImageFont.truetype('https://outsideathome.com/static/ems/Arial.ttf', 60)
 
-    # from django.contrib.staticfiles.storage import staticfiles_storage
-    # fontfile = staticfiles_storage.url('ems/Arial.ttf')1
-    font = ImageFont.truetype(fontfile, 60)
+    #  https://outsideathome.com/static/ems/Arial.ttf
+    # font = ImageFont.load_default()
     d = ImageDraw.Draw(txt)
     d.text((img.size[0] / 2, img.size[1] - 10), text, anchor="ms", font=font, fill=(0, 0, 0, 256))
     out = Image.alpha_composite(img, txt)

@@ -40,6 +40,6 @@ urlpatterns = [
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
-admin.site.site_header = "PCF EMS Admin (v0.1)"
+admin.site.site_header = f"PCF EMS Admin (v{settings.EMS_VERSION})"
 admin.site.site_title = "EMS Admin Portal"
 admin.site.index_title = "Welcome to the PCF Equipment Management System Admin Portal"
