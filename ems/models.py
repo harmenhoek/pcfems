@@ -98,6 +98,9 @@ class Item(models.Model):  # inherit from models, all fields below
     # General details
     # id or pk automatically created
     qrid = models.SlugField(max_length=10, null=True, blank=True)
+    version = models.IntegerField(null=True, blank=True, default=1)
+    labelstatus = models.DateTimeField(default=None, null=True, blank=True)
+
     brand = models.CharField(max_length=100)
     model = models.CharField(max_length=100)
     title = models.CharField(max_length=25, null=True, blank=True, help_text="Add short title that describes the item. E.g. 'Multimeter 0-1000V'.")

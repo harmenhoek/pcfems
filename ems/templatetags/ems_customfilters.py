@@ -54,3 +54,4 @@ def nonevalue(value):
 @register.simple_tag
 def settings_value(name):
     return getattr(settings, name, "")
+

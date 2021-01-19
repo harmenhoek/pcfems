@@ -29,7 +29,7 @@
         <td>{{ item.pk }} <p class="d-none">{{ item.qrid }}</p></td>
         <td>
             <div class="image">
-                <img class="rounded img-fluid thumb-img" src="{{ item.image.url }}" />
+                <img class="rounded img-fluid thumb-img lazy" data-original="{{ item.image.url }}" />
 <!--                <img class="thumb-img" src="{{ item.image.url }}" />-->
             </div>
         </td>
@@ -102,6 +102,10 @@
 {% block tablescript %}
 {# Code block for javascript table #}
 
+<script src="//cdnjs.cloudflare.com/ajax/libs/jquery.lazyload/1.9.1/jquery.lazyload.min.js"></script>
+
+
+
 <script>
 $(document).ready(function(){
 
@@ -123,6 +127,9 @@ var noColumn = [1, 7];
 
     // DataTable
     $('#example').DataTable({
+        drawCallback: function(){
+            $("img.lazy").lazyload();
+       },
         "order": [[ 2, "asc" ]],
         "pagingType": "full_numbers",
         responsive: true,

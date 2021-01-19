@@ -20,15 +20,12 @@ from django.contrib import messages
 
 from django.conf import settings
 
+import os
+
 class ItemListView(LoginRequiredMixin, ListView):
     model = Item
     template_name = 'ems/home.html'  # <app>/<model>_<viewtype>.html
     ordering = ['-added_on']  # minus sign to get oldest first.
-
-    def get_context_data(self, **kwargs):  # to send extra data
-        context = super().get_context_data(**kwargs)
-        context['EMS_VERSION'] = settings.EMS_VERSION
-        return context
 
 class ItemHistoryView(LoginRequiredMixin, DetailView):
     model = Item
@@ -75,11 +72,27 @@ class ItemDetailView(LoginRequiredMixin, DetailView):
         except:
             item = get_object_or_404(Item, qrid=self.kwargs['qrid'])
 
-        # update last_scanned in model if refered from scanner
+        # update last_scanned in model if referred from scanner
+        # TODO this needs some updating, now everything is done inside the get_context_data function, which is not needed.
         from urllib import parse
         if parse.urlparse(self.request.META.get('HTTP_REFERER')).path == reverse('ems-scanner'):
             item.last_scanned = timezone.now()
             item.save()
+
+        version = self.request.GET.get('v', None)
+        if version:
+            if version == 'harmen':
+                messages.success(self.request, f'You found a rabbithole! WoW! Congrats! This app is made by Harmen Hoek.')
+            elif item.version != int(version):
+                messages.warning(self.request, f'The scanned label is not up-to-date, a staff member is notified to replace this label.')
+                if item.labelstatus is None:
+                    item.labelstatus = timezone.now()
+                    item.save()
+            else:
+                if item.labelstatus:  # label (assuming only 1 is around) is up to date.
+                    item.labelstatus = None
+                    item.save()
+
 
 
         # Get all the changes of this specific item.
@@ -127,7 +140,6 @@ class ItemDetailView(LoginRequiredMixin, DetailView):
         context['log_list'] = log_list
 
         context['DEFAULT_IMAGE'] = settings.DEFAULT_IMAGE
-        context['EMS_VERSION'] = settings.EMS_VERSION
 
         # get flag history information  (adapted from ems_manage/views)
         if item.flag:
@@ -167,6 +179,12 @@ class ItemCreateView(SuccessMessageMixin, LoginRequiredMixin, CreateView):
             qrid=self.object.qrid,
         )
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['button'] = 'Add'
+        context['fieldtype'] = 'Item'
+        return context
+
 class LogCreateView(SuccessMessageMixin, LoginRequiredMixin, CreateView):
     model = ItemLog
     success_message = "Log was added successfully."
@@ -182,6 +200,11 @@ class LogCreateView(SuccessMessageMixin, LoginRequiredMixin, CreateView):
         # form.instance.added_on = timezone.now()
         return super().form_valid(form)
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['button'] = 'Add'
+        return context
+
 class LogUpdateView(SuccessMessageMixin, LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = ItemLog
     success_message = "Log was updated successfully."
@@ -194,6 +217,11 @@ class LogUpdateView(SuccessMessageMixin, LoginRequiredMixin, UserPassesTestMixin
         if self.request.user == log.added_by:
             return True
         return False
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['button'] = 'Update'
+        return context
 
 class LogDeleteView(SuccessMessageMixin, LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     model = ItemLog
@@ -234,6 +262,11 @@ class AssignCreateView(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
             location=self.object.location,
         )
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['button'] = 'Update'
+        return context
+
 @login_required
 def assignremove(request, pk):
     item = get_object_or_404(Item, pk=pk)
@@ -259,6 +292,12 @@ class FlagCreateView(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
     success_message = "Item flagged as <b>%(flag)s</b> successfully."
     fields = ['flag', 'flag_comment']
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['button'] = 'Add'
+        context['fieldtype'] = 'Flag'
+        return context
+
 @method_decorator(staff_member_required, name='dispatch') #only staff can edit fully
 class ItemStaffUpdateView(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
     model = Item
@@ -267,6 +306,8 @@ class ItemStaffUpdateView(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
 
     def form_valid(self, form):
         form.instance.updated_by = self.request.user
+        if set(['brand', 'model', 'serial']).intersection(set(form.changed_data)):
+            form.instance.version = self.object.version + 1
         return super().form_valid(form)
 
     # For ModelForms, if you need access to fields from the saved object override the get_success_message() method.
@@ -277,6 +318,12 @@ class ItemStaffUpdateView(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
             brand=self.object.brand,
             qrid=self.object.qrid,
         )
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['button'] = 'Update'
+        context['fieldtype'] = 'Item'
+        return context
 
 class ItemUserUpdateView(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
     model = Item
@@ -295,6 +342,13 @@ class ItemUserUpdateView(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
             brand=self.object.brand,
             qrid=self.object.qrid,
         )
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['button'] = 'Update'
+        context['fieldtype'] = 'Item'
+        return context
+
 
     # def test_func(self):
     #     post = self.get_object()
@@ -324,7 +378,7 @@ def scanner(request):
     return render(request, 'ems/scanner.html')
 
 # Regular function
-def createqr(text):
+def createqr(qrid):
     import qrcode
     from PIL import Image, ImageFont, ImageDraw, ImageOps
     qr = qrcode.QRCode(
@@ -333,21 +387,101 @@ def createqr(text):
         box_size=15,
         border=1,
     )
-    qr.add_data(text)
+    qr.add_data(qrid)
     qr.make(fit=True)
     img = qr.make_image(fill_color="black", back_color="white").convert("RGBA")
     img = ImageOps.expand(img, border=(0, 0, 0, 60), fill='white')
     txt = Image.new("RGBA", img.size, (255, 255, 255, 0))
 
-    from django.templatetags.static import static
-    fontfile = static('ems/Arial.ttf')
-    font = ImageFont.truetype(fontfile)
-    # font = ImageFont.truetype('https://outsideathome.com/static/ems/Arial.ttf', 60)
+    import os
+    fontfile = os.path.join(settings.BASE_DIR, 'static/ems/Arial.ttf')
+    font = ImageFont.truetype(fontfile, 30)
 
-    #  https://outsideathome.com/static/ems/Arial.ttf
-    # font = ImageFont.load_default()
     d = ImageDraw.Draw(txt)
-    d.text((img.size[0] / 2, img.size[1] - 10), text, anchor="ms", font=font, fill=(0, 0, 0, 256))
+    d.text((img.size[0] / 2, img.size[1] - 10), qrid, anchor="ms", font=font, fill=(0, 0, 0, 256))
+    out = Image.alpha_composite(img, txt)
+    return out
+
+def createqrv2(data, request):
+    import qrcode
+    from PIL import Image, ImageFont, ImageDraw, ImageOps
+    qr = qrcode.QRCode(
+        version=1,
+        error_correction=qrcode.constants.ERROR_CORRECT_M,
+        box_size=11,  # 11 when url, 15 when just id
+        border=1,
+    )
+
+    urlitem = reverse('item-detail', kwargs={'qrid': data['qrid']})
+    urlhost = request.build_absolute_uri('/')
+    urlfull = os.path.join(urlhost, *urlitem.split(os.sep))
+
+    # just ID
+    # qr.add_data(f"{data['qrid']}?v={data['version']}")
+    # URL
+    qr.add_data(f"{urlfull}?v={data['version']}")
+
+    qr.make(fit=True)
+    if data['tracking']:
+        fillclr = "maroon"
+        value = 'YES'
+    else:
+        fillclr = "black"
+        value = 'NO'
+    img = qr.make_image(fill_color=fillclr, back_color="white").convert("RGBA")
+    # img = qr.make_image(fill_color="black", back_color="white").convert("RGBA")
+    img = ImageOps.expand(img, border=(0, 0, 550, 0), fill='white')
+    txt = Image.new("RGBA", img.size, (255, 255, 255, 0))
+
+    fontfile = os.path.join(settings.BASE_DIR, 'static/ems/Arial.ttf')
+
+    d = ImageDraw.Draw(txt)
+
+
+    title_fontsize = 20
+    standardfield_fontsize = 35
+    main_offset = 0
+    offset = 120
+    # for idx, title in enumerate(titles):
+    #     d.multiline_text((350, 25 + idx * offset), title, anchor='lm', font=ImageFont.truetype(fontfile, 25), fill=(0, 0, 0, 128))
+
+    # item id
+    d.multiline_text((350, 25 + main_offset), 'Item ID', anchor='lm', font=ImageFont.truetype(fontfile, title_fontsize), fill=(0, 0, 0, 128))
+    d.multiline_text((580, 25 + offset / 2 + main_offset), data['qrid'], anchor='mm', font=ImageFont.truetype(fontfile, 70),
+                     fill=(0, 0, 0, 256))
+    # d.multiline_text((580, 25 + offset / 2 + main_offset), urlfull, anchor='mm', font=ImageFont.truetype(fontfile, 70),
+    #                  fill=(0, 0, 0, 256))
+    d.rectangle([(350, 25 + offset / 2 - 40 + main_offset), (img.size[0] - 25, 25 + offset / 2 + 40 + main_offset)], fill=None, outline='black', width=2)
+
+    offset = 70
+    offset2 = 50
+    # brand and model
+    d.multiline_text((350, 25 + offset + offset2 + main_offset), 'Brand and model', anchor='lm', font=ImageFont.truetype(fontfile, title_fontsize),
+                     fill=(0, 0, 0, 128))
+    d.multiline_text((350 + 10, offset + 25 + offset / 2 + offset2 + main_offset), f"{data['brand']} {data['model']}", anchor='lm',
+                     font=ImageFont.truetype(fontfile, standardfield_fontsize),
+                     fill=(0, 0, 0, 256))
+
+    # Serial number
+    d.multiline_text((350, 25 + offset * 2 + offset2 + main_offset), 'Serial number', anchor='lm', font=ImageFont.truetype(fontfile, title_fontsize),
+                     fill=(0, 0, 0, 128))
+    d.multiline_text((350 + 10, offset * 2 + 25 + offset / 2 + offset2 + main_offset), f"{data['serial']}", anchor='lm',
+                     font=ImageFont.truetype(fontfile, standardfield_fontsize),
+                     fill=(0, 0, 0, 256))
+
+    # Tracking
+    d.multiline_text((350, 25 + offset * 3 + offset2 + main_offset), 'Tracking', anchor='lm',
+                     font=ImageFont.truetype(fontfile, title_fontsize),
+                     fill=(0, 0, 0, 128))
+
+    d.multiline_text((350 + 10, offset * 3 + 25 + offset / 2 + offset2 + main_offset), value, anchor='lm',
+                     font=ImageFont.truetype(fontfile, standardfield_fontsize),
+                     fill=fillclr)
+
+    # Print date & version
+    d.multiline_text((img.size[0] - 20, img.size[1] - 20), f"{data['printed']} ({data['version']})", anchor='rs',
+                     font=ImageFont.truetype(fontfile, 15), fill=(0, 0, 0, 128))
+
     out = Image.alpha_composite(img, txt)
     return out
 
@@ -355,7 +489,19 @@ def createqr(text):
 def qrgenerator(request, pk):
     item = get_object_or_404(Item, pk=pk)
 
-    out = createqr(item.qrid)
+    from datetime import date
+    data = {
+        'qrid': item.qrid,
+        'tracking': item.tracking,
+        'serial': item.serial,
+        'brand': item.brand,
+        'model': item.model,
+        'title': item.title,
+        'version': item.version,
+        'storage': item.storage_location,
+        'printed': date.today(),
+    }
+    out = createqrv2(data, request)
 
     response = HttpResponse(content_type='image/png')
     out.save(response, "PNG")
@@ -371,24 +517,41 @@ def qrbatchgenerator(request, pk1, pk2):
     from reportlab.lib.utils import ImageReader
     buffer = io.BytesIO()
 
-    p = canvas.Canvas(buffer)
+    from reportlab.lib.units import mm
+    scale_factor = 0.85
+    pagesize = (150 * (841 / 341) * scale_factor * mm, 150 * scale_factor * mm)
+    p = canvas.Canvas(buffer, pagesize=pagesize)
 
     for pk in range(pk1, pk2+1):
         try:
             item = get_object_or_404(Item, pk=pk)
-            out = createqr(item.qrid)
+            from datetime import date
+            data = {
+                'qrid': item.qrid,
+                'tracking': item.tracking,
+                'serial': item.serial,
+                'brand': item.brand,
+                'model': item.model,
+                'title': item.title,
+                'version': item.version,
+                'storage': item.storage_location,
+                'printed': date.today(),
+            }
+            out = createqrv2(data, request)
+
+
             scale = 1
             (wdt, hgt) = (out.width // scale, out.height // scale)
             p.drawImage(ImageReader(out.resize((wdt, hgt))), 10, 10, mask='auto')
-            scale = 2
-            (wdt, hgt) = (out.width // scale, out.height // scale)
-            p.drawImage(ImageReader(out.resize((wdt, hgt))), 10, hgt * 2 + 10, mask='auto')
-            scale = 4
-            (wdt, hgt) = (out.width // scale, out.height // scale)
-            p.drawImage(ImageReader(out.resize((wdt, hgt))), 10, hgt * 6 + 10, mask='auto')
-            scale = 6
-            (wdt, hgt) = (out.width // scale, out.height // scale)
-            p.drawImage(ImageReader(out.resize((wdt, hgt))), 10, hgt * 11 + 5, mask='auto')
+            # scale = 2
+            # (wdt, hgt) = (out.width // scale, out.height // scale)
+            # p.drawImage(ImageReader(out.resize((wdt, hgt))), 10, hgt * 2 + 10, mask='auto')
+            # scale = 4
+            # (wdt, hgt) = (out.width // scale, out.height // scale)
+            # p.drawImage(ImageReader(out.resize((wdt, hgt))), 10, hgt * 6 + 10, mask='auto')
+            # scale = 6
+            # (wdt, hgt) = (out.width // scale, out.height // scale)
+            # p.drawImage(ImageReader(out.resize((wdt, hgt))), 10, hgt * 11 + 5, mask='auto')
             p.showPage()
 
         except:
@@ -398,4 +561,4 @@ def qrbatchgenerator(request, pk1, pk2):
     # FileResponse sets the Content-Disposition header so that browsers
     # present the option to save the file.
     buffer.seek(0)
-    return FileResponse(buffer, as_attachment=True, filename='hello.pdf')
+    return FileResponse(buffer, as_attachment=True, filename='qrcodes.pdf')

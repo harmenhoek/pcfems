@@ -1,4 +1,6 @@
 {% load static %}
+{% load ems_customfilters %}
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -24,7 +26,7 @@
     <link rel="stylesheet" type="text/css" href="{% static 'ems/main.css' %}">
 
 
-    <title>PCF EMS v{{ EMS_VERSION }}</title>
+    <title>PCF EMS v{% settings_value "EMS_VERSION" %}</title>
 
 </head>
 <body>
@@ -35,7 +37,7 @@
             <a class="navbar-brand mr-4" href="/">
 <!--                <i class="fas fa-boxes"></i> -->
                 <img class="align-middle" style="height:1em;" src="{% static 'ems/favicon_white_192x192.png' %}" />
-                PCF EMS v{{ EMS_VERSION }}
+                PCF EMS v{% settings_value "EMS_VERSION" %}
             </a>
             <div class="navbar-nav mr-auto"> <!-- Above collapse to control custom behavior on <md devices, i.e. hide Home, but always show Scan.-->
                 {% if user.is_authenticated %}

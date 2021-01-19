@@ -43,3 +43,18 @@ Version 0.2
 - In manage, updated locations with interactive table, and new model changes from last week.
 - Added image compression to upload of images of Cabinet, Setup and Lab.
 - More hidden fields in home for search
+
+Version 0.3
+2021-01-18
+- Implemented lazyload on home. Images only loaded when needed. With 57 items instead of 6MB+ only 1.7MB is loaded initially. Great speed improvement.
+- Fixed bug os error when generating QR code on live version
+- Updated QR code style
+
+2021-01-19
+- Improved version number loading. Now directly into base.
+- Implemented qridcheck, as a version, to check whether label fields have changed since printing (brand, model or serial number). To do: show message automatically.
+- Fixed Update / Add buttons on forms to be dynamic.
+- qridcheck increased when brand, model or serial is updated. Note: it is very simple, when reverting back, the value still increases.
+- renamed qridcheck to version
+- added labelstatus to models: it keeps track whether a label is up to date or not. Version is check every time version is send in GET to item-detail (?v=).
+- updated qrgenerator and qrbatchgenerator.

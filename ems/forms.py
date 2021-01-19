@@ -6,7 +6,8 @@ from bootstrap_datepicker_plus import DatePickerInput
 class ItemForm(forms.ModelForm):
     class Meta:
         model = Item
-        exclude = ['qrid', 'added_by', 'updated_by', 'added_on', 'last_scanned', 'status', 'location', 'user', 'date_inuse', 'date_return', 'flag', 'flag_comment']
+        exclude = ['qrid', 'added_by', 'updated_by', 'added_on', 'last_scanned', 'status', 'location', 'user',
+                   'date_inuse', 'date_return', 'flag', 'flag_comment', 'qridcheck']
         widgets = {
             'purchased_on': DatePickerInput(format='%Y-%m-%d'),
             'warranty_expiration': DatePickerInput(format='%Y-%m-%d'),

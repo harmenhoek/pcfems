@@ -13,7 +13,7 @@
                 <div class="col col-lg-9 col-9">
                     <h2 class="align-middle d-inline article-title pr-2">{{ object.brand }} {{ object.model }}</h2>
                     {% if object.title %}
-                    <p class="text-muted my-0">{{ object.title }}</p>
+                        <p class="text-muted my-0">{{ object.title }}</p>
                     {% endif %}
                 </div>
 
@@ -47,7 +47,7 @@
             <hr>
             <div class="row">
                 <div class="col col-lg-12 col-12">
-                    <small class="text-muted">ID: {{ object.qrid }}</small>
+                    <small class="text-muted" data-toggle="tooltip" data-placement="top" title="Unique item ID visible on the item label.">ID: {{ object.qrid }}</small><small class="text-muted" data-toggle="tooltip" data-placement="top" title="Version updated automatically when brand, model or serial number is updated."> | Version: {{ object.version }}</small>
                     <!-- {{ object.added_on|date:"F d, Y" }} -->
 
                     <div class="shadow p-3 mb-5 bg-white rounded mt-3 mx-2">
