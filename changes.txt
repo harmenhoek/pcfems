@@ -58,3 +58,22 @@ Version 0.3
 - renamed qridcheck to version
 - added labelstatus to models: it keeps track whether a label is up to date or not. Version is check every time version is send in GET to item-detail (?v=).
 - updated qrgenerator and qrbatchgenerator.
+
+Version 0.4
+2021-01-19
+- Version also linked to tracking now.
+
+2021-01-26
+- Added parts fields to indicate number of parts of item
+- Linebreaks in description
+- Help texts Item model and reordering in form. Title mandatory now.
+- ItemForm, category ChoiceField custom: initial blank, but still required: makes user actively select a category.
+- Removed Scan from header. Will go with url-based for faster scanning. TODO remove ems-scanner from urls, templates, etc later on.
+- DataTables, StateSave: true on home. Session.
+
+2021-01-27
+- Added GET to qrgenerator to accept part. In item-detail N links to generate QR-codes are shown in menu for N parts.
+- QRbatchgenerator updated. Page size still wacky.
+- On home redid sorting part jquery. Added filtervalue to SelectFields. This filtervalue is the actual value that is shown in the menu. Sorting is done based on the full html string. No more overcomplicated specific js in the background but general code.
+- Fixed sorting of ID col on home
+- Custom css and js loading for Datatables. No more unneeded code.

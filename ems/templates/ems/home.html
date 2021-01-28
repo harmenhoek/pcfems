@@ -21,12 +21,13 @@
         <th class="d-none">Description</th>
         <th class="d-none">Serial</th>
         <th class="d-none">Storage Location</th>
+        <th class="d-none">QR id</th>
     </tr>
     </thead>
     <tbody>
     {% for item in object_list %}
     <tr style="cursor:pointer;" onclick="window.location='{% url 'item-detail' item.id %}';">
-        <td>{{ item.pk }} <p class="d-none">{{ item.qrid }}</p></td>
+        <td>{{ item.pk }}</td>
         <td>
             <div class="image">
                 <img class="rounded img-fluid thumb-img lazy" data-original="{{ item.image.url }}" />
@@ -34,32 +35,32 @@
             </div>
         </td>
         <td><b>{{ item.brand }}</b> <br> {{ item.model }} <br> {% if item.title %}<p class=" my-0 text-muted">{{ item.title }}</p>{% endif %}</td>
-        <td>{{ item.category }}</td>
+        <td><span filtervalue="{{ item.category }}">{{ item.category }}</span></td>
         <td>
             {% if item.status and item.tracking %}
                 {% if item.storage_location %}
-                    <span class="align-middle badge badge-pill badge-warning">{{ item.storage_location }}</span>
+                    <span filtervalue="{{ item.storage_location }}" class="align-middle badge badge-pill badge-warning">{{ item.storage_location }}</span>
                 {% endif %}
             {% elif item.tracking and not item.status %}
-                <span class="align-middle badge badge-pill badge-primary">{{ item.location }}</span>
+                <span filtervalue="{{ item.location }}" class="align-middle badge badge-pill badge-primary">{{ item.location }}</span>
             {% else %}
-                <em class="text-muted">Unknown</em>
+                <em filtervalue="Unknown" class="text-muted">Unknown</em>
             {% endif %}
         </td>
         <td>
             {% if item.status and item.tracking %}
-                <span class="align-middle badge badge-pill badge-success">Available</span>
+                <span filtervalue="Available" class="align-middle badge badge-pill badge-success">Available</span>
             {% elif item.tracking and not item.status %}
-                <span class="align-middle badge badge-pill badge-danger">In use</span>
+                <span filtervalue="In Use" class="align-middle badge badge-pill badge-danger">In use</span>
             {% else %}
-                <span class="align-middle badge badge-pill badge-secondary">No tracking</span>
+                <span filtervalue="No Tracking" class="align-middle badge badge-pill badge-secondary">No tracking</span>
             {% endif %}
         </td>
         <td>
             {% if item.tracking %}
-                {{ item.user|nonevalue|safe }}
+                <span filtervalue="{{ item.user }}">{{ item.user|nonevalue|safe }}</span>
             {% else %}
-                <em class="text-muted">Unknown</em>
+                <em filtervalue="Unknown" class="text-muted">Unknown</em>
             {% endif %}
         </td>
         <td style="max-width: 100px;">
@@ -76,6 +77,7 @@
         <td class="d-none"><span>{{ item.description }}</span></td>
         <td class="d-none"><span>{{ item.serial }}</span></td>
         <td class="d-none"><span>{{ item.storage_location }}</span></td>
+        <td class="d-none">{{ item.qrid }}</td>
     </tr>
     {% endfor %}
     </tbody>
@@ -92,6 +94,7 @@
         <th class="d-none">Description</th>
         <th class="d-none">Serial</th>
         <th class="d-none">Storage Location</th>
+        <th class="d-none">QR id</th>
     </tr>
     </tfoot>
 
@@ -125,8 +128,19 @@ var noColumn = [1, 7];
         }
     );
 
+    // this.api().state.clear();
+
     // DataTable
     $('#example').DataTable({
+        buttons: [
+            {
+                text: 'My button',
+                action: function ( e, dt, node, config ) {
+                    alert( 'Button activated' );
+                }
+            }
+        ],
+        stateSave: true,
         drawCallback: function(){
             $("img.lazy").lazyload();
        },
@@ -165,20 +179,12 @@ var noColumn = [1, 7];
             } );
 
         column.data().unique().sort().each( function ( d, j ) {
-        if (i == 7) { // Flag <-- skipped above
-            select.append( '<option class="form-control" value="' + d + '">' + d + 'test</option>' )
-        } else if (i == 5) { // Status
-            var d_str = d.split(/[><]/)[2]; // since cell is html, get value between > and < (span).
-            select.append( '<option class="form-control" value="' + d_str + '">' + d_str + '</option>')
-        } else if (i == 4) { // Location
-            var d_str = d.split(/[><]/)[2]; // since cell is html, get value between > and < (span).
-            if (d_str != null) {
-                select.append( '<option class="form-control" value="' + d_str + '">' + d_str + '</option>')
-            }
-        } else {
-            select.append( '<option class="form-control" value="' + d + '">' + d + '</option>')
-        }
-
+                var value = $(d).attr("filtervalue");
+                if (typeof value !== typeof undefined && value !== false) {
+                    select.append( '<option class="form-control" value="' + value + '">' + d + '</option>')
+                } else {
+                    select.append( '<option class="form-control" value="' + d + '">' + d + '</option>')
+                }
         } );
         }
     } );
@@ -196,7 +202,15 @@ var noColumn = [1, 7];
                     }
                 } );
             } );
-        }
+        },
+        "columnDefs": [
+            {
+                type: "num",
+                orderable: true,
+                targets: 0,
+            },
+        ],
+
     });
 
     $('#example tfoot tr').appendTo('#example thead');

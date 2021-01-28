@@ -19,8 +19,8 @@
 <!--          integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">-->
 
     <!--  DataTables CSS  -->
-    <link href="https://cdn.datatables.net/responsive/2.2.6/css/responsive.dataTables.min.css" rel="stylesheet">
-    <link href="https://cdn.datatables.net/1.10.22/css/dataTables.bootstrap4.min.css" rel="stylesheet">
+<!--    <link href="https://cdn.datatables.net/responsive/2.2.6/css/responsive.dataTables.min.css" rel="stylesheet">-->
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/bs4/dt-1.10.23/b-1.6.5/b-colvis-1.6.5/b-print-1.6.5/r-2.2.7/datatables.min.css"/>    <!--    <link href="https://cdn.datatables.net/1.10.22/css/dataTables.bootstrap4.min.css" rel="stylesheet">-->
 
     <!-- Custom CSS -->
     <link rel="stylesheet" type="text/css" href="{% static 'ems/main.css' %}">
@@ -42,7 +42,7 @@
             <div class="navbar-nav mr-auto"> <!-- Above collapse to control custom behavior on <md devices, i.e. hide Home, but always show Scan.-->
                 {% if user.is_authenticated %}
                     <a class="nav-item nav-link d-none d-md-block" href="{% url 'ems-home' %}"><i class="fas fa-home"></i> Home</a>
-                    <a class="nav-item nav-link" href="{% url 'ems-scanner' %}"><i class="fas fa-qrcode"></i> Scan</a>
+<!--                    <a class="nav-item nav-link" href="{% url 'ems-scanner' %}"><i class="fas fa-qrcode"></i> Scan</a>-->
                 {% endif %}
             </div>
             <!--fa options: layer-group, boxes, archive, warehouse, database -->
@@ -160,11 +160,11 @@
 
 
 <!-- DataTables JS -->
-<script type="text/javascript" src="https://cdn.datatables.net/1.10.22/js/jquery.dataTables.min.js"></script>
-<script type="text/javascript" src="https://cdn.datatables.net/1.10.22/js/dataTables.bootstrap4.min.js"></script>
-<script type="text/javascript"
-        src="https://cdn.datatables.net/responsive/2.2.6/js/dataTables.responsive.min.js"></script>
-
+<!--<script type="text/javascript" src="https://cdn.datatables.net/1.10.22/js/jquery.dataTables.min.js"></script>-->
+<!--<script type="text/javascript" src="https://cdn.datatables.net/1.10.22/js/dataTables.bootstrap4.min.js"></script>-->
+<!--<script type="text/javascript"-->
+<!--        src="https://cdn.datatables.net/responsive/2.2.6/js/dataTables.responsive.min.js"></script>-->
+<script type="text/javascript" src="https://cdn.datatables.net/v/bs4/dt-1.10.23/b-1.6.5/b-colvis-1.6.5/b-print-1.6.5/r-2.2.7/datatables.min.js"></script>
 <!-- fa-icons -->
 <script src="https://kit.fontawesome.com/e599ec3b64.js" crossorigin="anonymous"></script>
 

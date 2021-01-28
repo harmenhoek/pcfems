@@ -102,11 +102,11 @@ class Item(models.Model):  # inherit from models, all fields below
     labelstatus = models.DateTimeField(default=None, null=True, blank=True)
 
     brand = models.CharField(max_length=100)
-    model = models.CharField(max_length=100)
-    title = models.CharField(max_length=25, null=True, blank=True, help_text="Add short title that describes the item. E.g. 'Multimeter 0-1000V'.")
-    serial = models.CharField(max_length=100, null=True, blank=True)
-    category = models.ForeignKey(Category, on_delete=models.SET_DEFAULT, default='uncategorized', help_text='New categories can be added in Admin/Manage/Categories.')
-    description = models.TextField()  # longer than CharField, unrestricted text.
+    model = models.CharField(max_length=100, help_text="If multiple parts (e.g. proprietary power supply) with multiple models, comma separate models.")
+    title = models.CharField(max_length=25, help_text="Add short title that describes the item. E.g. 'Multimeter 0-1000V'.")
+    serial = models.CharField(max_length=100, null=True, blank=True, help_text="Comma separate multiple serial numbers.")
+    category = models.ForeignKey(Category, on_delete=models.SET_DEFAULT, default='', blank=True, help_text='New categories can be added in Admin/Manage/Categories.')
+    description = models.TextField(help_text="Add as many terms printed on the item and possible search terms.")  # longer than CharField, unrestricted text.
     purchased_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name="purchaseduser", limit_choices_to={'is_superuser': False})
     purchased_on = models.DateField(default="", null=True, blank=True)
     purchased_price = models.DecimalField(decimal_places=2, max_digits=10, null=True, blank=True)
@@ -127,6 +127,7 @@ class Item(models.Model):  # inherit from models, all fields below
     tracking = models.BooleanField(default=True, help_text="Tracking allows for assigning an item to a user and location, common items such as multimeters are not tracked.")
     status = models.BooleanField(default=True) #True is in storage (item is free), False is in use (assigned to)
     location = models.ForeignKey(Setup, on_delete=models.SET_NULL, null=True)
+    parts = models.IntegerField(default=1, help_text="Number of separate parts, e.g. when an item has a proprietary power supply.")
     # location = ForeignKey(Setup OR Cabinet)
 
     # content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)

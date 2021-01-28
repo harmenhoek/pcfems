@@ -306,7 +306,7 @@ class ItemStaffUpdateView(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
 
     def form_valid(self, form):
         form.instance.updated_by = self.request.user
-        if set(['brand', 'model', 'serial']).intersection(set(form.changed_data)):
+        if set(['brand', 'model', 'serial', 'tracking', 'parts']).intersection(set(form.changed_data)):
             form.instance.version = self.object.version + 1
         return super().form_valid(form)
 
@@ -403,12 +403,31 @@ def createqr(qrid):
     return out
 
 def createqrv2(data, request):
+
+    # settings
+
+    label_height = 500
+    label_width = 1250
+
+    edge_padding = 30
+
+    def x_percent(x):
+        return x * ((label_width - label_height - edge_padding) / 100) + label_height
+
+    def y_percent(y):
+        return y * ((label_height - 2 * edge_padding) / 100) + edge_padding
+
+    # x_percent = (label_width - label_height) / 100 + label_height
+    # y_percent = label_height / 100
+
+
+
     import qrcode
     from PIL import Image, ImageFont, ImageDraw, ImageOps
     qr = qrcode.QRCode(
         version=1,
         error_correction=qrcode.constants.ERROR_CORRECT_M,
-        box_size=11,  # 11 when url, 15 when just id
+        box_size=20,  # 11 when url, 15 when just id
         border=1,
     )
 
@@ -423,64 +442,72 @@ def createqrv2(data, request):
 
     qr.make(fit=True)
     if data['tracking']:
-        fillclr = "maroon"
-        value = 'YES'
+        fillclr = "black"
+        value = 'TRACK ITEM'
     else:
         fillclr = "black"
-        value = 'NO'
+        value = 'NO TRACKING'
     img = qr.make_image(fill_color=fillclr, back_color="white").convert("RGBA")
     # img = qr.make_image(fill_color="black", back_color="white").convert("RGBA")
-    img = ImageOps.expand(img, border=(0, 0, 550, 0), fill='white')
+
+    img = img.resize((label_height, label_height))
+    imgsize = img.size
+    img = ImageOps.expand(img, border=(0, 0, label_width - label_height, 0), fill='white')
     txt = Image.new("RGBA", img.size, (255, 255, 255, 0))
 
     fontfile = os.path.join(settings.BASE_DIR, 'static/ems/Arial.ttf')
 
     d = ImageDraw.Draw(txt)
 
+    def add_text(d, text, location, type, anchor='lm'):
+        if type == 'title':
+            fill = (0, 0, 0, 128)
+            fontsize = 30
+        elif type == 'field':
+            fill = (0, 0, 0, 256)
+            fontsize = 55
+        elif type == 'mainfield':
+            fill = (0, 0, 0, 256)
+            fontsize = 90
+        elif type == 'tracking':
+            fill = (256, 0, 0, 256)
+            fontsize = 55
+        elif type == 'notracking':
+            fill = (0, 0, 0, 128)
+            fontsize = 55
+        elif type == 'version':
+            fill = (0, 0, 0, 128)
+            fontsize = 15
+        elif type == 'owner':
+            fill = (0, 0, 0, 256)
+            fontsize = 15
 
-    title_fontsize = 20
-    standardfield_fontsize = 35
-    main_offset = 0
-    offset = 120
-    # for idx, title in enumerate(titles):
-    #     d.multiline_text((350, 25 + idx * offset), title, anchor='lm', font=ImageFont.truetype(fontfile, 25), fill=(0, 0, 0, 128))
+        return d.multiline_text(location, text, anchor=anchor, font=ImageFont.truetype(fontfile, fontsize), fill=fill)
 
-    # item id
-    d.multiline_text((350, 25 + main_offset), 'Item ID', anchor='lm', font=ImageFont.truetype(fontfile, title_fontsize), fill=(0, 0, 0, 128))
-    d.multiline_text((580, 25 + offset / 2 + main_offset), data['qrid'], anchor='mm', font=ImageFont.truetype(fontfile, 70),
-                     fill=(0, 0, 0, 256))
-    # d.multiline_text((580, 25 + offset / 2 + main_offset), urlfull, anchor='mm', font=ImageFont.truetype(fontfile, 70),
-    #                  fill=(0, 0, 0, 256))
-    d.rectangle([(350, 25 + offset / 2 - 40 + main_offset), (img.size[0] - 25, 25 + offset / 2 + 40 + main_offset)], fill=None, outline='black', width=2)
 
-    offset = 70
-    offset2 = 50
-    # brand and model
-    d.multiline_text((350, 25 + offset + offset2 + main_offset), 'Brand and model', anchor='lm', font=ImageFont.truetype(fontfile, title_fontsize),
-                     fill=(0, 0, 0, 128))
-    d.multiline_text((350 + 10, offset + 25 + offset / 2 + offset2 + main_offset), f"{data['brand']} {data['model']}", anchor='lm',
-                     font=ImageFont.truetype(fontfile, standardfield_fontsize),
-                     fill=(0, 0, 0, 256))
+    add_text(d, 'Item ID', (x_percent(0), y_percent(0)), 'title')
+    add_text(d, data['qrid'], (x_percent(35), y_percent(17.5)), 'mainfield', anchor='mm')
+    d.rectangle([(x_percent(0), y_percent(5)), (x_percent(70), y_percent(30))],
+                fill=None, outline='black', width=3)
 
-    # Serial number
-    d.multiline_text((350, 25 + offset * 2 + offset2 + main_offset), 'Serial number', anchor='lm', font=ImageFont.truetype(fontfile, title_fontsize),
-                     fill=(0, 0, 0, 128))
-    d.multiline_text((350 + 10, offset * 2 + 25 + offset / 2 + offset2 + main_offset), f"{data['serial']}", anchor='lm',
-                     font=ImageFont.truetype(fontfile, standardfield_fontsize),
-                     fill=(0, 0, 0, 256))
+    if data['parts'] > 1:
+        add_text(d, 'Part', (x_percent(80), y_percent(0)), 'title')
+        add_text(d, f"{data['part']}/{data['parts']}", (x_percent(80), y_percent(17.5)), 'mainfield')
 
-    # Tracking
-    d.multiline_text((350, 25 + offset * 3 + offset2 + main_offset), 'Tracking', anchor='lm',
-                     font=ImageFont.truetype(fontfile, title_fontsize),
-                     fill=(0, 0, 0, 128))
+    add_text(d, 'Brand and model', (x_percent(0), y_percent(37.5)), 'title')
+    add_text(d, f"{data['brand']} {data['model']}", (x_percent(0), y_percent(48.5)), 'field')
 
-    d.multiline_text((350 + 10, offset * 3 + 25 + offset / 2 + offset2 + main_offset), value, anchor='lm',
-                     font=ImageFont.truetype(fontfile, standardfield_fontsize),
-                     fill=fillclr)
+    add_text(d, 'Serial number', (x_percent(0), y_percent(60)), 'title')
+    add_text(d, f"{data['serial']}", (x_percent(0), y_percent(71)), 'field')
 
-    # Print date & version
-    d.multiline_text((img.size[0] - 20, img.size[1] - 20), f"{data['printed']} ({data['version']})", anchor='rs',
-                     font=ImageFont.truetype(fontfile, 15), fill=(0, 0, 0, 128))
+    d.line([(x_percent(0), y_percent(80)), (x_percent(100), y_percent(80))], fill='black', width=3)
+    if data['tracking']:
+        add_text(d, 'TRACK ITEM', (x_percent(50), y_percent(95)), 'tracking', anchor='ms')
+    else:
+        add_text(d, 'NO TRACKING', (x_percent(50), y_percent(95)), 'notracking', anchor='ms')
+
+    add_text(d, f"{data['printed']} ({data['version']})", (x_percent(100), y_percent(102.5)), 'version', anchor='rs')
+    add_text(d, f"Property of Physics of Complex Fluids, University of Twente.", (x_percent(0), y_percent(102.5)), 'owner', anchor='ls')
 
     out = Image.alpha_composite(img, txt)
     return out
@@ -488,10 +515,16 @@ def createqrv2(data, request):
 @login_required
 def qrgenerator(request, pk):
     item = get_object_or_404(Item, pk=pk)
+    if request.GET.get('part'):
+        part = request.GET.get('part')
+    else:
+        part = 1
 
     from datetime import date
     data = {
         'qrid': item.qrid,
+        'parts': item.parts,
+        'part': part,
         'tracking': item.tracking,
         'serial': item.serial,
         'brand': item.brand,
@@ -516,43 +549,39 @@ def qrbatchgenerator(request, pk1, pk2):
     from reportlab.pdfgen import canvas
     from reportlab.lib.utils import ImageReader
     buffer = io.BytesIO()
+    from datetime import date
 
     from reportlab.lib.units import mm
-    scale_factor = 0.85
-    pagesize = (150 * (841 / 341) * scale_factor * mm, 150 * scale_factor * mm)
+    scale_factor = .36
+    label_height = 500
+    label_width = 1250
+    pagesize = (label_width * scale_factor * mm, label_height * scale_factor * mm)
     p = canvas.Canvas(buffer, pagesize=pagesize)
 
     for pk in range(pk1, pk2+1):
         try:
             item = get_object_or_404(Item, pk=pk)
-            from datetime import date
-            data = {
-                'qrid': item.qrid,
-                'tracking': item.tracking,
-                'serial': item.serial,
-                'brand': item.brand,
-                'model': item.model,
-                'title': item.title,
-                'version': item.version,
-                'storage': item.storage_location,
-                'printed': date.today(),
-            }
-            out = createqrv2(data, request)
 
+            for part in range(item.parts):
+                data = {
+                    'qrid': item.qrid,
+                    'parts': item.parts,
+                    'part': part+1,
+                    'tracking': item.tracking,
+                    'serial': item.serial,
+                    'brand': item.brand,
+                    'model': item.model,
+                    'title': item.title,
+                    'version': item.version,
+                    'storage': item.storage_location,
+                    'printed': date.today(),
+                }
+                out = createqrv2(data, request)
 
-            scale = 1
-            (wdt, hgt) = (out.width // scale, out.height // scale)
-            p.drawImage(ImageReader(out.resize((wdt, hgt))), 10, 10, mask='auto')
-            # scale = 2
-            # (wdt, hgt) = (out.width // scale, out.height // scale)
-            # p.drawImage(ImageReader(out.resize((wdt, hgt))), 10, hgt * 2 + 10, mask='auto')
-            # scale = 4
-            # (wdt, hgt) = (out.width // scale, out.height // scale)
-            # p.drawImage(ImageReader(out.resize((wdt, hgt))), 10, hgt * 6 + 10, mask='auto')
-            # scale = 6
-            # (wdt, hgt) = (out.width // scale, out.height // scale)
-            # p.drawImage(ImageReader(out.resize((wdt, hgt))), 10, hgt * 11 + 5, mask='auto')
-            p.showPage()
+                scale = 1
+                (wdt, hgt) = (out.width // scale, out.height // scale)
+                p.drawImage(ImageReader(out.resize((wdt, hgt))), 10, 10, mask='auto')
+                p.showPage()
 
         except:
             pass

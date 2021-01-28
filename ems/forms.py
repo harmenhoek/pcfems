@@ -1,13 +1,20 @@
 from django import forms
-from .models import Item, ItemImage
+from .models import Item, ItemImage, Category
 from django.forms.models import inlineformset_factory
 from bootstrap_datepicker_plus import DatePickerInput
 
 class ItemForm(forms.ModelForm):
+    category = forms.ModelChoiceField(  # to set the initial value to blank, but still require it. Makes user actively select value.
+        queryset=Category.objects.all(),
+        required=True
+    )
+
     class Meta:
         model = Item
-        exclude = ['qrid', 'added_by', 'updated_by', 'added_on', 'last_scanned', 'status', 'location', 'user',
-                   'date_inuse', 'date_return', 'flag', 'flag_comment', 'qridcheck']
+        fields = ['title', 'category', 'brand', 'model', 'serial', 'parts', 'description', 'storage_location',
+                  'purchased_by', 'purchased_on', 'purchased_price', 'warranty', 'warranty_expiration', 'next_service_date']
+        # exclude = ['qrid', 'added_by', 'updated_by', 'added_on', 'last_scanned', 'status', 'location', 'user',
+        #            'date_inuse', 'date_return', 'flag', 'flag_comment', 'labelstatus', 'version']
         widgets = {
             'purchased_on': DatePickerInput(format='%Y-%m-%d'),
             'warranty_expiration': DatePickerInput(format='%Y-%m-%d'),
