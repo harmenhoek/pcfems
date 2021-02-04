@@ -35,7 +35,11 @@ class Lab(models.Model):
             super().save(*args, **kwargs)
 
     def __str__(self):
-        return f"{self.number} ({self.nickname})"
+        if self.nickname:
+            extra = f"({self.nickname})"
+        else:
+            extra = ''
+        return f"{self.number} {extra}"
 
 class Cabinet(models.Model):
     lab = models.ForeignKey(Lab, on_delete=models.CASCADE)
@@ -55,7 +59,11 @@ class Cabinet(models.Model):
             super().save(*args, **kwargs)
 
     def __str__(self):
-        return f"{self.lab.number} - {self.number}"
+        if self.main_content:
+            extra = f"({self.main_content})"
+        else:
+            extra = ''
+        return f"{self.lab.number} - {self.number} {extra}"
 
 class Setup(models.Model):
     lab = models.ForeignKey(Lab, on_delete=models.CASCADE)

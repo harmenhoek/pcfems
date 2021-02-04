@@ -8,7 +8,7 @@
 
 <article class="media content-section">
     <div class="row justify-content-md-center">
-        <div class="col col-lg-8 col-12">
+        <div class="col col-8">
             <div class="row item-metadate my-2">
                 <div class="col col-lg-9 col-9">
                     <h2 class="align-middle d-inline article-title pr-2">{{ object.brand }} {{ object.model }}</h2>
@@ -32,7 +32,7 @@
                             {% if user.is_authenticated %}
                                 <a class="dropdown-item" href="{% url 'item-userupdate' object.id %}"><i class="fas fa-edit"></i> Update</a>
                                 {% if object.parts > 1 %}
-                                    {% for i in "x"|rjust:"2" %}
+                                    {% for i in "x"|rjust:object.parts %}
                                         <a class="dropdown-item" target="_blank" href="{% url 'ems-qrgenerator' object.id %}?part={{ forloop.counter }}"><i class="fas fa-qrcode"></i> Generate QR code part {{ forloop.counter }}</a>
 
                                     {% endfor %}
@@ -225,7 +225,7 @@
 
             </div>
         </div>
-        <div class="col col-lg-4 col-12 pl-1">
+        <div class="col col-4 l-1">
 
             <div class="row my-2">
                 <div class="col col-12">
@@ -236,14 +236,13 @@
                     {% endif %}
                  </div>
             </div>
-            {% if object.image2 %}
-                <div class="row my-2">
-                    <div class="col col-12">
+            <div class="row my-2">
+                <div class="col col-12">
+                    {% if object.image2 %}
                         <a href="{{ object.image2.url }}" data-toggle="lightbox"><img class="rounded mr-0 w-100" src="{{ object.image2.url }}"></a>
-                    </div>
+                    {% endif %}
                 </div>
-            {% endif %}
-
+            </div>
             <hr class="my-2">
             <div class="row">
                 <div class="col col-12">

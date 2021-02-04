@@ -77,3 +77,13 @@ Version 0.4
 - On home redid sorting part jquery. Added filtervalue to SelectFields. This filtervalue is the actual value that is shown in the menu. Sorting is done based on the full html string. No more overcomplicated specific js in the background but general code.
 - Fixed sorting of ID col on home
 - Custom css and js loading for Datatables. No more unneeded code.
+
+Version 0.5
+2021-02-02
+- Bug fix: added image fields again to Item form
+- Added main content to storage location str
+- Bug fix: only 2 parts were shown for qr code on item-detail page. Now upto N
+- New default.png (500px instead of 300px). 300px caused css alignment problem (300<col-3).
+- Statesave in manage env
+- |nonevalue|safe in manage
+- home table Reset button when filtering is on. Check is results != total items.

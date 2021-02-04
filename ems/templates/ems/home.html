@@ -112,6 +112,9 @@
 <script>
 $(document).ready(function(){
 
+
+
+
 var filterColumns = [3, 4, 5, 6, 7]; // columns with options
 var noColumn = [1, 7];
 
@@ -130,16 +133,9 @@ var noColumn = [1, 7];
 
     // this.api().state.clear();
 
+
     // DataTable
-    $('#example').DataTable({
-        buttons: [
-            {
-                text: 'My button',
-                action: function ( e, dt, node, config ) {
-                    alert( 'Button activated' );
-                }
-            }
-        ],
+    var table = $('#example').DataTable({
         stateSave: true,
         drawCallback: function(){
             $("img.lazy").lazyload();
@@ -169,6 +165,7 @@ var noColumn = [1, 7];
         var select = $('<select aria-controls="example" class="custom-select custom-select-sm form-control form-control-sm"><option value=""></option></select>')
             .appendTo( $(column.footer()).empty() )
             .on( 'change', function () {
+
                 var val = $.fn.dataTable.util.escapeRegex(
                     $(this).val()
                 );
@@ -214,6 +211,26 @@ var noColumn = [1, 7];
     });
 
     $('#example tfoot tr').appendTo('#example thead');
+
+    // Reset button when filtering is going on (when filtered results != total results)
+    var did_append
+    did_append = 0
+    $('#example').on('draw.dt', function () {
+        if (table.rows( { filter : 'applied'} ).nodes().length != table.rows().count()) {
+            var filter = $('#example_filter');
+            var btn = " <button type='button' class='btn btn-secondary btn-sm align-top'>Reset</button>"
+            if (did_append == 0) {
+                $("#example_filter").append(btn);
+                did_append = 1
+            }
+        }
+        $('button').on('click', function () {
+            table.state.clear();
+            window.location.reload();
+            did_append = 0
+        });
+    });
+
 
 });
 

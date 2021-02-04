@@ -63,8 +63,8 @@
                     {% endif %}
                 </td>
                 <td>{{ item.number }}</td>
-                <td>{{ item.manager }}</td>
-                <td>{{ item.nickname }}</td>
+                <td>{{ item.manager|nonevalue|safe }}</td>
+                <td>{{ item.nickname|nonevalue|safe }}</td>
                 <td>
                     <a href="{% url 'manage-labs-update' item.pk %}" class="btn btn-secondary">Edit</a>
                 </td>
@@ -114,8 +114,8 @@
                     {% endif %}
                 </td>
                 <td>{{ item.lab }}</td>
-                <td>{{ item.name }}</td>
-                <td>{{ item.manager }}</td>
+                <td>{{ item.name|nonevalue|safe }}</td>
+                <td>{{ item.manager|nonevalue|safe }}</td>
                 <td>
                     <a href="{% url 'manage-setups-update' item.pk %}" class="btn btn-secondary">Edit</a>
                 </td>
@@ -194,6 +194,7 @@
 <script>
     $(document).ready(function() {
         $('#labs_list').DataTable({
+            stateSave: true,
             "order": [[ 1, "asc" ]],
             "pagingType": "full_numbers",
             responsive: true,
@@ -218,6 +219,7 @@
 
     $(document).ready(function() {
         $('#setups_list').DataTable({
+            stateSave: true,
             "order": [[ 1, "asc" ]],
             "pagingType": "full_numbers",
             responsive: true,
@@ -241,6 +243,7 @@
 
     $(document).ready(function() {
         $('#cabinets_list').DataTable({
+            stateSave: true,
             "order": [[ 3, "asc" ]],
             "pagingType": "full_numbers",
             responsive: true,
