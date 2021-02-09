@@ -1,0 +1,73 @@
+{% extends "ems/base.html" %}
+{% block tab2_active %}
+active
+{% endblock tab2_active %}
+{% block content %}
+{% load ems_customfilters %}
+
+<div class="row">
+    <div class="col col-12">
+        <table id="cabinets_list" class="table table-striped table-bordered table">
+            <thead>
+            <tr>
+                <th data-priority="10">Lab</th>
+                <th data-priority="10">Cabinet number</th>
+                <th data-priority="10">Full number</th>
+                <th data-priority="10">Nickname</th>
+                <th data-priority="10">Main content</th>
+                <th data-priority="10">Owner</th>
+                <th data-priority="10">Items</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for item in object_list %}
+                <tr style="cursor:pointer;" onclick="window.location='{% url 'storage-detail' item.id %}';">
+                    <td>{{ item.lab }}</td>
+                    <td>{{ item.number }}</td>
+                    <td><span class="align-middle badge badge-pill badge-warning">{{ item.lab.number }}_{{ item.number }}</span></td>
+                    <td>{{ item.nickname|nonevalue|safe }}</td>
+                    <td>{{ item.main_content|nonevalue|safe }}</td>
+                    <td>{{ item.owner|nonevalue|safe }}</td>
+                    <td>{{ item.num_items }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% endblock content %}
+
+{% block tablescript %}
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/jquery.lazyload/1.9.1/jquery.lazyload.min.js"></script>
+
+<script>
+    $(document).ready(function() {
+        $('#cabinets_list').DataTable({
+            "lengthMenu": [ 10, 25, 50, 75, 100],
+            "order": [[ 6, "desc" ]],
+            "pagingType": "full_numbers",
+            responsive: true,
+            responsive: {
+                details: false
+            },
+            "language": {
+                "lengthMenu": "Show _MENU_ cabinets per page",
+                "zeroRecords": "No matching cabinets found.",
+                "infoFiltered": "(filtered from _MAX_ total items)",
+                "info":           "Showing _START_ to _END_ of _TOTAL_ cabinets",
+                "paginate": {
+                    "first":      "First",
+                    "last":       "Last",
+                    "next":       "Next",
+                    "previous":   "Previous"
+                },
+
+            },
+            "pageLength": 25,
+        });
+    } );
+</script>
+
+{% endblock tablescript %}

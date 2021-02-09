@@ -20,14 +20,17 @@ from django.contrib.auth import views as auth_views
 from django.conf import settings
 from django.conf.urls.static import static
 from ems_manage.views import ManageView
-
+from users.views import UserDetailView
 
 urlpatterns = [
    path('admin/', admin.site.urls),
    #path('register/', user_views.register, name='register'),
    path('login/', auth_views.LoginView.as_view(template_name='users/login.html'), name='login'),
    path('logout/', auth_views.LogoutView.as_view(template_name='users/logout.html'), name='logout'),
+
    path('profile/', user_views.profile, name='profile'),
+   path('profile/<str:slug>/', UserDetailView.as_view(), name='profile'),
+
    path('manage/', include('ems_manage.urls')),
    # path('manage/', ManageView.as_view(), name='manage-home'),
    path('password-reset/', auth_views.PasswordResetView.as_view(template_name='users/password_reset.html', email_template_name='users/password_reset_email.html'), name='password_reset'),

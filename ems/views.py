@@ -19,6 +19,7 @@ from django.contrib.messages.views import SuccessMessageMixin
 from django.contrib import messages
 
 from django.conf import settings
+from django.db.models import Count
 
 import os
 
@@ -26,6 +27,30 @@ class ItemListView(LoginRequiredMixin, ListView):
     model = Item
     template_name = 'ems/home.html'  # <app>/<model>_<viewtype>.html
     ordering = ['-added_on']  # minus sign to get oldest first.
+
+class LocationListView(LoginRequiredMixin, ListView):
+    model = Cabinet
+    queryset = Cabinet.objects.annotate(
+        num_items=Count('item')
+    )
+    template_name = 'ems/storage.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['setups'] = Setup.objects.all()
+        context['labs'] = Lab.objects.all()
+        # context['items_count'] = Cabinet.objects.filter(storage_location=self.kwargs['pk']).count()
+        return context
+
+class CabinetDetailView(LoginRequiredMixin, DetailView):
+    model = Cabinet
+    template_name = 'ems/cabinet_detail.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['items'] = Item.objects.filter(storage_location=self.kwargs['pk']).filter(status=True)
+        context['items_inuse'] = Item.objects.filter(storage_location=self.kwargs['pk']).filter(status=False)
+        return context
 
 class ItemHistoryView(LoginRequiredMixin, DetailView):
     model = Item
@@ -157,6 +182,7 @@ class ItemDetailView(LoginRequiredMixin, DetailView):
             context['flagged_by'] = history.get(history_id=history_flagged_id).history_user
             context['flagged_on'] = history.get(history_id=history_flagged_id).history_date
 
+        # context['cabinet'] = Cabinet.objects.filter(pk)
         return context
 
 @method_decorator(staff_member_required, name='dispatch') #only staff can add new

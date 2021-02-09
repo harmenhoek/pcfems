@@ -1,4 +1,7 @@
 {% extends "ems_manage/manage_base.html" %}
+{% block tabmanage2_active %}
+active
+{% endblock tabmanage2_active %}
 {% block content %}
 
 <div class="row">
@@ -25,6 +28,7 @@
             <th data-priority="10">Status</th>
             <th data-priority="10">Last login</th>
             <th data-priority="10">Joined</th>
+            <th data-priority="10">Items</th>
             <th data-priority="10"></th>
         </tr>
         </thead>
@@ -54,6 +58,7 @@
             </td>
             <td>{{ item.last_login|date:"Y-m-d G:i:s" }}</td>
             <td>{{ item.date_joined|date:"Y-m-d G:i:s" }}</td>
+            <td>{{ item.num_items }}</td>
             <td>
                 {% if item.is_superuser %}
                     <a href="{% url 'manage-users-update' item.pk %}" class="btn btn-secondary disabled">Edit</a>

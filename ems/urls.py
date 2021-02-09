@@ -1,7 +1,8 @@
 from django.urls import path
 from . import views  # imports the functions from views.py
 from .views import ItemListView, ItemDetailView, ItemCreateView, ItemStaffUpdateView, ItemUserUpdateView, \
-    ItemDeleteView, ItemHistoryView, AssignCreateView, LogCreateView, LogUpdateView, LogDeleteView, FlagCreateView
+    ItemDeleteView, ItemHistoryView, AssignCreateView, LogCreateView, LogUpdateView, LogDeleteView, FlagCreateView, \
+    LocationListView, CabinetDetailView
 
 urlpatterns = [
     path('', ItemListView.as_view(), name='ems-home'),
@@ -27,8 +28,12 @@ urlpatterns = [
     path('item/<slug:qrid>/', ItemDetailView.as_view(), name='item-detail'),
     path('test/', views.test, name='ems-test'),
     path('scanner/', views.scanner, name='ems-scanner'),
+
     path('qrgenerator/<int:pk>/', views.qrgenerator, name='ems-qrgenerator'),
     path('qrbatchgenerator/<int:pk1>/<int:pk2>/', views.qrbatchgenerator, name='ems-qrbatchgenerator'),
+
+    path('storage/', LocationListView.as_view(), name='ems-storage'),
+    path('storage/cabinet/<int:pk>/', CabinetDetailView.as_view(), name='storage-detail'),
 ]
 
     # path('user/<str:username>', UserPostListView.as_view(), name='user-posts'),

@@ -13,6 +13,8 @@ from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.contrib import messages
 from django.contrib.messages.views import SuccessMessageMixin
+from django.db.models import Count
+
 
 @method_decorator(staff_member_required, name='dispatch') #only staff can add new
 class ManageView(LoginRequiredMixin, ListView):
@@ -53,6 +55,9 @@ class ManageView(LoginRequiredMixin, ListView):
 @method_decorator(staff_member_required, name='dispatch') #only staff can add new
 class UsersView(LoginRequiredMixin, ListView):
     model = get_user_model()
+    queryset = model.objects.annotate(
+        num_items=Count('itemuser')
+    )
     template_name = 'ems_manage/user_list.html'  # Custom otherwise auth/user_list.html
 
     # def get_context_data(self, **kwargs): # to send extra data

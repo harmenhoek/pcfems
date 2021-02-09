@@ -1,0 +1,258 @@
+{% extends "ems/base.html" %}
+{% load humanize %}
+{% load ems_customfilters %}
+{% load static %}
+
+{% block content %}
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ekko-lightbox/5.3.0/ekko-lightbox.css" integrity="sha512-Velp0ebMKjcd9RiCoaHhLXkR1sFoCCWXNp6w4zj1hfMifYB5441C+sKeBl/T/Ka6NjBiRfBBQRaQq65ekYz3UQ==" crossorigin="anonymous" />
+
+<div class="content-section">
+    <div class="row">
+        <div class="col col-lg-2">
+            <a href="{{ object.user.profile.image.url }}" data-toggle="lightbox"><img class="rounded-circle account-img" src="{{ object.user.profile.image.url }}"></a>
+        </div>
+        <div class="col col-lg-10">
+            <div class="row item-metadate my-2">
+                <div class="col col-lg-9 col-9">
+                    <h2 class="align-middle d-inline article-title pr-2">{{ object.user.first_name }} {{ object.user.last_name }}</h2>
+                    <p class="text-muted my-0">@{{ object.user.username }}</p>
+                </div>
+
+                <div class="col col-lg-3 col-3">
+
+                </div>
+
+            </div>
+            <hr>
+            <div class="row">
+                <div class="col col-lg-12 col-12">
+                    <small class="text-muted" data-toggle="tooltip" data-placement="top" title="Unique item ID visible on the item label.">ID:
+                        {{ object.user.pk }}</small>
+
+                    <div class="shadow p-3 mb-5 bg-white rounded mt-3 mx-2">
+                        <table class="table table-borderless table-sm mb-0 w-auto">
+                            <tr>
+                                <td><i class="fas fa-at"></i></td>
+                                <td>Username</td>
+                                <td><h6>{{ object.user.username }}</h6></td>
+                            </tr>
+                            <tr>
+                                <td><i class="fas fa-envelope"></i></td>
+                                <td>E-mail</td>
+                                <td><h6><a href="mailto:{{ object.user.email }}">{{ object.user.email }}</a></h6></td>
+                            </tr>
+                            <tr>
+                                <td><i class="fas fa-toggle-on"></i></td>
+                                <td class="th-sm">Active</td>
+                                <td>
+                                    <h5>
+                                        {% if object.user.is_active %}
+                                            <span class="align-middle badge badge-pill badge-success">Yes</span>
+                                        {% else %}
+                                            <span class="align-middle badge badge-pill badge-danger" data-toggle="tooltip" data-placement="right" title="User has been deactivated by a staff member and can no longer login.">No</span>
+                                        {% endif %}
+                                    </h5>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><i class="fas fa-user-plus"></i></td>
+                                <td>Staff</td>
+                                <td>
+                                    <h5>
+                                        {% if object.user.is_staff %}
+                                            <span class="align-middle badge badge-pill badge-success">Yes</span>
+                                        {% else %}
+                                            <span class="align-middle badge badge-pill badge-danger">No</span>
+                                        {% endif %}
+                                    </h5>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><i class="fas fa-history"></i></td>
+                                <td>Date joined</td>
+                                <td><h6>{{ object.user.date_joined|date:"Y-m-d G:i:s" }}</h6></td>
+                            </tr>
+                            <tr>
+
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<article class="media content-section">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col col-lg-12 col-12">
+                <h3 class="d-inline">Items in use by user</h3>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col col-12">
+                <table id="item_list" class="table table-striped responsive nowrap table-hover" style="width:100%">
+                    <thead>
+                    <tr>
+                        <th data-priority="10">ID</th>
+                        <th data-priority="1">Image</th>
+                        <th data-priority="1">Item</th>
+                        <th data-priority="1">Category</th>
+                        <th data-priority="5">Location</th>
+                        <th data-priority="2">Status</th>
+                        <th data-priority="5">User</th>
+                        <th data-priority="10">Flag</th>
+                        <th class="d-none">Description</th>
+                        <th class="d-none">Serial</th>
+                        <th class="d-none">Storage Location</th>
+                        <th class="d-none">QR id</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for item in items %}
+                        <tr style="cursor:pointer;" onclick="window.location='{% url 'item-detail' item.id %}';">
+                            <td>{{ item.pk }}</td>
+                            <td>
+                                <div class="image">
+                                    <img class="rounded img-fluid thumb-img lazy" data-original="{{ item.image.url }}" />
+                                </div>
+                            </td>
+                            <td><b>{{ item.brand }}</b> <br> {{ item.model }} <br> {% if item.title %}<p class=" my-0 text-muted">{{ item.title }}</p>{% endif %}</td>
+                            <td>{{ item.category }}</td>
+                            <td>
+                                {% if item.status and item.tracking %}
+                                    {% if item.storage_location %}
+                                        <span class="align-middle badge badge-pill badge-warning">{{ item.storage_location }}</span>
+                                    {% endif %}
+                                {% elif item.tracking and not item.status %}
+                                    <span class="align-middle badge badge-pill badge-primary">{{ item.location }}</span>
+                                {% else %}
+                                    <em class="text-muted">Unknown</em>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if item.status and item.tracking %}
+                                    <span class="align-middle badge badge-pill badge-success">Available</span>
+                                {% elif item.tracking and not item.status %}
+                                    <span class="align-middle badge badge-pill badge-danger">In use</span>
+                                {% else %}
+                                    <span class="align-middle badge badge-pill badge-secondary">No tracking</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if item.tracking %}
+                                   {{ item.user|nonevalue|safe }}
+                                {% else %}
+                                    <em class="text-muted">Unknown</em>
+                                {% endif %}
+                            </td>
+                            <td style="max-width: 100px;">
+                                {% if item.flag %}
+                                    <h5>
+                                        <span class="align-middle badge badge-pill badge-danger" data-toggle="tooltip" data-placement="bottom" data-html="true"  title="<i class='fas fa-{{ item.flag.icon }}'></i> {{ item.flag.flag }}">
+                                            <i class="fas fa-{{ item.flag.icon }}"></i>
+                                        </span>
+                                    </h5>
+                                {% endif %}
+                            </td>
+                            <td class="d-none"><span>{{ item.description }}</span></td>
+                            <td class="d-none"><span>{{ item.serial }}</span></td>
+                            <td class="d-none"><span>{{ item.storage_location }}</span></td>
+                            <td class="d-none">{{ item.qrid }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+
+
+                </table>
+            </div>
+        </div>
+    </div>
+</article>
+
+{% endblock content %}
+
+
+{% block tablescript %}
+{# Code block for javascript table #}
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/jquery.lazyload/1.9.1/jquery.lazyload.min.js"></script>
+
+
+<script>
+    $(document).ready(function() {
+        $('#item_list').DataTable({
+            stateSave: true,
+            "order": [[ 2, "asc" ]],
+            drawCallback: function(){
+                $("img.lazy").lazyload();
+           },
+            "pagingType": "full_numbers",
+            "bLengthChange": false,
+            responsive: true,
+            responsive: {
+                details: false
+            },
+            "language": {
+                "lengthMenu": "Show _MENU_ logs per page",
+                "zeroRecords": "No matching logs found.",
+                "infoFiltered": "(filtered from _MAX_ total items)",
+                "info":           "Showing _START_ to _END_ of _TOTAL_ items",
+                "infoEmpty":      "",
+                "emptyTable":     "No items in this cabinet or all in use",
+                "paginate": {
+                    "first":      "First",
+                    "last":       "Last",
+                    "next":       "Next",
+                    "previous":   "Previous"
+                },
+            },
+        } );
+    } );
+
+     $(document).ready(function() {
+        $('#item_list2').DataTable({
+            stateSave: true,
+            "order": [[ 2, "asc" ]],
+            drawCallback: function(){
+                $("img.lazy").lazyload();
+           },
+            "pagingType": "full_numbers",
+            "bLengthChange": false,
+            responsive: true,
+            responsive: {
+                details: false
+            },
+            "language": {
+                "lengthMenu": "Show _MENU_ logs per page",
+                "zeroRecords": "No matching logs found.",
+                "infoFiltered": "(filtered from _MAX_ total items)",
+                "info":           "Showing _START_ to _END_ of _TOTAL_ items",
+                "infoEmpty":      "",
+                "emptyTable":     "This user has no items in use",
+                "paginate": {
+                    "first":      "First",
+                    "last":       "Last",
+                    "next":       "Next",
+                    "previous":   "Previous"
+                },
+            },
+        } );
+    } );
+</script>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/ekko-lightbox/5.3.0/ekko-lightbox.min.js" integrity="sha512-Y2IiVZeaBwXG1wSV7f13plqlmFOx8MdjuHyYFVoYzhyRr3nH/NMDjTBSswijzADdNzMyWNetbLMfOpIPl6Cv9g==" crossorigin="anonymous"></script>
+
+<script>
+    $(document).on('click', '[data-toggle="lightbox"]', function(event) {
+        event.preventDefault();
+        $(this).ekkoLightbox();
+    });
+</script>
+
+{% endblock tablescript %}

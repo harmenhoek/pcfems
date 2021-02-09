@@ -95,7 +95,8 @@
                                     </td>
                                     <td class="pl-4">
                                         {% if object.status %}
-                                            <h5><span class="badge badge-warning">{{ object.storage_location }}</span></h5>
+
+                                        <h5><a href="{% url 'storage-detail' object.storage_location.pk %}"> <span class="badge badge-warning">{{ object.storage_location }}</span></a></h5>
                                         {% else %}
                                              <h5><span class="badge badge-primary">{{ object.location }}</span></h5>
                                         {% endif %}
@@ -113,7 +114,7 @@
                                             {% if object.user == None %}
                                                 <span class="badge badge-secondary">{{ object.user }}</span>
                                             {% else %}
-                                                <span class="badge badge-primary">{{ object.user }}</span>
+                                                <a href="{% url 'profile' object.user.username %}"><span class="badge badge-primary">{{ object.user }}</span></a>
                                             {% endif %}
                                         </h5>
                                     </td>

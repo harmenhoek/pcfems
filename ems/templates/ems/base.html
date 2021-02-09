@@ -41,7 +41,8 @@
             </a>
             <div class="navbar-nav mr-auto"> <!-- Above collapse to control custom behavior on <md devices, i.e. hide Home, but always show Scan.-->
                 {% if user.is_authenticated %}
-                    <a class="nav-item nav-link d-none d-md-block" href="{% url 'ems-home' %}"><i class="fas fa-home"></i> Home</a>
+                    <a class="nav-item nav-link d-none d-md-block {% block tab1_active %}{% endblock tab1_active %}" href="{% url 'ems-home' %}"><i class="fas fa-home"></i> Items</a>
+                    <a class="nav-item nav-link d-none d-md-block {% block tab2_active %}{% endblock tab2_active %}" href="{% url 'ems-storage' %}"><i class="fas fa-boxes"></i> Storage</a>
 <!--                    <a class="nav-item nav-link" href="{% url 'ems-scanner' %}"><i class="fas fa-qrcode"></i> Scan</a>-->
                 {% endif %}
             </div>
@@ -84,7 +85,7 @@
                             <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
                                 <a class="dropdown-item" href="{% url 'profile' %}">
                                     <i class="fas fa-id-badge"></i>
-                                    Profile
+                                    Edit Profile
                                 </a>
                                 <div class="dropdown-divider"></div>
                                 <a class="dropdown-item" href="{% url 'logout' %}">

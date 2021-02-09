@@ -87,3 +87,12 @@ Version 0.5
 - Statesave in manage env
 - |nonevalue|safe in manage
 - home table Reset button when filtering is on. Check is results != total items.
+
+Version 0.6
+2021-02-08
+- New interface: storage. This page lists all the storage locations (cabinets) in an interactive table. On click detail page of cabinet is shown, including all the items that are currently on that location, and are supposed to be there (but in use now). Made all the links in item-detail clickable to this. Itemview in storageview is similar to home view. TODO add custom maps
+- Updated top menu bar: Home is now Items, added Storage.
+- Added active tab management in base.html.
+- Added profile pages for all users to access. Profile is now 'Update profile', and with <str:slug> (slug username) profiles of others can be accessed. On profile pages items in use by users can be viewed. Links to users on item-detail. TODO correct aspect ratio of profile image, probably some redesign, merge profile update in this page.
+- Active classes dynamically on manage_base.
+- user_list in manage shows items in use per user.
