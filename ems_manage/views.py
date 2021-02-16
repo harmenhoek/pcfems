@@ -15,6 +15,60 @@ from django.contrib import messages
 from django.contrib.messages.views import SuccessMessageMixin
 from django.db.models import Count
 
+from .forms import ExportForm
+from distutils.util import strtobool
+
+@staff_member_required
+def export(request):
+    # if this is a POST request we need to process the form data
+    if request.method == 'POST':
+        # create a form instance and populate it with data from the request:
+        form = ExportForm(request.POST)
+        # check whether it's valid:
+        if form.is_valid():
+            # process the data in form.cleaned_data as required
+            pk1 = form.cleaned_data['pk1']
+            pk2 = form.cleaned_data['pk2']
+            tracking = strtobool(form.cleaned_data['tracking'])
+
+            if tracking:
+                filename = 'export_tracking.csv'
+            else:
+                filename = 'export_notracking.csv'
+
+            from datetime import date
+            import csv
+            from django.http import HttpResponse
+            import os
+
+            response = HttpResponse(content_type='text/csv')
+            response['Content-Disposition'] = f'attachment; filename={filename}'
+            writer = csv.writer(response)
+            writer.writerow(['id', 'brand', 'model', 'serial', 'tracking', 'parts', 'part', 'version', 'date', 'url'])
+
+
+            for pk in range(pk1, pk2 + 1):
+                try:
+                    item = get_object_or_404(Item, pk=pk)
+                    if tracking == item.tracking:
+                        for part in range(item.parts):
+                            urlitem = reverse('item-detail', kwargs={'pk': item.pk})
+                            urlhost = request.build_absolute_uri('/')
+                            urlfull = os.path.join(urlhost, *urlitem.split(os.sep))
+                            url = f"{urlfull}?v={item.version}"
+
+                            # id, brand, model, serial, tracking, parts, part, version, date, url
+                            writer.writerow([item.qrid, item.brand, item.model, item.serial, int(item.tracking == True), item.parts, part+1, item.version, date.today(), url])
+                except:
+                    pass
+
+            return response
+
+    else:
+        form = ExportForm()
+
+    return render(request, 'ems_manage/export.html', {'form': form})
+
 
 @method_decorator(staff_member_required, name='dispatch') #only staff can add new
 class ManageView(LoginRequiredMixin, ListView):
@@ -231,3 +285,4 @@ class UserUpdateView(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
             return super(UserUpdateView, self).form_valid(form)
         else:
             return HttpResponseRedirect(reverse('manage-users'))
+

@@ -96,3 +96,19 @@ Version 0.6
 - Added profile pages for all users to access. Profile is now 'Update profile', and with <str:slug> (slug username) profiles of others can be accessed. On profile pages items in use by users can be viewed. Links to users on item-detail. TODO correct aspect ratio of profile image, probably some redesign, merge profile update in this page.
 - Active classes dynamically on manage_base.
 - user_list in manage shows items in use per user.
+
+Version 0.7 AKA 1.0
+2021-02-11
+- Export functionality to csv. New view def export(request): in manage. Creates csv-file with items for Dymo labelprinter. TODO: custom list / one item / all / maximize to last pk.
+
+2021-02-12
+- Manage home is now Overview.
+
+2021-02-15
+- Export functionality added tracking/notracking option to export different files for the 2 templates in use. 2 files in 1 response not possible. Other option is to ZIP.
+- All users can update storage_location
+- Updated assignremove. If item is unassigned and no storage_location is known. A location must be set before it is stored. This is only possible since storage_location is not mandatory on create item.
+- Updated ems/view. if parse.urlparse(self.request.META.get('HTTP_REFERER')).path == reverse('ems-scanner'): no longer in use. Instead if version is send in GET this is now seen as an item-scan, and last_scanned is updated.
+- Removed qrcode generation from Actions menu on item-detail. TODO: remove code of qrcode generation + scanner + js of scanner.
+- Added tracking to ItemForm again
+- Bug fix: if tracking is turned off when item is assigned, now user,date_inuse,date_return is set to None, status to True (available).

@@ -9,7 +9,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib.admin.views.decorators import staff_member_required
 from django.utils.decorators import method_decorator
 # for function-based views, decorator: staff_member_required @staff_member_required
-from .forms import ItemForm, AssignForm
+from .forms import ItemForm, AssignForm, AddStorageLocationForm
 from django.urls import reverse, reverse_lazy
 from django.http import HttpResponse, HttpResponseRedirect
 from django.utils import timezone
@@ -99,13 +99,12 @@ class ItemDetailView(LoginRequiredMixin, DetailView):
 
         # update last_scanned in model if referred from scanner
         # TODO this needs some updating, now everything is done inside the get_context_data function, which is not needed.
-        from urllib import parse
-        if parse.urlparse(self.request.META.get('HTTP_REFERER')).path == reverse('ems-scanner'):
-            item.last_scanned = timezone.now()
-            item.save()
 
         version = self.request.GET.get('v', None)
         if version:
+            item.last_scanned = timezone.now()
+            item.save()
+
             if version == 'harmen':
                 messages.success(self.request, f'You found a rabbithole! WoW! Congrats! This app is made by Harmen Hoek.')
             elif item.version != int(version):
@@ -296,13 +295,23 @@ class AssignCreateView(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
 @login_required
 def assignremove(request, pk):
     item = get_object_or_404(Item, pk=pk)
+
+    if item.storage_location is None:  # no storage location set, this must be done first before item can be stored.
+        if request.method == 'POST':
+            form = AddStorageLocationForm(request.POST)
+            if form.is_valid():
+                item.storage_location = form.cleaned_data['storage_location']
+        else:
+            form = AddStorageLocationForm()
+            return render(request, 'ems/storagelocation_form.html', {'form': form})
+
     messages.warning(request, f'Item <b>{item.brand} {item.model}</b> (assigned to {item.user} at {item.location}) was <b>unassigned.</b> Make sure it is in storage cabinet <b>{item.storage_location}</b>.')
     item.status = True
     item.user = None
     item.date_return = timezone.now()
     item.save()
-
     return HttpResponseRedirect(reverse('item-detail', args=(pk,)))  # get pk from the url
+
 
 @login_required
 def flagremove(request, pk):
@@ -332,8 +341,13 @@ class ItemStaffUpdateView(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
 
     def form_valid(self, form):
         form.instance.updated_by = self.request.user
-        if set(['brand', 'model', 'serial', 'tracking', 'parts']).intersection(set(form.changed_data)):
+        if {'brand', 'model', 'serial', 'tracking', 'parts'}.intersection(set(form.changed_data)):
             form.instance.version = self.object.version + 1
+        if 'tracking' in form.changed_data:
+            form.instance.user = None
+            form.instance.date_inuse = None
+            form.instance.status = True  # True = available / in storage
+            form.instance.date_return = None
         return super().form_valid(form)
 
     # For ModelForms, if you need access to fields from the saved object override the get_success_message() method.
@@ -354,7 +368,7 @@ class ItemStaffUpdateView(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
 class ItemUserUpdateView(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
     model = Item
     success_message = "Item <b>%(brand)s %(model)s (%(qrid)s)</b> was updated successfully."
-    fields = ['description', 'image', 'image2']
+    fields = ['description', 'storage_location', 'image', 'image2']
 
     def form_valid(self, form):
         form.instance.updated_by = self.request.user

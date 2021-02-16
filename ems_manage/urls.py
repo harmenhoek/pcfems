@@ -33,6 +33,8 @@ urlpatterns = [
     path('item/<int:pk>/assign/remove/', views.assignremove, name='manage-assign-remove'),
     path('item/<int:pk>/warranty/remove/', views.warrantyremove, name='manage-warranty-remove'),
 
+    path('export', views.export, name='manage-export'),
+
 ]
 
     # path('user/<str:username>', UserPostListView.as_view(), name='user-posts'),

@@ -27,15 +27,15 @@
             <hr>
             <div class="row">
                 <div class="col col-lg-12 col-12">
-                    <small class="text-muted" data-toggle="tooltip" data-placement="top" title="Unique item ID visible on the item label.">ID: {{ object.pk }}</small>
+                    <small class="text-muted" data-toggle="tooltip" data-placement="top" title="Unique cabinet ID.">ID: {{ object.pk }}</small>
 
                     <div class="shadow p-3 mb-5 bg-white rounded mt-3 mx-2">
                         <table class="table table-borderless table-sm mb-0 w-auto">
-                            <tr><td>Lab</td><td class="pl-4"><h5>{{ object.lab }}</h5></td></tr>
-                            <tr><td>Number</td><td class="pl-4"><h5>{{ object.number }}</h5></td></tr>
-                            <tr><td>Main Content</td><td class="pl-4"><h5>{{ object.main_content|nonevalue|safe }}</h5></td></tr>
-                            <tr><td>Owner</td><td class="pl-4"><h5>{{ object.owner|nonevalue|safe }}</h5></td></tr>
-                            <tr><td>Nickname</td><td class="pl-4"><h5>{{ object.nickname|nonevalue|safe }}</h5></td></tr>
+                            <tr><td>Lab</td><td class="pl-4"><h6>{{ object.lab }}</h6></td></tr>
+                            <tr><td>Number</td><td class="pl-4"><h6>{{ object.number }}</h6></td></tr>
+                            <tr><td>Main Content</td><td class="pl-4"><h6>{{ object.main_content|nonevalue|safe }}</h6></td></tr>
+                            <tr><td>Owner</td><td class="pl-4"><h6>{{ object.owner|nonevalue|safe }}</h6></td></tr>
+                            <tr><td>Nickname</td><td class="pl-4"><h6>{{ object.nickname|nonevalue|safe }}</h6></td></tr>
                         </table>
                     </div>
                 </div>

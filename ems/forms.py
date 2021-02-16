@@ -11,7 +11,7 @@ class ItemForm(forms.ModelForm):
 
     class Meta:
         model = Item
-        fields = ['title', 'category', 'brand', 'model', 'serial', 'parts', 'description', 'storage_location', 'image', 'image2',
+        fields = ['title', 'category', 'brand', 'model', 'serial', 'parts', 'description', 'tracking', 'storage_location', 'image', 'image2',
                   'purchased_by', 'purchased_on', 'purchased_price', 'warranty', 'warranty_expiration', 'next_service_date']
         # exclude = ['qrid', 'added_by', 'updated_by', 'added_on', 'last_scanned', 'status', 'location', 'user',
         #            'date_inuse', 'date_return', 'flag', 'flag_comment', 'labelstatus', 'version']
@@ -34,6 +34,10 @@ class ItemImageForm(forms.ModelForm):
         model = ItemImage
         exclude = ()
 
+class AddStorageLocationForm(forms.ModelForm):
+    class Meta:
+        model = Item
+        fields = ['storage_location']
 
 # ItemImageFormSet = inlineformset_factory(
 #     Item, ItemImage, form=ItemImageForm,

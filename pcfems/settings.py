@@ -197,7 +197,7 @@ BOOTSTRAP4 = {
 
 DEFAULT_IMAGE = 'default.png'
 
-EMS_VERSION = '0.6'
+EMS_VERSION = '1.0'
 
 TIME_ZONE = 'Europe/Amsterdam'
 

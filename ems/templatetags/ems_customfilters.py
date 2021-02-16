@@ -50,6 +50,13 @@ def nonevalue(value):
     else:
         return f"<em class='text-muted'>{value}</em>"
 
+@register.filter
+def unknown(value):
+    if value:
+        return value
+    else:
+        return f"<em class='text-muted'>Unknown</em>"
+
 # settings value
 @register.simple_tag
 def settings_value(name):

@@ -26,10 +26,10 @@
     <link rel="stylesheet" type="text/css" href="{% static 'ems/main.css' %}">
 
 
-    <title>PCF EMS v{% settings_value "EMS_VERSION" %}</title>
+    <title>PCF EMS</title>
 
 </head>
-<body>
+<body class="mb-3">
 
 <header class="site-header">
     <nav class="navbar navbar-expand-md navbar-dark bg-steel fixed-top">
@@ -37,7 +37,7 @@
             <a class="navbar-brand mr-4" href="/">
 <!--                <i class="fas fa-boxes"></i> -->
                 <img class="align-middle" style="height:1em;" src="{% static 'ems/favicon_white_192x192.png' %}" />
-                PCF EMS v{% settings_value "EMS_VERSION" %}
+                PCF EMS
             </a>
             <div class="navbar-nav mr-auto"> <!-- Above collapse to control custom behavior on <md devices, i.e. hide Home, but always show Scan.-->
                 {% if user.is_authenticated %}
@@ -136,13 +136,12 @@
     </div>
 </main>
 
-<footer class="footer">
-    <div class="container text-center">
-        <span class="text-muted">
-            <a class="text-muted" href="https://github.com/harmenhoek/pcfems/" target="_blank">About EMS <i class="fas fa-external-link-alt"></i></a>
-        </span>
-    </div>
+<footer class="mt-5 pt-3 pb-0 text-muted text-center text-small border-top">
+        <p class="mb-1">Equipment Management System for the Physics of Complex Fluids Group at the University of Twente.</p>
+        <p class="m-0">Version {% settings_value "EMS_VERSION" %} | <a class="text-muted" href="https://github.com/harmenhoek/pcfems/" target="_blank">About EMS <i class="fas fa-external-link-alt fa-xs" style="vertical-align: +20%"></i></a></p>
 </footer>
+
+
 
 <!-- Optional JavaScript -->
 <!-- jQuery first, then Popper.js, then Bootstrap JS -->

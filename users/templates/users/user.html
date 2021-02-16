@@ -41,7 +41,7 @@
                             <tr>
                                 <td><i class="fas fa-envelope"></i></td>
                                 <td>E-mail</td>
-                                <td><h6><a href="mailto:{{ object.user.email }}">{{ object.user.email }}</a></h6></td>
+                                <td><h6>{% if object.user.email %}<a href="mailto:{{ object.user.email }}">{{ object.user.email }}</a>{% else %}{{ object.user.email|unknown|safe }}{% endif %}</h6></td>
                             </tr>
                             <tr>
                                 <td><i class="fas fa-toggle-on"></i></td>
@@ -72,7 +72,7 @@
                             <tr>
                                 <td><i class="fas fa-history"></i></td>
                                 <td>Date joined</td>
-                                <td><h6>{{ object.user.date_joined|date:"Y-m-d G:i:s" }}</h6></td>
+                                <td><h6>{{ object.user.date_joined|date:"Y-m-d G:i:s"|unknown|safe }}</h6></td>
                             </tr>
                             <tr>
 
@@ -203,7 +203,7 @@
                 "infoFiltered": "(filtered from _MAX_ total items)",
                 "info":           "Showing _START_ to _END_ of _TOTAL_ items",
                 "infoEmpty":      "",
-                "emptyTable":     "No items in this cabinet or all in use",
+                "emptyTable":     "No items are assigned to this user",
                 "paginate": {
                     "first":      "First",
                     "last":       "Last",
