@@ -8,7 +8,7 @@
 
 <article class="media content-section">
     <div class="row justify-content-md-center">
-        <div class="col  col-md-8">
+        <div class="col col-md-8">
             <div class="row item-metadate my-2">
                 <div class="col col-lg-9 col-9">
                     <h2 class="align-middle d-inline article-title pr-2">{{ object.brand }} {{ object.model }}</h2>
@@ -55,6 +55,7 @@
 
                     <div class="shadow p-3 mb-5 bg-white rounded mt-3 mx-2">
 <!--                          <hr class="my-2">-->
+<!--                        <table class="table table-sm mb-0 w-auto">-->
                         <table class="table table-borderless table-sm mb-0 w-auto">
                             <tr>
                                 <td>
@@ -66,11 +67,11 @@
                                 <td class="pl-4">
                                     <h5>
                                         {% if object.status and object.tracking %}
-                                            <span class="align-middle badge badge-pill badge-success">Available</span>
+                                            <span class="align-middle badge badge-pill badge-success text-wrap text-left">Available</span>
                                         {% elif object.tracking and not object.status %}
-                                            <span class="align-middle badge badge-pill badge-danger">In use</span> <!-- TODO Hiding elements -->
+                                            <span class="align-middle badge badge-pill badge-danger text-wrap text-left">In use</span> <!-- TODO Hiding elements -->
                                         {% else %}
-                                            <span class="align-middle badge badge-pill badge-secondary" data-toggle="tooltip" data-placement="right" title="This item cannot be assigned to a user or location.">No tracking</span>
+                                            <span class="align-middle badge badge-pill badge-secondary text-wrap text-left" data-toggle="tooltip" data-placement="right" title="This item cannot be assigned to a user or location.">No tracking</span>
                                         {% endif %}
 
                                     </h5>
@@ -86,13 +87,17 @@
                                     </td>
                                     <td class="pl-4">
                                         {% if object.status %}
+                                            {% if object.storage_location %}
                                             <h5>
                                                 <a href="{% url 'storage-detail' object.storage_location.pk %}">
-                                                    <span class="badge badge-warning">{{ object.storage_location }}</span>
+                                                    <span class="badge badge-warning text-wrap text-left">{{ object.storage_location|safe }}</span>
                                                 </a>
                                             </h5>
+                                            {% else %}  <!-- if no storage location isset (when adding or via admin, see bugfix 2021-03-04) -->
+                                                <em class="text-muted">Unknown</em>
+                                            {% endif %}
                                         {% else %}
-                                             <h5><span class="badge badge-primary">{{ object.location }}</span></h5>
+                                             <h5><span class="badge badge-primary text-wrap text-left">{{ object.location }}</span></h5>
                                         {% endif %}
                                     </td>
                                 </tr>
@@ -106,9 +111,9 @@
                                     <td class="pl-4">
                                         <h5>
                                             {% if object.user == None %}
-                                                <span class="badge badge-secondary">{{ object.user }}</span>
+                                                <span class="badge badge-secondary text-wrap text-left">{{ object.user }}</span>
                                             {% else %}
-                                                <a href="{% url 'profile' object.user.username %}"><span class="badge badge-primary">{{ object.user }}</span></a>
+                                                <a href="{% url 'profile' object.user.username %}"><span class="badge badge-primary text-wrap text-left">{{ object.user }}</span></a>
                                             {% endif %}
                                         </h5>
                                     </td>
@@ -124,7 +129,7 @@
                                     </td>
                                     <td class="pl-4">
                                         <h5>
-                                            <span class="badge badge-danger"><i class="fas fa-{{ object.flag.icon }}"></i>  {{ object.flag.flag }}</span>
+                                            <span class="badge badge-danger text-wrap text-left"><i class="fas fa-{{ object.flag.icon }}"></i>  {{ object.flag.flag }}</span>
                                         </h5>
                                         <p class="text-muted small my-0">{{ flagged_by }} | {{ flagged_on|date:"d-m-Y" }}</p>
                                         <p class="text-muted my-0">
@@ -163,7 +168,7 @@
                         </tr>
                         <tr style="min-height: 200px;">
                             <th scope="row">Description</th>
-                            <td>
+                            <td class="col-10 col-lg-8">
                                 <div style="min-height: 60px;">
                                     {{ object.description|nonevalue|safe|linebreaks }}
                                 </div>
@@ -244,16 +249,16 @@
                     <h3>Quick actions</h3>
                     {% if object.tracking %}
                         {% if object.status %}
-                            <a class="btn btn-secondary btn-block" href="{% url 'item-assign' object.id %}"><i class="fas fa-stamp"></i> Assign To</a>
+                            <a class="btn btn-primary btn-block" href="{% url 'item-assign' object.id %}"><i class="fas fa-stamp"></i> Assign To</a>
                         {% else %}
-                            <a class="btn btn-secondary btn-block" href="{% url 'item-assign' object.id %}"><i class="fas fa-stamp"></i> Change Assign To</a>
-                            <a class="btn btn-warning btn-block" href="{% url 'item-assign-remove' object.id %}"><i class="fas fa-stamp"></i> Return to Storage</a>
+                            <a class="btn btn-outline-primary btn-block" href="{% url 'item-assign' object.id %}"><i class="fas fa-stamp"></i> Change Assign To</a>
+                            <a class="btn btn-warning btn-block" href="{% url 'item-assign-remove' object.id %}"><i class="fas fa-warehouse"></i> Return to Storage</a>
                         {% endif %}
                     {% endif %}
                     {% if object.flag %}
-                        <a class="btn btn-success btn-block" href="{% url 'item-flag-remove' object.id %}"><i class="fas fa-flag"></i> Resolve Flag</a>
+                        <a class="btn btn-outline-success btn-block" href="{% url 'item-flag-remove' object.id %}"><i class="fas fa-flag"></i> Resolve Flag</a>
                     {% else %}
-                        <a class="btn btn-secondary btn-block" href="{% url 'item-flag' object.id %}"><i class="fas fa-flag"></i> Flag</a>
+                        <a class="btn btn-outline-danger btn-block" href="{% url 'item-flag' object.id %}"><i class="fas fa-flag"></i> Flag</a>
                     {% endif %}
 
 
@@ -320,7 +325,7 @@
 
 <div class="container-fluid">
     <div class="row">
-        <div class="col col-lg-12 col-12">
+        <div class="col col-lg-12 col-12 px-0">
             <h3 class="d-inline">Logbook</h3>
             <div class="float-right my-2">
                 <a class="btn btn-outline-success" href="{% url 'item-log-create' object.id %}"><i class="fas fa-plus"></i> Add log</a>
@@ -328,7 +333,7 @@
         </div>
     </div>
         <div class="row">
-            <div class="col col-12">
+            <div class="col col-12 px-0">
             <table id="logbook_list" class="table table-striped table-bordered w-100">
                 <thead>
                 <tr>
@@ -392,19 +397,17 @@
 <div class="container-fluid">
     {% if history %}
     <div class="row">
-        <div class="col col-lg-12 col-12">
+        <div class="col col-lg-12 col-12 px-0">
             <h3 class="d-inline">Item History</h3> <span class="align-middle badge badge-pill badge-secondary d-inline align-text-top">Beta</span>
 
             <table id="history_list" class="table table-striped table-bordered w-100">
 
                 <thead>
-                    <th>Date</th>
-                    <th>User</th>
-                    <th class="d-none d-md-block">Type</th>
-                    <th>Fields changed</th>
-
+                    <th data-priority="1">Date</th>
+                    <th data-priority="1">User</th>
+                    <th data-priority="10" >Type</th>
+                    <th data-priority="1">Fields changed</th>
                 </thead>
-
 
                 {% for idx in zipped_allhistory_alldelta %}
                 <tr>
@@ -425,7 +428,7 @@
                     </td>
                     <td>
                         {% for field in idx.1 %}
-                        <span class="align-middle badge badge-primary">{{ field }}</span>
+                        <span class="align-middle badge badge-secondary">{{ field }}</span>
 
                         {% endfor %}
                     </td>

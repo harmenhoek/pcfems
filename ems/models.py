@@ -60,7 +60,7 @@ class Cabinet(models.Model):
 
     def __str__(self):
         if self.main_content:
-            extra = f"({self.main_content})"
+            extra = f"(<em>{self.main_content}</em>)"
         else:
             extra = ''
         return f"{self.lab.number} - {self.number} {extra}"

@@ -112,3 +112,37 @@ Version 0.7 AKA 1.0
 - Removed qrcode generation from Actions menu on item-detail. TODO: remove code of qrcode generation + scanner + js of scanner.
 - Added tracking to ItemForm again
 - Bug fix: if tracking is turned off when item is assigned, now user,date_inuse,date_return is set to None, status to True (available).
+
+Version 1.0.1
+2021-03-04
+- Transition made to pcfems.utwente.nl, database from outsideathome
+- Bugfix: when no storage_location was set and item was available (only possible when added without storage_location OR in admin removed), error would show up generation url to storage-detail. Now warning is shown when available and no location is set.
+- Viewport metatag updated to max-scale:1, user-scalable=no to prevent zooming in on field on mobile.
+- Bugfixes: permission limitations on server caused errors on manage/add and admin page. All fixed.
+
+2021-03-09
+- Bugfix: text wrap of badges on item detail
+- Bugfix: Datatables pagination on home responsiveness
+- Bugfix: hidden menu items (Items and Storage) on sm-devices.
+- px-0 for Logbook and Item History (improves sm experience).
+
+2021-03-10
+- Bugfix: no table content on user and storage pages. Set px-0 in all tables on these pages, and correctly set data-priority.
+- Bugfix: gridsystem wrapping on user and storage pages.
+- Bugfix: fixed column width table item detail (different mobile and desktop).
+- Bugfix: item-detail Item History wrong overflow. data-priorities added.
+- item-detail redid button coloring. Added outline to some.
+    BLUE    users + locations + assign to + change assign to
+    YELLOW  storage + return to storage
+    RED     add flag + in use
+    GREEN   resolve flag + available
+    SECOND  none, other stuff
+- Locations are now all badges, no pills. Uniformity.
+- Text-wrap on home for location badges (not as pretty, but no more unneeded hiding of columns).
+- em in models storage_location of main content
+- Return to Storage icon now warehouse
+
+
+Known bugs:
+- Reset on home does not always show up.
+- Special chars and spaces in names show up in username.

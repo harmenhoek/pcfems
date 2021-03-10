@@ -123,7 +123,7 @@ CRISPY_TEMPLATE_PACK = 'bootstrap4'
 LOGIN_REDIRECT_URL = 'ems-home'
 LOGIN_URL = 'login'
 
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media') # full path to the folder where Django saves the files on the file system
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')  # full path to the folder where Django saves the files on the file system
 MEDIA_URL = '/media/' # how we access the image in the browser. Location of the url.
 
 
@@ -197,7 +197,7 @@ BOOTSTRAP4 = {
 
 DEFAULT_IMAGE = 'default.png'
 
-EMS_VERSION = '1.0'
+EMS_VERSION = '1.0.1'
 
 TIME_ZONE = 'Europe/Amsterdam'
 

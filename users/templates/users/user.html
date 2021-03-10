@@ -15,14 +15,11 @@
         </div>
         <div class="col col-lg-10">
             <div class="row item-metadate my-2">
-                <div class="col col-lg-9 col-9">
+                <div class="col col-lg-12 col-12">
                     <h2 class="align-middle d-inline article-title pr-2">{{ object.user.first_name }} {{ object.user.last_name }}</h2>
                     <p class="text-muted my-0">@{{ object.user.username }}</p>
                 </div>
 
-                <div class="col col-lg-3 col-3">
-
-                </div>
 
             </div>
             <hr>
@@ -89,19 +86,19 @@
 <article class="media content-section">
     <div class="container-fluid">
         <div class="row">
-            <div class="col col-lg-12 col-12">
+            <div class="col col-lg-12 col-12 px-0">
                 <h3 class="d-inline">Items in use by user</h3>
             </div>
         </div>
         <div class="row">
-            <div class="col col-12">
+            <div class="col col-12 px-0">
                 <table id="item_list" class="table table-striped responsive nowrap table-hover" style="width:100%">
                     <thead>
                     <tr>
                         <th data-priority="10">ID</th>
-                        <th data-priority="1">Image</th>
+                        <th data-priority="2">Image</th>
                         <th data-priority="1">Item</th>
-                        <th data-priority="1">Category</th>
+                        <th data-priority="3">Category</th>
                         <th data-priority="5">Location</th>
                         <th data-priority="2">Status</th>
                         <th data-priority="5">User</th>

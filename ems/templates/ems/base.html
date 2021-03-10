@@ -11,7 +11,8 @@
 
     <!-- Required meta tags -->
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<!--    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">-->
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
     <link rel="shortcut icon" type="image/png" href="{% static 'ems/favicon-32x32.png' %}"/>
 
     <!-- Bootstrap CSS -->
@@ -39,12 +40,11 @@
                 <img class="align-middle" style="height:1em;" src="{% static 'ems/favicon_white_192x192.png' %}" />
                 PCF EMS
             </a>
-            <div class="navbar-nav mr-auto"> <!-- Above collapse to control custom behavior on <md devices, i.e. hide Home, but always show Scan.-->
-                {% if user.is_authenticated %}
-                    <a class="nav-item nav-link d-none d-md-block {% block tab1_active %}{% endblock tab1_active %}" href="{% url 'ems-home' %}"><i class="fas fa-home"></i> Items</a>
-                    <a class="nav-item nav-link d-none d-md-block {% block tab2_active %}{% endblock tab2_active %}" href="{% url 'ems-storage' %}"><i class="fas fa-boxes"></i> Storage</a>
-<!--                    <a class="nav-item nav-link" href="{% url 'ems-scanner' %}"><i class="fas fa-qrcode"></i> Scan</a>-->
-                {% endif %}
+            <div class="navbar-nav mr-auto d-inline"> <!-- Above collapse to control custom behavior on <md devices, i.e. hide Home, but always show Scan.-->
+<!--                Add classes 'd-none d-md-block' to hide it on mobile-->
+                <a class="nav-item nav-link {% block tab1_active %}{% endblock tab1_active %} d-inline" href="{% url 'ems-home' %}"><i class="fas fa-home"></i> Items<h6 class="d-none d-sm-none d-inline">&nbsp; &nbsp;</h6> </a>
+                <a class="nav-item nav-link {% block tab2_active %}{% endblock tab2_active %} d-inline" href="{% url 'ems-storage' %}"><i class="fas fa-boxes"></i> Storage</a>
+<!--                <a class="nav-item nav-link" href="{% url 'ems-scanner' %}"><i class="fas fa-qrcode"></i> Scan</a>-->
             </div>
             <!--fa options: layer-group, boxes, archive, warehouse, database -->
             <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarToggle"
@@ -137,8 +137,8 @@
 </main>
 
 <footer class="mt-5 pt-3 pb-0 text-muted text-center text-small border-top">
-        <p class="mb-1">Equipment Management System for the Physics of Complex Fluids Group at the University of Twente.</p>
-        <p class="m-0">Version {% settings_value "EMS_VERSION" %} | <a class="text-muted" href="https://github.com/harmenhoek/pcfems/" target="_blank">About EMS <i class="fas fa-external-link-alt fa-xs" style="vertical-align: +20%"></i></a></p>
+        <small class="mb-1">Equipment Management System for the Physics of Complex Fluids Group at the University of Twente.</small><br>
+        <small class="m-0">Version {% settings_value "EMS_VERSION" %} | <a class="text-muted" href="https://github.com/harmenhoek/pcfems/" target="_blank">About PCFEMS <i class="fas fa-external-link-alt fa-xs" style="vertical-align: +20%"></i></a></small>
 </footer>
 
 

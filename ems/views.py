@@ -97,6 +97,9 @@ class ItemDetailView(LoginRequiredMixin, DetailView):
         except:
             item = get_object_or_404(Item, qrid=self.kwargs['qrid'])
 
+        if item.storage_location is None and item.status is True:
+            messages.warning(self.request, f'Something is wrong with this item. It is not in use and no storage location is set. Please set a storage location, or contact a staff member.')
+
         # update last_scanned in model if referred from scanner
         # TODO this needs some updating, now everything is done inside the get_context_data function, which is not needed.
 

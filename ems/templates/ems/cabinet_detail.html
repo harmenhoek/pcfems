@@ -7,20 +7,16 @@
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ekko-lightbox/5.3.0/ekko-lightbox.css" integrity="sha512-Velp0ebMKjcd9RiCoaHhLXkR1sFoCCWXNp6w4zj1hfMifYB5441C+sKeBl/T/Ka6NjBiRfBBQRaQq65ekYz3UQ==" crossorigin="anonymous" />
 
-<article class="content-section">
-    <div class="row">
-        <div class="col col-8">
+<article class="content-section container">
+    <div class="row ">
+        <div class="col-sm-8">
             <div class="row item-metadate my-2">
-                <div class="col col-lg-9 col-9">
-                    <h2 class="align-middle d-inline article-title pr-2">Cabinet <span class="badge rounded-pill bg-warning text-dark">{{ object.lab }} {{ object.number }}</span></h2>
+                <div class="col col-lg-12 col-12">
+                    <h2 class="align-middle d-inline article-title pr-2">Cabinet <span class="badge bg-warning text-dark">{{ object.lab }} {{ object.number }}</span></h2>
 
                     {% if object.title %}
                         <p class="text-muted my-0">{{ object.title }}</p>
                     {% endif %}
-                </div>
-
-                <div class="col col-lg-3 col-3">
-
                 </div>
 
             </div>
@@ -42,9 +38,9 @@
             </div>
 
         </div>
-        <div class="col col-4">
-                <a href="{% static 'ems/labmap.png' %}" data-toggle="lightbox"><img class="rounded mr-0 w-100" src="{% static 'ems/labmap.png' %}"></a>
-                <em>This will be a custom image of the location in the future.</em>
+        <div class="col-sm-4">
+                <a href="{% static 'ems/default.png' %}" data-toggle="lightbox"><img class="rounded mr-0 w-100" src="{% static 'ems/default.png' %}"></a>
+<!--                <em>This will be a custom image of the location in the future.</em>-->
         </div>
 
     </div>
@@ -54,19 +50,19 @@
 <article class="media content-section">
     <div class="container-fluid">
         <div class="row">
-            <div class="col col-lg-12 col-12">
+            <div class="col col-lg-12 col-12 px-0">
                 <h3 class="d-inline">Items in this cabinet</h3>
             </div>
         </div>
         <div class="row">
-            <div class="col col-12">
+            <div class="col col-12 px-0">
                 <table id="item_list" class="table table-striped responsive nowrap table-hover" style="width:100%">
                     <thead>
                     <tr>
                         <th data-priority="10">ID</th>
-                        <th data-priority="1">Image</th>
+                        <th data-priority="2">Image</th>
                         <th data-priority="1">Item</th>
-                        <th data-priority="1">Category</th>
+                        <th data-priority="3">Category</th>
                         <th data-priority="5">Location</th>
                         <th data-priority="2">Status</th>
                         <th data-priority="5">User</th>
@@ -142,7 +138,7 @@
 <article class="media content-section">
     <div class="container-fluid">
         <div class="row">
-            <div class="col col-lg-12 col-12">
+            <div class="col col-lg-12 col-12 px-0">
                 <h3 class="d-inline">Items in this cabinet now in use</h3>
             </div>
         </div>
@@ -152,9 +148,9 @@
                     <thead>
                     <tr>
                         <th data-priority="10">ID</th>
-                        <th data-priority="1">Image</th>
+                        <th data-priority="2">Image</th>
                         <th data-priority="1">Item</th>
-                        <th data-priority="1">Category</th>
+                        <th data-priority="3">Category</th>
                         <th data-priority="5">Location</th>
                         <th data-priority="2">Status</th>
                         <th data-priority="5">User</th>

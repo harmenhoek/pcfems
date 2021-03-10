@@ -37,10 +37,10 @@ active
         <td>
             {% if item.status and item.tracking %}
                 {% if item.storage_location %}
-                    <span filtervalue="{{ item.storage_location }}" class="align-middle badge badge-pill badge-warning">{{ item.storage_location }}</span>
+                    <span filtervalue="{{ item.storage_location }}" class="align-middle badge  badge-warning text-wrap text-left">{{ item.storage_location|safe }}</span>
                 {% endif %}
             {% elif item.tracking and not item.status %}
-                <span filtervalue="{{ item.location }}" class="align-middle badge badge-pill badge-primary">{{ item.location }}</span>
+                <span filtervalue="{{ item.location }}" class="align-middle badge  badge-primary text-wrap text-left">{{ item.location }}</span>
             {% else %}
                 <em filtervalue="Unknown" class="text-muted">Unknown</em>
             {% endif %}
@@ -149,11 +149,17 @@ var noColumn = [1, 7];
             "zeroRecords": "No matching items found.",
             "infoFiltered": "(filtered from _MAX_ total items)",
             "info":           "Showing _START_ to _END_ of _TOTAL_ items",
-            "paginate": {
+            "paginate": $(window).width() > 768 ? true  :{
                 "first":      "First",
                 "last":       "Last",
                 "next":       "Next",
                 "previous":   "Previous"
+            },
+            "paginate": $(window).width() > 768 ? false  :{
+                "first":      "|<",
+                "last":       ">|",
+                "next":       ">",
+                "previous":   "<"
             },
         },
         initComplete: function () {
