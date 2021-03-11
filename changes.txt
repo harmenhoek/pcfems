@@ -143,6 +143,12 @@ Version 1.0.1
 - Return to Storage icon now warehouse
 
 
+Version 1.0.2
+2021-03-10
+- manual added
+- removed em from storage location title
+
+
 Known bugs:
 - Reset on home does not always show up.
 - Special chars and spaces in names show up in username.

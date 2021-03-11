@@ -23,6 +23,8 @@ from django.db.models import Count
 
 import os
 
+from django.contrib.staticfiles.views import serve
+
 class ItemListView(LoginRequiredMixin, ListView):
     model = Item
     template_name = 'ems/home.html'  # <app>/<model>_<viewtype>.html
@@ -420,6 +422,10 @@ def test(request):
 def scanner(request):
     return render(request, 'ems/scanner.html')
 
+def manual(request):
+    file = os.path.join(settings.BASE_DIR, 'static/ems/manual.pdf')
+    return serve(request, file)
+
 # Regular function
 def createqr(qrid):
     import qrcode
@@ -436,7 +442,6 @@ def createqr(qrid):
     img = ImageOps.expand(img, border=(0, 0, 0, 60), fill='white')
     txt = Image.new("RGBA", img.size, (255, 255, 255, 0))
 
-    import os
     fontfile = os.path.join(settings.BASE_DIR, 'static/ems/Arial.ttf')
     font = ImageFont.truetype(fontfile, 30)
 
