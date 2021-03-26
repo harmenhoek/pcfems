@@ -166,7 +166,7 @@ var noColumn = [1, 7];
     this.api().columns().every( function (i) {
     if ((filterColumns.includes(i)) && !(noColumn.includes(i))) {
         var column = this;
-        var select = $('<select aria-controls="example" class="custom-select custom-select-sm form-control form-control-sm"><option value=""></option></select>')
+        var select = $('<select aria-controls="example" id="selectboxes' + i + '" class="custom-select custom-select-sm form-control form-control-sm"><option value=""></option></select>')
             .appendTo( $(column.footer()).empty() )
             .on( 'change', function () {
 
@@ -219,7 +219,8 @@ var noColumn = [1, 7];
     // Reset button when filtering is going on (when filtered results != total results)
     var did_append
     did_append = 0
-    $('#example').on('draw.dt', function () {
+
+    function showbutton() {
         if (table.rows( { filter : 'applied'} ).nodes().length != table.rows().count()) {
             var filter = $('#example_filter');
             var btn = " <button type='button' class='btn btn-secondary btn-sm align-top'>Reset</button>"
@@ -233,10 +234,59 @@ var noColumn = [1, 7];
             window.location.reload();
             did_append = 0
         });
-    });
+    }
+
+    $('#example').on('draw.dt', showbutton);
 
 
-});
+
+    // todo: on reload, set columnspecific searches as before reload.
+    // Solution below now only works for search fields, NOT the dropdowns.
+
+    var state = table.state.loaded();
+    if ( state ) {
+      table.columns().eq( 0 ).each( function ( i ) {
+        var column = this;
+        // console.log('-----------')
+        // console.log(column);
+
+        if ((filterColumns.includes(i)) && !(noColumn.includes(i))) { // if select button
+          // approach: get current select value
+
+
+          // select options are NOT saved in stateSave by default, since these are custom elements. I need to first save these states manually. StateSaveParams.
+          var colSearch = state.columns[i].search;
+          if ( colSearch.search ) {
+            // console.log('------- START ENTERING -------')
+            // console.log('state:');
+            // console.log(state);
+            // console.log($('<textarea/>').html(colSearch.search).val());
+            // console.log($("<div />").html(colSearch.search).text());
+            // console.log(colSearch.search);
+            // console.log(colSearch.search.slice(1,-1));
+            // console.log("#selectboxes" + i);
+            // console.log('------ END ENTERING --------');
+            $("#selectboxes" + i).val(colSearch.search.slice(1,-1).replace('\\', ''));
+
+            // currently it ONLY works for Category, where the id=selectboxes. Next goal is to make it applicable for all select boxes.
+          }
+
+
+
+        } else { // if search bar
+          var colSearch = state.columns[i].search; // col search is already colum
+          // console.log(colSearch);
+
+          if ( colSearch.search ) {
+            $('input', $('.filters th')[i]).eq(i).val( colSearch.search );
+        }
+        }
+      });
+    table.draw();
+  } // if (state)
+
+}); // $(document).ready(function(){
+
 
 
 </script>

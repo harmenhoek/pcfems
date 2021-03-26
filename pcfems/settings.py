@@ -36,6 +36,7 @@ INSTALLED_APPS = [
     'bootstrap_datepicker_plus',
     'bootstrap4',
     'qr_code',
+    'macros',
 
     # own apps
     'ems.apps.EmsConfig',
@@ -197,7 +198,7 @@ BOOTSTRAP4 = {
 
 DEFAULT_IMAGE = 'default.png'
 
-EMS_VERSION = '1.0.2'
+EMS_VERSION = '1.0.3'
 
 TIME_ZONE = 'Europe/Amsterdam'
 

@@ -11,6 +11,8 @@ from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.conf import settings
 
+from django.core.validators import MaxValueValidator, MinValueValidator
+
 register(User)  # to allow simple_history to track it
 
 # set __str__ for user
@@ -20,7 +22,7 @@ def get_first_name(self):
 User.add_to_class("__str__", get_first_name)
 
 class Lab(models.Model):
-    number = models.CharField(max_length=5)
+    number = models.CharField(max_length=6)
     manager = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, default=2, limit_choices_to={'is_superuser': False})
     nickname = models.CharField(max_length=20, default='', null=True, blank=True)
     image = models.ImageField(upload_to='lab_pics', blank=True, null=True)
@@ -135,7 +137,7 @@ class Item(models.Model):  # inherit from models, all fields below
     tracking = models.BooleanField(default=True, help_text="Tracking allows for assigning an item to a user and location, common items such as multimeters are not tracked.")
     status = models.BooleanField(default=True) #True is in storage (item is free), False is in use (assigned to)
     location = models.ForeignKey(Setup, on_delete=models.SET_NULL, null=True)
-    parts = models.IntegerField(default=1, help_text="Number of separate parts, e.g. when an item has a proprietary power supply.")
+    parts = models.PositiveIntegerField(default=1, validators=[MinValueValidator(1), MaxValueValidator(10)], help_text="Number of separate parts, e.g. when an item has a proprietary power supply.")
     # location = ForeignKey(Setup OR Cabinet)
 
     # content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
