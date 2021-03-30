@@ -14,8 +14,8 @@ Items that require tracking need to be assigned to a new location (and user) whe
 Items that don't require tracking can be moved around freely without recording its location, but are in the system for logging and flagging purposes.
 <table>
 <tr>
-<td style="width:100/3%;"><img src="screenshots/tracking.png">Item label for item that <b>requires tracking</b>
-<td style="width:100/3%;"><img src="screenshots/notracking.png">Item label for item that <b>doesn't require tracking</b>
+<td style="width:100/3%;"><img src="screenshots/tracking.PNG">Item label for item that <b>requires tracking</b>
+<td style="width:100/3%;"><img src="screenshots/notracking.PNG">Item label for item that <b>doesn't require tracking</b>
 </tr>
 </table>
 
