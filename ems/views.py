@@ -11,7 +11,7 @@ from django.utils.decorators import method_decorator
 # for function-based views, decorator: staff_member_required @staff_member_required
 from .forms import ItemForm, AssignForm, AddStorageLocationForm
 from django.urls import reverse, reverse_lazy
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect, FileResponse
 from django.utils import timezone
 from django.forms import modelformset_factory
 
@@ -424,7 +424,7 @@ def scanner(request):
 
 def manual(request):
     file = os.path.join(settings.BASE_DIR, 'static/ems/manual.pdf')
-    return serve(request, file)
+    return FileResponse(open(file, 'rb'), content_type='application/pdf')
 
 # Regular function
 def createqr(qrid):

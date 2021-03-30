@@ -155,10 +155,18 @@ Version 1.0.3
 - Note: when tracking is disabled user is removed, but there are still old items around with user. Manually remove these!
 - Bug fix: when tracking removed and no storage location is set: warning shows up something is wrong. Set new conditions for warning: only when tracking=1.
 - Code cleanup: item_detail, incl removal of unnecessary </div>s
-- Redid flex-cols on item-detail, correct responsiveness now for inbetween. Using plugin macros for django to device quick actions macro. quickactions now below shadow on mobile, same place on desktop as before. Could not be done with BT order, since we don't use d-flex all over the page.
+- Redid flex-cols on item-detail, correct responsiveness now for in between. Using plugin macros for Django to device quick actions macro. quickactions now below shadow on mobile, same place on desktop as before. Could not be done with BT order, since we don't use d-flex all over the page.
 
 2021-03-24
 - Bug fix: Reset button did not always show up. Cause: column specific search did not load state after reload. Fixed it with javascript. Ugly fix: order of fields should not change. TODO: make the js more generic for this.
 
+Version 1.0.4
+2021-03-26
+- Updated views to have correct FileResponse for manual (was already on production server).
+
+
+
 Known bugs:
 - Special chars and spaces in names show up in username.
+
+TODO requirements.txt update
