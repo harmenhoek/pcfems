@@ -1,3 +1,5 @@
+Manual below is for version 1.0.3
+
 ## About
 
 PCFEMS is the equipment management system for Physics of Complex Fluids at University of Twente. The system allows for tracking equipment in a web-based application that is accessible on desktop and mobile.
