@@ -21,6 +21,13 @@ class ItemForm(forms.ModelForm):
             'next_service_date': DatePickerInput(format='%Y-%m-%d'),
         }
 
+    def __init__(self, *args, **kwargs):
+        super(ItemForm, self).__init__(*args, **kwargs)
+        self.fields['category'].queryset = self.fields['category'].queryset.order_by('name')
+        self.fields['storage_location'].queryset = self.fields['storage_location'].queryset.order_by('-lab', 'number')
+        self.fields['purchased_by'].queryset = self.fields['purchased_by'].queryset.order_by('username')
+
+
 class AssignForm(forms.ModelForm):  # added to include date selector widget
     class Meta:
         model = Item
@@ -28,6 +35,11 @@ class AssignForm(forms.ModelForm):  # added to include date selector widget
         widgets = {
             'date_return': DatePickerInput(format='%Y-%m-%d'),
         }
+
+    def __init__(self, *args, **kwargs):
+        super(AssignForm, self).__init__(*args, **kwargs)
+        self.fields['location'].queryset = self.fields['location'].queryset.order_by('lab__number', 'name')
+        self.fields['user'].queryset = self.fields['user'].queryset.order_by('username')
 
 class ItemImageForm(forms.ModelForm):
     class Meta:

@@ -57,8 +57,37 @@ def unknown(value):
     else:
         return f"<em class='text-muted'>Unknown</em>"
 
+
+@register.filter
+def defaultifempty(value):
+    if value:
+        return value.url
+    else:
+        return f"{settings.MEDIA_URL}{settings.DEFAULT_IMAGE}"
+
 # settings value
 @register.simple_tag
 def settings_value(name):
     return getattr(settings, name, "")
 
+@register.filter()
+def check_permission(user, permission):
+    if user.user_permissions.filter(codename = permission).exists():
+        return True
+    return False
+
+
+from django.contrib.contenttypes.models import ContentType
+from users.models import Profile
+
+@register.filter()
+def get_all_permissions(user):
+    content_type = ContentType.objects.get_for_model(Profile)
+    perms = user.user_permissions.filter(content_type=content_type)
+    perms_codename = [perm.codename for perm in perms]
+    perms_name = [perm.name for perm in perms]
+
+    if not perms:
+        return ""
+    else:
+        return zip(perms_codename, perms_name)

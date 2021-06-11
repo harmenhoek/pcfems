@@ -1,191 +1,25 @@
 {% extends "ems_manage/manage_base.html" %}
 {% load humanize %}
-{% load ems_customfilters %}
 {% block tabmanage1_active %}
 active
 {% endblock tabmanage1_active %}
+{% block manage_submenu %}
+<div>
+    <h2 style="display: inline-block">Dashboard</h2>
+    <span class="badge rounded-pill bg-secondary" style="vertical-align: top">Beta</span>
+</div>
+
+<div class="float-end my-2">
+    {% include "ems/help_modal.html" with title="Dashboard" help_file="ems_manage/help.html" help_section="dashboard" %}
+</div>
+
+{% endblock manage_submenu %}
 {% block content %}
+    {% load ems_customfilters %}
 
-<!--<div class="row">-->
-<!--    <div class="col col-12">-->
-<!--        <div class="alert alert-warning" role="alert">-->
-<!--            The manage environment is under development and currently not functioning fully.-->
-<!--        </div>-->
-<!--    </div>-->
-<!--</div>-->
-<div class="content-section">
-    <div class="col col-12">
-        <h3>Open flags</h3>
-        <p>The items that are flagged are listed below. Resolving the item will remove the flag. This cannot be undone.</p>
-        <table id="open_flags" class="table table-striped table-bordered table">
-            <thead>
-                <th>ID</th>
-                <th>Item</th>
-                <th>Location</th>
-                <th>Status</th>
-                <th>User</th>
-                <th>Flag</th>
-                <th>Flagged by</th>
-                <th>Flagged on</th>
-                <th></th>
-            </thead>
-            <tbody>
-                {% for item, item2 in openflags %}
-                    <tr>
-                        <td>{{ item.id }}</td>
-                        <td>{{ item.brand }} {{ item.model }}</td>
-                        <td>
-                            {% if item.status and item.tracking %}
-                                {{ item.location|nonevalue|safe }}
-                            {% elif item.tracking and not item.status %}
-                                {{ item.storage_location|nonevalue|safe }}
-                            {% else %}
-                                <em class="text-muted">Unknown</em>
-                            {% endif %}
-                        </td>
-                        <td>
-                            {% if item.status and item.tracking %}
-                                <span class="align-middle badge badge-pill badge-success">Available</span>
-                            {% elif item.tracking and not item.status %}
-                                <span class="align-middle badge badge-pill badge-danger">In use</span>
-                            {% else %}
-                                <span class="align-middle badge badge-pill badge-secondary">No tracking</span>
-                            {% endif %}
-                        </td>
-                        <td>
-                            {% if item.tracking %}
-                                {{ item.user|nonevalue|safe }}
-                            {% else %}
-                                <em class="text-muted">Unknown</em>
-                            {% endif %}
-                        </td>
-                        <td><span class="badge badge-danger"><i class="fas fa-{{ item.flag.icon }}"></i> {{ item.flag.flag }}</span> <br> {% if item.flag_comment %}{{ item.flag_comment }}{% endif %}</td>
-                        <td>{{ item2.flagged_by }}</td>
-                        <td>{{ item2.flagged_on|date:'d-m-Y H:i' }}</td>
-                        <td>
-                            <a href="{% url 'item-detail' item.pk %}" class="btn btn-secondary mb-2">Go To</a>
-                            <a href="{% url 'manage-flags-resolve' item.pk %}" class="btn btn-success">Unflag</a>
-                        </td>
-                    </tr>
-        {% endfor %}
-            </tbody>
-        </table>
-    </div>
+<div class="alert alert-warning" role="alert">
+  The dashboard is still under development.
 </div>
-
-
-
-<div class="content-section">
-    <div class="col col-12">
-        <h3>Assigned Items</h3>
-        <p>All the items currently in use (assigned) are listed below. If overdue, the return date is marked red. Returning an item will unassign the current user, make sure that the item is actually in storage when doing this. This cannot be undone.</p>
-        <table id="assigned_items" class="table table-striped table-bordered table">
-            <thead>
-                <th>ID</th>
-                <th>Item</th>
-                <th>Location</th>
-                <th>Status</th>
-                <th>User</th>
-                <th>Date in use</th>
-                <th>Date return</th>
-                <th></th>
-                <th></th>
-            </thead>
-            <tbody>
-                {% now "Y-m-d" as todays_date %}
-                {% for item in assgineditems %}
-                    <tr>
-                        <td>{{ item.id }}</td>
-                        <td>{{ item.brand }} {{ item.model }}</td>
-                        <td>
-                            {% if item.status %}
-                                {{ item.location|nonevalue|safe }}
-                            {% else %}
-                                {{ item.storage_location|nonevalue|safe }}
-                            {% endif %}
-                        </td>
-                        <td>
-                            {% if item.status %}
-                                <span class="align-middle badge badge-pill badge-success">Available</span>
-                            {% else %}
-                                <span class="align-middle badge badge-pill badge-danger">In use</span>
-                            {% endif %}
-                        </td>
-                        <td>{{ item.user|nonevalue|safe }}</td>
-                        <td>{{ item.date_inuse|date:"d-m-Y" }}</td>
-                        {% if item.date_return|date:"Y-m-d" > todays_date or item.date_return == None %}
-                            <td>{{ item.date_return|date:"d-m-Y" }}</td>
-                        {% else %}
-                            <td class="p-3 mb-2 bg-danger text-white">{{ item.date_return|date:"d-m-Y" }}</td>
-                        {% endif %}
-                        <td><a href="{% url 'manage-assign-remove' item.pk %}" class="btn btn-secondary">Return</a></td>
-                        <td><a href="{% url 'item-detail' item.pk %}" class="btn btn-secondary">Go To</a></td>
-                    </tr>
-        {% endfor %}
-            </tbody>
-        </table>
-    </div>
-</div>
-
-
-<div class="content-section">
-    <div class="col col-12">
-        <h3>Items under warranty</h3>
-        <p>Below are the items that are marked as under warranty listed. When warranty has expired or the service date has passed, the date is marked red. When warranty is expired, the option to remove warranty can be selected. This cannot be undone. To remove warranty of items that have dates in the future, please use the regular edit functionality.</p>
-        <table id="warranty_items" class="table table-striped table-bordered table">
-            <thead>
-                <th>ID</th>
-                <th>Item</th>
-                <th>Location</th>
-                <th>Status</th>
-                <th>User</th>
-                <th>Warranty expiration</th>
-                <th>Next service date</th>
-                <th>Remove warranty</th>
-                <th></th>
-            </thead>
-            <tbody>
-                {% now "Y-m-d" as todays_date %}
-                {% for item in warrantyitems %}
-                    <tr>
-                        <td>{{ item.id }}</td>
-                        <td>{{ item.brand }} {{ item.model }}</td>
-                        {% if item.status %}
-                            <td>{{ item.location|nonevalue|safe }}</td>
-                        {% else %}
-                            <td>{{ item.storage_location|nonevalue|safe }}</td>
-                        {% endif %}
-                        <td>
-                            {% if item.status %}
-                                <span class="align-middle badge badge-pill badge-success">Available</span>
-                            {% else %}
-                                <span class="align-middle badge badge-pill badge-danger">In use</span>
-                            {% endif %}
-                        </td>
-                        <td>{{ item.user|nonevalue|safe }}</td>
-                        {% if item.warranty_expiration|date:"Y-m-d" > todays_date %}
-                            <td>{{ item.warranty_expiration|date:"d-m-Y" }}</td>
-                        {% else %}
-                            <td class="p-3 mb-2 bg-danger text-white">{{ item.warranty_expiration|date:"d-m-Y" }}</td>
-                        {% endif %}
-                        {% if item.next_service_date|date:"Y-m-d" > todays_date %}
-                            <td>{{ item.next_service_date|date:"d-m-Y" }}</td>
-                        {% else %}
-                            <td class="p-3 mb-2 bg-danger text-white">{{ item.next_service_date|date:"d-m-Y" }}</td>
-                        {% endif %}
-                        {% if item.warranty_expiration|date:"Y-m-d" > todays_date %}
-                            <td><a href="{% url 'manage-warranty-remove' item.pk %}" class="btn btn-warning">Remove</a></td>
-                        {% else %}
-                            <td><a href="#" class="btn btn-warning disabled">Remove</a></td>
-                        {% endif %}
-                        <td><a href="{% url 'item-detail' item.pk %}" class="btn btn-secondary">Go To</a></td>
-                    </tr>
-        {% endfor %}
-            </tbody>
-        </table>
-    </div>
-</div>
-<br><br>
 
 
 {% endblock content %}
@@ -194,108 +28,7 @@ active
 {# Code block for javascript table #}
 
 <script>
-    $(document).ready(function() {
-        $('#open_flags').DataTable({
-            "pagingType": "full_numbers",
-            "bLengthChange": false,
-            responsive: true,
-            responsive: {
-                details: false
-            },
-            "language": {
-                "lengthMenu": "Show _MENU_ items per page",
-                "zeroRecords": "No matching items found.",
-                "infoFiltered": "(filtered from _MAX_ total items)",
-                "info":           "Showing _START_ to _END_ of _TOTAL_ items",
-                "infoEmpty":      "",
-                "emptyTable":     "No flagged items.",
-                "paginate": {
-                    "first":      "First",
-                    "last":       "Last",
-                    "next":       "Next",
-                    "previous":   "Previous"
-                },
-            },
-        } );
-    } );
 
-    $(document).ready(function() {
-        $('#assigned_items').DataTable({
-            "order": [[ 6, "desc" ]],
-            "pagingType": "full_numbers",
-            "bLengthChange": false,
-            responsive: true,
-            responsive: {
-                details: false
-            },
-            "language": {
-                "lengthMenu": "Show _MENU_ items per page",
-                "zeroRecords": "No matching items found.",
-                "infoFiltered": "(filtered from _MAX_ total items)",
-                "info":           "Showing _START_ to _END_ of _TOTAL_ items",
-                "infoEmpty":      "",
-                "emptyTable":     "No flagged items.",
-                "paginate": {
-                    "first":      "First",
-                    "last":       "Last",
-                    "next":       "Next",
-                    "previous":   "Previous"
-                },
-            },
-        } );
-    } );
-
-    $(document).ready(function() {
-        $('#warranty_items').DataTable({
-            "order": [[ 6, "asc" ], [ 5, "asc" ]],
-            "pagingType": "full_numbers",
-            "bLengthChange": false,
-            responsive: true,
-            responsive: {
-                details: false
-            },
-            "language": {
-                "lengthMenu": "Show _MENU_ items per page",
-                "zeroRecords": "No matching items found.",
-                "infoFiltered": "(filtered from _MAX_ total items)",
-                "info":           "Showing _START_ to _END_ of _TOTAL_ items",
-                "infoEmpty":      "",
-                "emptyTable":     "No flagged items.",
-                "paginate": {
-                    "first":      "First",
-                    "last":       "Last",
-                    "next":       "Next",
-                    "previous":   "Previous"
-                },
-            },
-        } );
-    } );
-
-    $(document).ready(function() {
-        $('#lastscanned_items').DataTable({
-            "order": [[ 5, "asc" ]],
-            "pagingType": "full_numbers",
-            "bLengthChange": false,
-            responsive: true,
-            responsive: {
-                details: false
-            },
-            "language": {
-                "lengthMenu": "Show _MENU_ items per page",
-                "zeroRecords": "No matching items found.",
-                "infoFiltered": "(filtered from _MAX_ total items)",
-                "info":           "Showing _START_ to _END_ of _TOTAL_ items",
-                "infoEmpty":      "",
-                "emptyTable":     "No flagged items.",
-                "paginate": {
-                    "first":      "First",
-                    "last":       "Last",
-                    "next":       "Next",
-                    "previous":   "Previous"
-                },
-            },
-        } );
-    } );
 
 </script>
 

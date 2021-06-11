@@ -34,9 +34,12 @@ INSTALLED_APPS = [
     'simple_history',
     'sslserver',
     'bootstrap_datepicker_plus',
-    'bootstrap4',
-    'qr_code',
+    # 'bootstrap4',
+    'django_bootstrap5',
+    # 'qr_code',
     'macros',
+    'crispy_bootstrap5',
+    'dynamic_preferences',
 
     # own apps
     'ems.apps.EmsConfig',
@@ -71,6 +74,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'dynamic_preferences.processors.global_preferences',
             ],
         },
     },
@@ -104,6 +108,7 @@ LANGUAGE_CODE = 'en-us'
 
 TIME_ZONE = 'UTC'
 
+
 USE_I18N = True
 
 USE_L10N = True
@@ -119,7 +124,10 @@ STATIC_URL = '/static/'
 
 # CUSTOM SETTINGS
 
-CRISPY_TEMPLATE_PACK = 'bootstrap4'
+# CRISPY_TEMPLATE_PACK = 'bootstrap4'
+CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
+
+CRISPY_TEMPLATE_PACK = "bootstrap5"
 
 LOGIN_REDIRECT_URL = 'ems-home'
 LOGIN_URL = 'login'
@@ -192,15 +200,85 @@ EMAIL_USE_TLS = True
 #     },
 # }
 
-BOOTSTRAP4 = {
+# BOOTSTRAP4 = {
+#     'include_jquery': True,
+# }
+
+BOOTSTRAP5 = {
     'include_jquery': True,
 }
 
 DEFAULT_IMAGE = 'default.png'
 
-EMS_VERSION = '1.0.4'
+EMS_VERSION = '1.1'
 
 TIME_ZONE = 'Europe/Amsterdam'
+
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# 2021-05-11 settings below are not yet working
+
+# available settings with their default values
+DYNAMIC_PREFERENCES = {
+
+    # a python attribute that will be added to model instances with preferences
+    # override this if the default collide with one of your models attributes/fields
+    'MANAGER_ATTRIBUTE': 'preferences',
+
+    # The python module in which registered preferences will be searched within each app
+    'REGISTRY_MODULE': 'dynamic_preferences_registry',
+
+    # Allow quick editing of preferences directly in admin list view
+    # WARNING: enabling this feature can cause data corruption if multiple users
+    # use the same list view at the same time, see https://code.djangoproject.com/ticket/11313
+    'ADMIN_ENABLE_CHANGELIST_FORM': False,
+
+    # Customize how you can access preferences from managers. The default is to
+    # separate sections and keys with two underscores. This is probably not a settings you'll
+    # want to change, but it's here just in case
+    'SECTION_KEY_SEPARATOR': '__',
+
+    # Use this to disable caching of preference. This can be useful to debug things
+    'ENABLE_CACHE': True,
+
+    # Use this to disable checking preferences names. This can be useful to debug things
+    'VALIDATE_NAMES': True,
+}
+
+
+
+# TODO
+APPLICATION_SLUG_PREFIX = "PCF"  # Only applies to new items added, old items will remain old value!
+APPLICATION_LOGO_SRC = "favicon-512x512.png"  # Pick a file in static/ems/ or False
+QR_CODE_BASEURL = "AUTO"  # Set to AUTO for using the current domain, or specify custom here (e.g. "https://pcfems.utwente.nl/").
+
+
+
+# Textual
+APPLICATION_OWNER = "Physics of Complex Fluids"
+
+# General
+MAINTENANCE_MODE = False  #  Shows maintenance page while system is being updated.
+
+HOME_COLUMNS = ["ID", "Image", "Item", "Category", "Location", "Status", "User", "Flag"]
+HOME_COLUMNS_WEIGHT = [0, 0, 5, 4, 3, 4, 3, 0]
+HOME_COLUMNS_HIDDEN = ["Description", "Owner"]
+HOME_COLUMNS_SEARCH = True  # If False, no individual column search visible.
+
+# Storage
+IMAGE_COMPRESSION = True
+IMAGE_COMPRESSION_RATIO = 0.25
+MAX_UPLOAD_FILE_SIZE = False
+
+# SETTINGS USAGE IN TEMPLATES LIKE:
+# 1. load ems_customtags
+# 2. use like:
+#     {% settings_value "APPLICATION_FOOTER" %}
+#     {% settings_value "SHOW_VERSION" as showversion %}
+
+USER_PERMISSIONS = ['is_admin', 'is_itemmoderator', 'is_usermoderator']
+
+
 
 try:
     from pcfems.local_settings import *

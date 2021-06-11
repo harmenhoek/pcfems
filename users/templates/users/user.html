@@ -6,12 +6,11 @@
 {% block content %}
 
 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ekko-lightbox/5.3.0/ekko-lightbox.css" integrity="sha512-Velp0ebMKjcd9RiCoaHhLXkR1sFoCCWXNp6w4zj1hfMifYB5441C+sKeBl/T/Ka6NjBiRfBBQRaQq65ekYz3UQ==" crossorigin="anonymous" />
 
 <div class="content-section">
     <div class="row">
         <div class="col col-lg-2">
-            <a href="{{ object.user.profile.image.url }}" data-toggle="lightbox"><img class="rounded-circle account-img" src="{{ object.user.profile.image.url }}"></a>
+            <a href="{{ object.user.profile.image.url }}"><img class="rounded-circle account-img" src="{{ object.user.profile.image.url }}"></a>
         </div>
         <div class="col col-lg-10">
             <div class="row item-metadate my-2">
@@ -46,9 +45,9 @@
                                 <td>
                                     <h5>
                                         {% if object.user.is_active %}
-                                            <span class="align-middle badge badge-pill badge-success">Yes</span>
+                                            <span class="align-middle badge rounded-pill bg-success">Yes</span>
                                         {% else %}
-                                            <span class="align-middle badge badge-pill badge-danger" data-toggle="tooltip" data-placement="right" title="User has been deactivated by a staff member and can no longer login.">No</span>
+                                            <span class="align-middle badge rounded-pill bg-danger" data-toggle="tooltip" data-placement="right" title="User has been deactivated by a staff member and can no longer login.">No</span>
                                         {% endif %}
                                     </h5>
                                 </td>
@@ -59,9 +58,9 @@
                                 <td>
                                     <h5>
                                         {% if object.user.is_staff %}
-                                            <span class="align-middle badge badge-pill badge-success">Yes</span>
+                                            <span class="align-middle badge rounded-pill bg-success">Yes</span>
                                         {% else %}
-                                            <span class="align-middle badge badge-pill badge-danger">No</span>
+                                            <span class="align-middle badge rounded-pill bg-danger">No</span>
                                         {% endif %}
                                     </h5>
                                 </td>
@@ -70,6 +69,17 @@
                                 <td><i class="fas fa-history"></i></td>
                                 <td>Date joined</td>
                                 <td><h6>{{ object.user.date_joined|date:"Y-m-d G:i:s"|unknown|safe }}</h6></td>
+                            </tr>
+                            <tr>
+                                <td><i class="fas fa-warehouse"></i></td>
+                                <td>Personal cabinets</td>
+                                <td><h6>
+                                    {% for cabinet in object.user.cabinet_owner.all %}
+                                        <a href="{% url 'storage-detail' cabinet.pk %}"><span class="align-start badge bg-warning text-dark text-wrap text-left">{{ cabinet }}</span></a>
+                                    {% empty %}
+                                        <span class='text-muted'>None</span>
+                                    {% endfor %}
+                                </h6></td>
                             </tr>
                             <tr>
 
@@ -123,21 +133,21 @@
                             <td>
                                 {% if item.status and item.tracking %}
                                     {% if item.storage_location %}
-                                        <span class="align-middle badge badge-pill badge-warning">{{ item.storage_location }}</span>
+                                        <span class="align-middle badge rounded-pill bg-warning text-dark">{{ item.storage_location }}</span>
                                     {% endif %}
                                 {% elif item.tracking and not item.status %}
-                                    <span class="align-middle badge badge-pill badge-primary">{{ item.location }}</span>
+                                    <span class="align-middle badge rounded-pill bg-primary">{{ item.location }}</span>
                                 {% else %}
                                     <em class="text-muted">Unknown</em>
                                 {% endif %}
                             </td>
                             <td>
                                 {% if item.status and item.tracking %}
-                                    <span class="align-middle badge badge-pill badge-success">Available</span>
+                                    <span class="align-middle badge rounded-pill bg-success">Available</span>
                                 {% elif item.tracking and not item.status %}
-                                    <span class="align-middle badge badge-pill badge-danger">In use</span>
+                                    <span class="align-middle badge rounded-pill bg-danger">In use</span>
                                 {% else %}
-                                    <span class="align-middle badge badge-pill badge-secondary">No tracking</span>
+                                    <span class="align-middle badge rounded-pill bg-secondary">No tracking</span>
                                 {% endif %}
                             </td>
                             <td>
@@ -150,7 +160,7 @@
                             <td style="max-width: 100px;">
                                 {% if item.flag %}
                                     <h5>
-                                        <span class="align-middle badge badge-pill badge-danger" data-toggle="tooltip" data-placement="bottom" data-html="true"  title="<i class='fas fa-{{ item.flag.icon }}'></i> {{ item.flag.flag }}">
+                                        <span class="align-middle badge rounded-pill bg-danger" data-toggle="tooltip" data-placement="bottom" data-html="true"  title="<i class='fas fa-{{ item.flag.icon }}'></i> {{ item.flag.flag }}">
                                             <i class="fas fa-{{ item.flag.icon }}"></i>
                                         </span>
                                     </h5>
@@ -242,8 +252,6 @@
     } );
 </script>
 
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/ekko-lightbox/5.3.0/ekko-lightbox.min.js" integrity="sha512-Y2IiVZeaBwXG1wSV7f13plqlmFOx8MdjuHyYFVoYzhyRr3nH/NMDjTBSswijzADdNzMyWNetbLMfOpIPl6Cv9g==" crossorigin="anonymous"></script>
 
 <script>
     $(document).on('click', '[data-toggle="lightbox"]', function(event) {

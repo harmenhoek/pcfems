@@ -5,77 +5,85 @@ active
 {% block content %}
 {% load ems_customfilters %}
 
-<table id="example" class="table table-striped responsive nowrap table-hover" style="width:100%">
+<div class="float-end">
+    {% include "ems/help_modal.html" with title="Equipment overview" help_file="ems/help.html" help_section="home" %}
+</div>
+
+<table id="example" class="table table-striped responsive nowrap table-hover align-middle" style="width:100%">
+
     <thead>
     <tr>
-        <th data-priority="10">ID</th>
+        <th data-priority="10" style="max-width:30px;">ID</th>
         <th data-priority="1">Image</th>
         <th data-priority="1">Item</th>
         <th data-priority="1">Category</th>
         <th data-priority="5">Location</th>
         <th data-priority="2">Status</th>
         <th data-priority="5">User</th>
-        <th data-priority="10">Flag</th>
+        <th data-priority="9">Flag</th>
         <th class="d-none">Description</th>
         <th class="d-none">Serial</th>
         <th class="d-none">Storage Location</th>
         <th class="d-none">QR id</th>
+        <th class="d-none">Date in use</th>
     </tr>
     </thead>
     <tbody>
     {% for item in object_list %}
     <tr style="cursor:pointer;" onclick="window.location='{% url 'item-detail' item.id %}';">
-        <td>{{ item.pk }}</td>
+        <td class="h6 align-middle" style="font-size: 0.9em;">{{ item.pk }}</td>
         <td>
             <div class="image">
                 <img class="rounded img-fluid thumb-img lazy" data-original="{{ item.image.url }}" />
-<!--                <img class="thumb-img" src="{{ item.image.url }}" />-->
             </div>
         </td>
         <td><b>{{ item.brand }}</b> <br> {{ item.model }} <br> {% if item.title %}<p class=" my-0 text-muted">{{ item.title }}</p>{% endif %}</td>
-        <td><span filtervalue="{{ item.category }}">{{ item.category }}</span></td>
+        <td><span filtervalue="{{ item.category }}" class="badge rounded-pill bg-light text-dark">{{ item.category }}</span></td>
+<!--        <td><span filtervalue="{{ item.category }}" class="badge rounded-pill bg-secondary">{{ item.category }}</span></td>-->
+<!--        <td><span filtervalue="{{ item.category }}">{{ item.category }}</span></td>-->
         <td>
             {% if item.status and item.tracking %}
                 {% if item.storage_location %}
-                    <span filtervalue="{{ item.storage_location }}" class="align-middle badge  badge-warning text-wrap text-left">{{ item.storage_location|safe }}</span>
+                    <span filtervalue="{{ item.storage_location.lab.number|safe }} - {{ item.storage_location.number|safe }}" class="align-start badge bg-warning text-dark">{{ item.storage_location.lab.number|safe }} - {{ item.storage_location.number|safe }}</span>
                 {% endif %}
             {% elif item.tracking and not item.status %}
-                <span filtervalue="{{ item.location }}" class="align-middle badge  badge-primary text-wrap text-left">{{ item.location }}</span>
+                <span filtervalue="{{ item.location }}" class="text-start badge bg-primary text-wrap">{{ item.location }}</span>
             {% else %}
                 <em filtervalue="Unknown" class="text-muted">Unknown</em>
             {% endif %}
         </td>
         <td>
             {% if item.status and item.tracking %}
-                <span filtervalue="Available" class="align-middle badge badge-pill badge-success">Available</span>
+                <span filtervalue="Available" class="align-middle badge rounded-pill bg-success">Available</span>
             {% elif item.tracking and not item.status %}
-                <span filtervalue="In Use" class="align-middle badge badge-pill badge-danger">In use</span>
+                <span filtervalue="In Use" class="align-middle badge rounded-pill bg-danger">In use</span>
             {% else %}
-                <span filtervalue="No Tracking" class="align-middle badge badge-pill badge-secondary">No tracking</span>
+                <span filtervalue="No Tracking" class="align-middle badge rounded-pill bg-secondary">No tracking</span>
             {% endif %}
         </td>
         <td>
             {% if item.tracking %}
-                <span filtervalue="{{ item.user }}">{{ item.user|nonevalue|safe }}</span>
+                <span filtervalue="{{ item.user }}">{{ item.user|nonevalue|safe }}</span> {# Can be one with default_if_none filter #}
             {% else %}
                 <em filtervalue="Unknown" class="text-muted">Unknown</em>
             {% endif %}
         </td>
         <td style="max-width: 100px;">
             {% if item.flag %}
-<!--                <span class="align-middle badge badge-pill badge-danger"><i class="fas fa-{{ item.flag.icon }}"></i> {{ item.flag.flag }}</span>-->
+<!--                <span class="align-middle badge rounded-pill bg-danger"><i class="fas fa-{{ item.flag.icon }}"></i> {{ item.flag.flag }}</span>-->
                 <h5>
-                    <span class="align-middle badge badge-pill badge-danger" data-toggle="tooltip" data-placement="bottom" data-html="true"  title="<i class='fas fa-{{ item.flag.icon }}'></i> {{ item.flag.flag }}">
-
+                    <span class="align-middle badge rounded-pill bg-danger" data-bs-toggle="tooltip" data-placement="bottom" data-bs-html="true"  title="<i class='fas fa-{{ item.flag.icon }}'></i> {{ item.flag.flag }}">
                         <i class="fas fa-{{ item.flag.icon }}"></i>
                     </span>
                 </h5>
+
             {% endif %}
         </td> <!-- item.added_on|date:"F d, Y" -->
         <td class="d-none"><span>{{ item.description }}</span></td>
         <td class="d-none"><span>{{ item.serial }}</span></td>
         <td class="d-none"><span>{{ item.storage_location }}</span></td>
         <td class="d-none">{{ item.qrid }}</td>
+        <td class="d-none">{{ item.date_inuse|date:"Y-m-d" }}</td>
     </tr>
     {% endfor %}
     </tbody>
@@ -93,6 +101,7 @@ active
         <th class="d-none">Serial</th>
         <th class="d-none">Storage Location</th>
         <th class="d-none">QR id</th>
+        <th class="d-none">Date in use</th>
     </tr>
     </tfoot>
 
@@ -110,9 +119,6 @@ active
 <script>
 $(document).ready(function(){
 
-
-
-
 var filterColumns = [3, 4, 5, 6, 7]; // columns with options
 var noColumn = [1, 7];
 
@@ -124,7 +130,7 @@ var noColumn = [1, 7];
                 $(this).html( '' );
             } else {
                 var title = $(this).text();
-                $(this).html( '<input class="form-control form-control-sm" type="text" placeholder=" '+title+'" />' );
+                $(this).html( '<input class="form-control form-control-sm" type="text" placeholder="" />' );
             }
         }
     );
@@ -134,11 +140,16 @@ var noColumn = [1, 7];
 
     // DataTable
     var table = $('#example').DataTable({
+        "lengthMenu": [{{ user.preferences.home_itemsshown }}, 10, 25, 50, 100],
+        "pageLength": {{ user.preferences.home_itemsshown }},
         stateSave: true,
+        "stateSaveParams": function (settings, data) {
+           data.length = {{ user.preferences.home_itemsshown }};
+         },
         drawCallback: function(){
             $("img.lazy").lazyload();
        },
-        "order": [[ 2, "asc" ]],
+        "order": [[ {{ global_preferences.general__default_sort_col }}, "{{ global_preferences.general__default_sort_col_direction }}" ]],
         "pagingType": "full_numbers",
         responsive: true,
         responsive: {
@@ -166,7 +177,7 @@ var noColumn = [1, 7];
     this.api().columns().every( function (i) {
     if ((filterColumns.includes(i)) && !(noColumn.includes(i))) {
         var column = this;
-        var select = $('<select aria-controls="example" id="selectboxes' + i + '" class="custom-select custom-select-sm form-control form-control-sm"><option value=""></option></select>')
+        var select = $('<select aria-controls="example" id="selectboxes' + i + '" class="form-select form-select form-select-sm form-control form-control-sm"><option value=""></option></select>')
             .appendTo( $(column.footer()).empty() )
             .on( 'change', function () {
 
@@ -181,10 +192,10 @@ var noColumn = [1, 7];
 
         column.data().unique().sort().each( function ( d, j ) {
                 var value = $(d).attr("filtervalue");
-                if (typeof value !== typeof undefined && value !== false) {
+                if (typeof value !== typeof undefined && value !== false && value !== "") {
                     select.append( '<option class="form-control" value="' + value + '">' + d + '</option>')
                 } else {
-                    select.append( '<option class="form-control" value="' + d + '">' + d + '</option>')
+                    // select.append( '<option class="form-control" value="' + d + '">' + d + '</option>') // 2021-06-11 removed to prevent double white entry location
                 }
         } );
         }
@@ -274,7 +285,7 @@ var noColumn = [1, 7];
 
 
         } else { // if search bar
-          var colSearch = state.columns[i].search; // col search is already colum
+          var colSearch = state.columns[i].search; // col search is already column
           // console.log(colSearch);
 
           if ( colSearch.search ) {

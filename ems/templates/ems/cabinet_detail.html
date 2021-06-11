@@ -5,14 +5,15 @@
 
 {% block content %}
 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ekko-lightbox/5.3.0/ekko-lightbox.css" integrity="sha512-Velp0ebMKjcd9RiCoaHhLXkR1sFoCCWXNp6w4zj1hfMifYB5441C+sKeBl/T/Ka6NjBiRfBBQRaQq65ekYz3UQ==" crossorigin="anonymous" />
-
 <article class="content-section container">
     <div class="row ">
         <div class="col-sm-8">
             <div class="row item-metadate my-2">
                 <div class="col col-lg-12 col-12">
-                    <h2 class="align-middle d-inline article-title pr-2">Cabinet <span class="badge bg-warning text-dark">{{ object.lab }} {{ object.number }}</span></h2>
+                    <h2 class="align-middle d-inline article-title pr-2">{{ global_preferences.nomenclature__storage_name }} <span class="badge bg-warning text-dark text-dark">{{ object.lab }} {{ object.number }}</span></h2>
+                    <div class="float-end">
+                        {% include "ems/help_modal.html" with title="Cabinet Detail" help_file="ems/help.html" help_section="cabinet_detail" %}
+                   </div>
 
                     {% if object.title %}
                         <p class="text-muted my-0">{{ object.title }}</p>
@@ -27,7 +28,7 @@
 
                     <div class="shadow p-3 mb-5 bg-white rounded mt-3 mx-2">
                         <table class="table table-borderless table-sm mb-0 w-auto">
-                            <tr><td>Lab</td><td class="pl-4"><h6>{{ object.lab }}</h6></td></tr>
+                            <tr><td>{{ global_preferences.nomenclature__room_name }}</td><td class="pl-4"><h6>{{ object.lab }}</h6></td></tr>
                             <tr><td>Number</td><td class="pl-4"><h6>{{ object.number }}</h6></td></tr>
                             <tr><td>Main Content</td><td class="pl-4"><h6>{{ object.main_content|nonevalue|safe }}</h6></td></tr>
                             <tr><td>Owner</td><td class="pl-4"><h6>{{ object.owner|nonevalue|safe }}</h6></td></tr>
@@ -38,11 +39,31 @@
             </div>
 
         </div>
-        <div class="col-sm-4">
-                <a href="{% static 'ems/default.png' %}" data-toggle="lightbox"><img class="rounded mr-0 w-100" src="{% static 'ems/default.png' %}"></a>
-<!--                <em>This will be a custom image of the location in the future.</em>-->
-        </div>
+       <div class="col col-md-4 col-12 l-1">
+            <div class="row my-2">
+                <div class="col col-lg-12 col-12">
+                    {% if object.image and object.image != DEFAULT_IMAGE %}
+                        <a href="{{ object.image.url }}" data-bs-toggle="modal" data-bs-target="#MainImageModal" data-bs-imagecnt="1" data-bs-imageurl="{{ object.image.url }}">
+                            <img class="rounded mr-0 w-100" src="{{ object.image.url }}">
+                        </a>
+                    {% else %}
+                        <img class="rounded mr-0 w-100" src="{{ object.image|defaultifempty }}">
+                    {% endif %}
 
+                </div>
+            </div>
+           <div class="modal fade" id="MainImageModal" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                <div class="modal-dialog modal-xl modal-dialog-centered">
+                    <div class="modal-content">
+                         <div class="modal-header">
+                             <h5 class="modal-title">{{ global_preferences.nomenclature__storage_name }} <span class="badge bg-warning text-dark text-dark">{{ object.lab }} {{ object.number }}</span></h5> <h6 class="modal-title"></h6>
+                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                         </div>
+                        <img id="MainImageModalImg" class="w-100" src="">
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </article>
 
@@ -51,7 +72,7 @@
     <div class="container-fluid">
         <div class="row">
             <div class="col col-lg-12 col-12 px-0">
-                <h3 class="d-inline">Items in this cabinet</h3>
+                <h3 class="d-inline">Items in this {{ global_preferences.nomenclature__storage_name }}</h3>
             </div>
         </div>
         <div class="row">
@@ -79,7 +100,7 @@
                             <td>{{ item.pk }}</td>
                             <td>
                                 <div class="image">
-                                    <img class="rounded img-fluid thumb-img lazy" data-original="{{ item.image.url }}" />
+                                    <img class="rounded img-fluid thumb-img lazy" data-original="{{ item.image|defaultifempty }}" />
                                 </div>
                             </td>
                             <td><b>{{ item.brand }}</b> <br> {{ item.model }} <br> {% if item.title %}<p class=" my-0 text-muted">{{ item.title }}</p>{% endif %}</td>
@@ -87,21 +108,21 @@
                             <td>
                                 {% if item.status and item.tracking %}
                                     {% if item.storage_location %}
-                                        <span class="align-middle badge badge-pill badge-warning">{{ item.storage_location }}</span>
+                                        <span class="align-middle badge rounded-pill bg-warning text-dark">{{ item.storage_location }}</span>
                                     {% endif %}
                                 {% elif item.tracking and not item.status %}
-                                    <span class="align-middle badge badge-pill badge-primary">{{ item.location }}</span>
+                                    <span class="align-middle badge rounded-pill bg-primary">{{ item.location }}</span>
                                 {% else %}
                                     <em class="text-muted">Unknown</em>
                                 {% endif %}
                             </td>
                             <td>
                                 {% if item.status and item.tracking %}
-                                    <span class="align-middle badge badge-pill badge-success">Available</span>
+                                    <span class="align-middle badge rounded-pill bg-success">Available</span>
                                 {% elif item.tracking and not item.status %}
-                                    <span class="align-middle badge badge-pill badge-danger">In use</span>
+                                    <span class="align-middle badge rounded-pill bg-danger">In use</span>
                                 {% else %}
-                                    <span class="align-middle badge badge-pill badge-secondary">No tracking</span>
+                                    <span class="align-middle badge rounded-pill bg-secondary">No tracking</span>
                                 {% endif %}
                             </td>
                             <td>
@@ -114,7 +135,7 @@
                             <td style="max-width: 100px;">
                                 {% if item.flag %}
                                     <h5>
-                                        <span class="align-middle badge badge-pill badge-danger" data-toggle="tooltip" data-placement="bottom" data-html="true"  title="<i class='fas fa-{{ item.flag.icon }}'></i> {{ item.flag.flag }}">
+                                        <span class="align-middle badge rounded-pill bg-danger" data-toggle="tooltip" data-placement="bottom" data-html="true"  title="<i class='fas fa-{{ item.flag.icon }}'></i> {{ item.flag.flag }}">
                                             <i class="fas fa-{{ item.flag.icon }}"></i>
                                         </span>
                                     </h5>
@@ -139,7 +160,7 @@
     <div class="container-fluid">
         <div class="row">
             <div class="col col-lg-12 col-12 px-0">
-                <h3 class="d-inline">Items in this cabinet now in use</h3>
+                <h3 class="d-inline">Items in this {{ global_preferences.nomenclature__storage_name }} now in use</h3>
             </div>
         </div>
         <div class="row">
@@ -167,7 +188,7 @@
                             <td>{{ item.pk }}</td>
                             <td>
                                 <div class="image">
-                                    <img class="rounded img-fluid thumb-img lazy" data-original="{{ item.image.url }}" />
+                                    <img class="rounded img-fluid thumb-img lazy" data-original="{{ item.image|defaultifempty }}" />
                                 </div>
                             </td>
                             <td><b>{{ item.brand }}</b> <br> {{ item.model }} <br> {% if item.title %}<p class=" my-0 text-muted">{{ item.title }}</p>{% endif %}</td>
@@ -175,21 +196,21 @@
                             <td>
                                 {% if item.status and item.tracking %}
                                     {% if item.storage_location %}
-                                        <span class="align-middle badge badge-pill badge-warning">{{ item.storage_location }}</span>
+                                        <span class="align-middle badge rounded-pill bg-warning text-dark">{{ item.storage_location }}</span>
                                     {% endif %}
                                 {% elif item.tracking and not item.status %}
-                                    <span class="align-middle badge badge-pill badge-primary">{{ item.location }}</span>
+                                    <span class="align-middle badge rounded-pill bg-primary">{{ item.location }}</span>
                                 {% else %}
                                     <em class="text-muted">Unknown</em>
                                 {% endif %}
                             </td>
                             <td>
                                 {% if item.status and item.tracking %}
-                                    <span class="align-middle badge badge-pill badge-success">Available</span>
+                                    <span class="align-middle badge rounded-pill bg-success">Available</span>
                                 {% elif item.tracking and not item.status %}
-                                    <span class="align-middle badge badge-pill badge-danger">In use</span>
+                                    <span class="align-middle badge rounded-pill bg-danger">In use</span>
                                 {% else %}
-                                    <span class="align-middle badge badge-pill badge-secondary">No tracking</span>
+                                    <span class="align-middle badge rounded-pill bg-secondary">No tracking</span>
                                 {% endif %}
                             </td>
                             <td>
@@ -202,7 +223,7 @@
                             <td style="max-width: 100px;">
                                 {% if item.flag %}
                                     <h5>
-                                        <span class="align-middle badge badge-pill badge-danger" data-toggle="tooltip" data-placement="bottom" data-html="true"  title="<i class='fas fa-{{ item.flag.icon }}'></i> {{ item.flag.flag }}">
+                                        <span class="align-middle badge rounded-pill bg-danger" data-toggle="tooltip" data-placement="bottom" data-html="true"  title="<i class='fas fa-{{ item.flag.icon }}'></i> {{ item.flag.flag }}">
                                             <i class="fas fa-{{ item.flag.icon }}"></i>
                                         </span>
                                     </h5>
@@ -232,6 +253,23 @@
 
 
 <script>
+
+    var exampleModal = document.getElementById('MainImageModal')
+    exampleModal.addEventListener('show.bs.modal', function (event) {
+          // Button that triggered the modal
+    var button = event.relatedTarget;
+          // Extract info from data-bs-* attributes
+    var src = button.getAttribute('data-bs-imageurl');
+    $("#MainImageModalImg").attr("src",src);
+
+    $("#MainImageModalCnt").html(button.getAttribute('data-bs-imagecnt'));
+
+
+
+
+    })
+
+
     $(document).ready(function() {
         $('#item_list').DataTable({
             stateSave: true,
@@ -251,7 +289,7 @@
                 "infoFiltered": "(filtered from _MAX_ total items)",
                 "info":           "Showing _START_ to _END_ of _TOTAL_ items",
                 "infoEmpty":      "",
-                "emptyTable":     "No items in this cabinet or all in use",
+                "emptyTable":     "No items in this {{ global_preferences.nomenclature__storage_name }} or all in use",
                 "paginate": {
                     "first":      "First",
                     "last":       "Last",
@@ -281,7 +319,7 @@
                 "infoFiltered": "(filtered from _MAX_ total items)",
                 "info":           "Showing _START_ to _END_ of _TOTAL_ items",
                 "infoEmpty":      "",
-                "emptyTable":     "No items of this cabinet are currently in use",
+                "emptyTable":     "No items of this {{ global_preferences.nomenclature__storage_name }} are currently in use",
                 "paginate": {
                     "first":      "First",
                     "last":       "Last",
@@ -293,13 +331,5 @@
     } );
 </script>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/ekko-lightbox/5.3.0/ekko-lightbox.min.js" integrity="sha512-Y2IiVZeaBwXG1wSV7f13plqlmFOx8MdjuHyYFVoYzhyRr3nH/NMDjTBSswijzADdNzMyWNetbLMfOpIPl6Cv9g==" crossorigin="anonymous"></script>
-
-<script>
-    $(document).on('click', '[data-toggle="lightbox"]', function(event) {
-        event.preventDefault();
-        $(this).ekkoLightbox();
-    });
-</script>
 
 {% endblock tablescript %}

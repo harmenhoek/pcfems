@@ -1,0 +1,91 @@
+{% extends "ems_manage/manage_base.html" %}
+{% block tabmanage6_active %}
+active
+{% endblock tabmanage6_active %}
+{% block manage_submenu %}
+<div>
+  <h2 style="display: inline-block">{{ global_preferences.nomenclature__room_name_plural }}</h2>
+</div>
+
+<div class="float-end my-2">
+    <a class="btn btn-sm btn-success" href="{% url 'manage-labs-add' %}"><i class="fas fa-plus"></i> Add new {{ global_preferences.nomenclature__room_name }}</a>
+    {% include "ems/help_modal.html" with title="Labs" help_file="ems_manage/help.html" help_section="labs" %}
+</div>
+
+{% endblock manage_submenu %}
+{% block content %}
+    {% load ems_customfilters %}
+
+<div class="row">
+        <div class="col col-12">
+        <table id="labs_list" class="able table-striped table-bordered table w-100">
+            <thead>
+            <tr>
+                <th data-priority="10">Image</th>
+                <th data-priority="10">Number</th>
+                <th data-priority="10">Manager</th>
+                <th data-priority="10">Nickname</th>
+                <th data-priority="10"></th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for item in object_list %}
+            <tr>
+                <td>
+                    {% if item.image %}
+                        <div class="image">
+                            <img class="rounded img-fluid thumb-img" src="{{ item.image.url }}" />
+                        </div>
+                    {% endif %}
+                </td>
+                <td>{{ item.number }}</td>
+                <td>{{ item.manager|nonevalue|safe }}</td>
+                <td>{{ item.nickname|nonevalue|safe }}</td>
+                <td>
+                    <a href="{% url 'manage-labs-update' item.pk %}" class="btn btn-sm btn-secondary">Edit</a>
+                </td>
+
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+</div>
+
+
+{% endblock content %}
+
+
+{% block tablescript %}
+{# Code block for javascript table #}
+
+<script>
+    $(document).ready(function() {
+        $('#labs_list').DataTable({
+            stateSave: true,
+            "order": [[ 1, "asc" ]],
+            "pagingType": "full_numbers",
+            responsive: true,
+            responsive: {
+                details: false
+            },
+            "language": {
+                "lengthMenu": "Show _MENU_ items per page",
+                "zeroRecords": "No matching items found.",
+                "infoFiltered": "(filtered from _MAX_ total items)",
+                "info":           "Showing _START_ to _END_ of _TOTAL_ items",
+                "paginate": {
+                    "first":      "First",
+                    "last":       "Last",
+                    "next":       "Next",
+                    "previous":   "Previous"
+                },
+            },
+
+        });
+    } );
+
+</script>
+
+{% endblock tablescript %}

@@ -1,16 +1,28 @@
 {% extends "ems_manage/manage_base.html" %}
 {% load crispy_forms_tags %}
+{% block tabmanage2_active %}
+active
+{% endblock tabmanage2_active %}
+{% block manage_submenu %}
+
+<h1 class="h2">Add user</h1>
+<div class="float-end my-2">
+    <a class="btn btn-sm btn-secondary" href="{% url 'manage-users' %}"><i class="fas fa-arrow-circle-left"></i> Back</a>
+    {% include "ems/help_modal.html" with title="User" help_file="ems_manage/help.html" help_section="user" %}
+</div>
+
+{% endblock manage_submenu %}
+
+
 {% block content %}
-   <div class="content-section">
+{% load ems_customfilters %}
       <form method="POST" enctype="multipart/form-data">
            {% csrf_token %}
            <fieldset class="form-group">
-               <legend class="border-bottom mb-4">Add User</legend>
                {{ form|crispy }}
            </fieldset>
            <div class="form-group">
-               <button class="btn btn-outline-info" type="submit">Add</button>
+               <button class="btn btn-primary" type="submit">Save user</button>
            </div>
        </form>
-   </div>
 {% endblock content %}

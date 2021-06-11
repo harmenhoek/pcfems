@@ -2,52 +2,24 @@
 {% block tabmanage6_active %}
 active
 {% endblock tabmanage6_active %}
+{% block manage_submenu %}
+<div>
+  <h2 style="display: inline-block">Locations</h2>
+</div>
+
+<div class="float-end my-2">
+
+    {% include "ems/help_modal.html" with title="Locations" help_file="ems_manage/help.html" help_section="location" %}
+</div>
+
+{% endblock manage_submenu %}
 {% block content %}
-{% load ems_customfilters %}
-
-
-<div class="content-section">
+    {% load ems_customfilters %}
 
 <div class="row">
-    <div class="col col-12">
-        <div class="float-left my-2">
-            <h3 class="d-inline">Locations</h3>
-        </div>
-    </div>
-</div>
-<p>
-    Each item in EMS is linked to a location. Each location is build up out of 2 parts:<br>
-    1. Lab <br>
-    2. Setup or Cabinet <br>
-    When an item is in use (assigned to a user) the location is Lab + Setup, when the item is in storage the location
-    is Lab + Cabinet.<br>
-    <br>
-    Below the Labs, Setups and Cabinets can be updated and added individually, EMS takes care of combining these.<br>
-
-    <br>
-    It is currently not possible to delete Labs, Cabinets and Setups.
-
-<!--    Explain Locations: combination of lab + setup (for in-use items) or lab + cabinet (for stored items)-->
-
-
-</p>
-
-</div>
-<div class="content-section">
-
-<div class="row">
-    <div class="col col-12">
-        <div class="float-left my-2">
-            <h3 class="d-inline">Labs</h3>
-            <p>Note that the system does not check for duplicates.</p>
-        </div>
-        <div class="float-right my-2">
-            <a class="btn btn-success" href="{% url 'manage-labs-add' %}"><i class="fas fa-plus"></i> Add new lab</a>
-        </div>
-    </div>
-</div>
-<div class="row">
-    <div class="col col-12">
+        <div class="col col-12">
+            <h3 class="">{{ global_preferences.nomenclature__room_name_plural }}</h3>
+                <a class="btn btn-sm btn-success float-end" href="{% url 'manage-labs-add' %}"><i class="fas fa-plus"></i> Add new {{ global_preferences.nomenclature__room_name }}</a>
         <table id="labs_list" class="table table-striped table-bordered table">
             <thead>
             <tr>
@@ -88,12 +60,12 @@ active
 
 <div class="row">
     <div class="col col-12">
-        <div class="float-left my-2">
-            <h3 class="d-inline">Setups</h3>
+        <div class="float-start my-2">
+            <h3 class="d-inline">{{ global_preferences.nomenclature__uselocation_name_plural }}</h3>
             <p>Note that the system does not check for duplicates.</p>
         </div>
-        <div class="float-right my-2">
-            <a class="btn btn-success" href="{% url 'manage-setups-add' %}"><i class="fas fa-plus"></i> Add new setup</a>
+        <div class="float-end my-2">
+            <a class="btn btn-success" href="{% url 'manage-setups-add' %}"><i class="fas fa-plus"></i> Add new {{ global_preferences.nomenclature__uselocation_name }}</a>
         </div>
     </div>
 </div>
@@ -103,7 +75,7 @@ active
             <thead>
             <tr>
                 <th data-priority="10">Image</th>
-                <th data-priority="10">Lab</th>
+                <th data-priority="10">{{ global_preferences.nomenclature__room_name }}</th>
                 <th data-priority="10">Name</th>
                 <th data-priority="10">Manager</th>
                 <th data-priority="10"></th>
@@ -141,12 +113,12 @@ active
 
 <div class="row">
     <div class="col col-12">
-        <div class="float-left my-2">
-            <h3 class="d-inline">Cabinets</h3>
+        <div class="float-start my-2">
+            <h3 class="d-inline">{{ global_preferences.nomenclature__storage_name_plural }}</h3>
             <p>Note that the system does not check for duplicates.</p>
         </div>
-        <div class="float-right my-2">
-            <a class="btn btn-success" href="{% url 'manage-cabinets-add' %}"><i class="fas fa-plus"></i> Add new cabinet</a>
+        <div class="float-end my-2">
+            <a class="btn btn-success" href="{% url 'manage-cabinets-add' %}"><i class="fas fa-plus"></i> Add new {{ global_preferences.nomenclature__storage_name }}</a>
         </div>
     </div>
 </div>
@@ -156,8 +128,8 @@ active
             <thead>
             <tr>
                 <th data-priority="10">Image</th>
-                <th data-priority="10">Lab</th>
-                <th data-priority="10">Cabinet number</th>
+                <th data-priority="10">{{ global_preferences.nomenclature__room_name }}</th>
+                <th data-priority="10">{{ global_preferences.nomenclature__storage_name_plural }} number</th>
                 <th data-priority="10">Full number</th>
                 <th data-priority="10">Nickname</th>
                 <th data-priority="10">Main content</th>
@@ -177,7 +149,7 @@ active
                 </td>
                 <td>{{ item.lab }}</td>
                 <td>{{ item.number }}</td>
-                <td><span class="align-middle badge badge-pill badge-warning">{{ item.lab.number }}_{{ item.number }}</span></td>
+                <td><span class="align-middle badge rounded-pill bg-warning text-dark">{{ item.lab.number }}_{{ item.number }}</span></td>
                 <td>{{ item.nickname|nonevalue|safe }}</td>
                 <td>{{ item.main_content|nonevalue|safe }}</td>
                 <td>{{ item.owner|nonevalue|safe }}</td>

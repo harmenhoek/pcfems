@@ -164,9 +164,169 @@ Version 1.0.4
 2021-03-26
 - Updated views to have correct FileResponse for manual (was already on production server).
 
-
+Version 1.0.5
+2021-05-02  branch: SmallFixesMay21
+- Added dropdown sorting on form fields in ItemForm, AssignForm in models for Cabinet, Flag. Not in Manage-->Add Lab, Add Setup, Add Cabinet,
 
 Known bugs:
 - Special chars and spaces in names show up in username.
 
-TODO requirements.txt update
+Version 1.1.0
+2021-05-12
+- Django upgraded 3.1.1 --> 3.2.2
+- Pip upgraded 20.2.4 --> 21.1.1
+- django-simple-history upgraded 2.12.0 --> 3.0.0
+- Warnings over missing primary keys. Starting in Django 3.2 you can now customise the type of created primary key. This used to be integers, but is now BigAutoField. This raises warning:
+    users.Profile: (models.W042) Auto-created primary key used when not defining a primary key type, by default 'django.db.models.AutoField'.
+    HINT: Configure the DEFAULT_AUTO_FIELD setting or the UsersConfig.default_auto_field attribute to point to a subclass of AutoField, e.g. 'django.db.models.BigAutoField'.
+  To fix, add to settings: DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField' to embrace this new BigAutoField. Than migrate and run migrations.
+- pip install django-bootstrap5, in settings add 'django_bootstrap5' to installed apps.
+- Load {% load django_bootstrap5 %} in base no jquery=full anymore, datatables still bs4. badge-primary --> bg-primary, badge-pill --> rounded-pill. btn-block --> w-100 my-1. float-end --> float-end. dropdown menu Action redone.
+- Location on home just LAB-CABINET or LAB-SETUP, no more nicknames or main content.
+
+2021-05-13
+- Overhaul of permissions started. Instead of just is_staff. Now users can have all kinds of permissions. Permissions are created in user/models/Profile. Added via ems_manage/views with custom form.
+- Adding new permissions is a 3-step process
+   1. Add permission to Meta data of user/Profile model.
+   2. Add input form to users/forms.py (use codename for fieldname).
+   3. Add to form_valid permissions list of ems_manage/views.py.
+   4. Change USER_PERMISSIONS in settings.
+Use permissions like:
+    - views, def --> from django.contrib.auth.decorators import permission_required, @permission_required('poll.add_vote')
+    - views, class --> @method_decorator(permission_required('Capacity.add_env',raise_exception=True))
+    OR:
+        from django.contrib.auth.mixins import PermissionRequiredMixin
+        class MyView(PermissionRequiredMixin, View):
+            permission_required = 'polls.add_choice'
+            # Or multiple of permissions:
+            permission_required = ('polls.view_choice', 'polls.change_choice')
+    - template, current user --> {% if perms.poll.add_vote %}
+    - template, any user --> custom filter: {{ user|check_permission:'is_flagmoderator' }}
+To get all user permissions: user.user_permissions.all()
+
+2021-05-14
+- Added permission system to ems_manage/views. Note. is_staff is still needed for the manage environment. But other permissions for specific functionality wihin the manage environment.
+- Start of redesign of manage.
+- Fixed header
+- Updates to base --> footer and header in blocks.
+- crispy-bootstrap5-0.3.1 implemented.
+- Datatables updated to bt5. BUT, still first loading bt4 for some plugins. Also some DT CSS causes strange behavior for other links, so disabled, seems to make no difference. Fixed Select boxes manually on home. New type in bs5.
+- Fixed flags tooltips on home. New tags and new JS.
+
+2021-05-15
+- Redone image lightbox, since EkkoLightbox did not work anymore with bs5. Now fully bs native with modal.
+- Manage users done. Now showing permissions in table, and add/edit users now show the permissions in the form + save them corectly.
+    TODO permissions can be added without staff member turned on, means these users cannot access manage even with correct permissions.
+- home. max-width for ID column.
+
+2021-05-18
+- Home: align-middle, ID smaller. Overall w/ bs5: more tightened look.
+- Bugfix: filtervalue of item location in home was not updated since change before. Fixed.
+
+2021-05-19:
+- Major update of image processing. Up to now: image2 was not renamed, not resized. image1 was processed but because of that image EXIF (rotation) was lost. New function process_image in models is now taking care of saving rotation, cropping and renaming of both images. Since image mods are done in models, it is working every time the model images are updated (so in every view/form).
+    TODO bug: if image=default, and item is updated so that image='', image2=animage, then redirected to the form again?!
+    TODO NOTE: so far all image1 don't all have correct rotation and all image2 are too big.
+- media/ added to .gitignore. Also removed from git: git rm -r --cached media/
+
+2021-05-20:
+- Redid the permissions: i.e. simplified. Now only: is_admin, is_usermoderator, is_itemmoderator.
+- Admin in main menu is now Staff.
+
+2021-05-21:
+- New help functionality! Add a small help button to a page using:
+    {% include "ems/help_modal.html" with title="User" help_file="ems_manage/help.html" help_section="flag" %}
+  This will show a help button, that pops up a modal. The help file contains help_sections (with if-else) that show the right help content. Very DRY!
+- New managepage style added to all manage-pages.
+- Added a settings page for users. New OneToOne model in users/models called Preferences.
+    NOTE: since no signal is ran since user is already created. We have to do this manually. Dirty fix for now, add to def(settings) ONCE:
+            for user in User.objects.all():
+                Preferences.objects.get_or_create(user=user)
+          This will create a preferences instance for the user
+          TODO create a migration-something for this.
+          TODO add profile updates also to this page. Remove old Edit Profile.
+- Implemented Preferences for pagelength on home and in help.
+- Implemented django-dynamic-preferences for system preferences (live preferences).
+    Settings can be changed in Settings in Manage. This will replace settings in settings.py. Settings that shouldn't be changed when running (item slug eg) will remain in settings.py.
+    The extension is a bit wanky, documentation not complete.
+    - Settings can be added to dynamic_preferences_registry.py.
+    - Caching is automatically used for settings.
+    - All these settings can be changed in Manage/Settings using a form_class. Had to look at source code to get this working. Use get_form_class to actually save the data (just form_class does not call the right functions).
+    - In templates use {% if global_preferences.item__show_logbook %} to get value of setting, like <section>__<name>.
+    NOTE: user settings still using own model.
+    - Access settings in views:
+        from dynamic_preferences.registries import global_preferences_registry
+        global_preferences = global_preferences_registry.manager()
+        title = global_preferences['general__title']
+
+2021-05-22:
+- Dynamic settings implemented.
+- Nomenclature implemented on:
+    - cabinet_detail.html
+    - location_list.html (manage)
+    - storage.html
+
+2021-05-26:
+- Split up Locations in Manage: Lab, Setup, Cabinet now separate pages.
+- Created Overview pages in Manage: Open Flags, Assigned Items and Items (under) Warranty. These are removed from manage-home.
+- Updated the Manage form-pages: new style, with back buttons.
+
+2021-05-30:
+- Updated setting of default sorting col. Now selection list.
+- Added column date_inuse hidden to home table. TODO change to last_interacted for. Use history.
+- Added linebreaks in logs
+- Fixed buttons Update and Delete in logs. Now buttons, no more badges (no longer supported in bt5).
+
+2021-06-01:
+- Show date_return in item-detail
+- Profile settings are now under Settings for users.
+
+2021-06-03:
+- Removed Profile from views, urls and template
+
+2021-06-04:
+- Purchased information only shown when not None now.
+- Showing personal cabinets on user profile page.
+- Exclude tracking=0 on profile page for user. items in use.
+- Implemented new image processing (like with item_pics) for labs, cabinets and setups. Cabinet images are shown on the cabinet detail page. This also solves 500 bug when adding new image to cabinet.
+- New image modal implemented for cabinet_detail. No more ekko lightbox.
+- New settings: image_item_maxsize, image_cabinetlabsetup_maxsize for max image size of uploading images.
+- Link to cabinet in manage cabinet list. Go button.
+- Custom filter on cabinet detail: |defaultifempty. Filter return .url if not empty and the href to the default image if so.
+- Bug fix: redirect of a location is now to the location-specific page instead of the old (unused) locations page.
+- Removed all qr code views.
+- Fully redone requirements.txt manually with a new venv. Removed unused packages, updated settings.py  --> removed old packages. Tested thouroiughly.
+
+2021-06-07
+- Added help to item detail, home, storage detail
+- Action button size reduce in item detail.
+
+2021-06-08
+- Added help to new item, cabinet detail, manage categories, manage flags, manage labs, manage setups,
+- Button size in tables in manage (Edit).
+- Color continuity improvements in Manage.
+- Show None if no personal cabinets in users.
+- Permissions added to ems/views: add/delete/fullupdate only possible with users.is_itemmoderator permission now. Updated the Actions menu too, to only show these options when permission.
+
+2021-06-11
+- Data migration for Preferences for users. Since Preferences are created for users in with signals on user create, existing users do not automatically have a settings database. Above I did some hack to do that manually, but that doesn't work properly. Instead use Data Migrations.
+    Note: do no delete users/migrations, as this results in an error when running the data migration: users_preferences table does not exist.
+    With Preferences model created. Run:
+        python manage.py makemigrations --empty --name=add_preferences users
+    This will create a new migrations file. Note, do not delete this one! This file is of course not needed for a new app.
+    Inside this migration file, make sure all users without preferences filter(preferences=None), will get a preferences model.
+        python manage.py migrate users
+    This should create preferences for all users!
+- There was an error in ems_manage.views. In UserCreateView the is_administrator permission does not exist.
+    Commented out the entire block.
+        # permission = Permission.objects.get(codename='is_administrator')
+        # success_message = f"User <b>%(first_name)s %(last_name)s (%(email)s)</b> was created successfully. permission:{permission}"
+        # success_url = reverse_lazy('manage-users')  # not even needed for CreateView
+    Even is_admin did not work. Not sure what I was doing there. Perhaps a test.
+    Now migrations work.
+- Removed separate Staff menu in header, integrated in User now.
+- Profile image new processing: first make square by cutting of longest sides (centered image), then thumbnail.
+- Header in base shows profile image if available.
+- Profile image optional now. If removed, icon is shown.
+- Help for manage/users, assign
+- JS home update: no more 2 empty cells.

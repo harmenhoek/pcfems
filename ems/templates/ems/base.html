@@ -5,186 +5,190 @@
 <html>
 <head>
 
-    {% load bootstrap4 %}       {# import bootstrap4/bootstrap3 #}
-    {% bootstrap_css %}         {# Embed Bootstrap CSS #}
+    {% load django_bootstrap5 %}
+    {% bootstrap_css %}
 
-
-    <!-- Required meta tags -->
     <meta charset="utf-8">
-<!--    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">-->
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
     <link rel="shortcut icon" type="image/png" href="{% static 'ems/favicon-32x32.png' %}"/>
 
-    <!-- Bootstrap CSS -->
-<!--    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"-->
-<!--          integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">-->
 
     <!--  DataTables CSS  -->
-<!--    <link href="https://cdn.datatables.net/responsive/2.2.6/css/responsive.dataTables.min.css" rel="stylesheet">-->
-<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/bs4/dt-1.10.23/b-1.6.5/b-colvis-1.6.5/b-print-1.6.5/r-2.2.7/datatables.min.css"/>    <!--    <link href="https://cdn.datatables.net/1.10.22/css/dataTables.bootstrap4.min.css" rel="stylesheet">-->
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/bs4/dt-1.10.23/b-1.6.5/b-colvis-1.6.5/b-print-1.6.5/r-2.2.7/datatables.min.css"/>
+<!--    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css">-->
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.24/css/dataTables.bootstrap5.min.css">
+
+
+    <!--    Bootstrap icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css">
 
     <!-- Custom CSS -->
     <link rel="stylesheet" type="text/css" href="{% static 'ems/main.css' %}">
 
-
-    <title>PCF EMS</title>
-
+    <title>{{ global_preferences.nomenclature__pagetitle }}</title>
 </head>
-<body class="mb-3">
+<body class="mb-0">
 
 <header class="site-header">
-    <nav class="navbar navbar-expand-md navbar-dark bg-steel fixed-top">
+
+
+    <!--        <nav class="navbar navbar-expand-lg navbar-dark bg-steel"> &lt;!&ndash; fixed-top can be added, requires mt of body to increase. &ndash;&gt;-->
+    <nav class="navbar navbar-expand-lg navbar-dark" style="background-color: #536679;">
+        <!-- fixed-top can be added, requires mt of body to increase. -->
         <div class="container">
+
             <a class="navbar-brand mr-4" href="/">
-<!--                <i class="fas fa-boxes"></i> -->
-                <img class="align-middle" style="height:1em;" src="{% static 'ems/favicon_white_192x192.png' %}" />
-                PCF EMS
+                <!--                <i class="fas fa-boxes"></i> -->
+                <img class="align-middle" style="height:1em;" src="{% static 'ems/favicon_white_192x192.png' %}"/>
+                {{ global_preferences.nomenclature__title }}
             </a>
-            <div class="navbar-nav mr-auto d-inline"> <!-- Above collapse to control custom behavior on <md devices, i.e. hide Home, but always show Scan.-->
-<!--                Add classes 'd-none d-md-block' to hide it on mobile-->
-                <a class="nav-item nav-link {% block tab1_active %}{% endblock tab1_active %} d-inline" href="{% url 'ems-home' %}"><i class="fas fa-home"></i> Items<h6 class="d-none d-sm-none d-inline">&nbsp; &nbsp;</h6> </a>
-                <a class="nav-item nav-link {% block tab2_active %}{% endblock tab2_active %} d-inline" href="{% url 'ems-storage' %}"><i class="fas fa-boxes"></i> Storage</a>
-<!--                <a class="nav-item nav-link" href="{% url 'ems-scanner' %}"><i class="fas fa-qrcode"></i> Scan</a>-->
-            </div>
-            <!--fa options: layer-group, boxes, archive, warehouse, database -->
-            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarToggle"
-                    aria-controls="navbarToggle" aria-expanded="false" aria-label="Toggle navigation">
+
+
+            <ul class="navbar-nav me-auto mb-lg-0 list-group-horizontal">
+                {% if user.is_authenticated %}
+                <li class="nav-item mx-lg-0 mx-3">
+                    <!--                Add classes 'd-none d-md-block' to hide it on mobile-->
+                    <a class="nav-link {% block tab1_active %}{% endblock tab1_active %} d-inline"
+                       href="{% url 'ems-home' %}"><i class="fas fa-home"></i> Items<h6
+                            class="d-none d-sm-none d-inline">&nbsp; &nbsp;</h6></a>
+                </li>
+                <li class="nav-item">
+
+                    <a class="nav-link {% block tab2_active %}{% endblock tab2_active %} d-inline"
+                       href="{% url 'ems-storage' %}"><i class="fas fa-boxes"></i> Storage</a>
+                </li>
+                {% endif %}
+            </ul>
+
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
+                    aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
-            <div class="collapse navbar-collapse" id="navbarToggle">
-                <div class="navbar-nav mr-auto"> <!-- Keep here, otherwise Right part not aligned properly.-->
-                </div>
-                <!-- Navbar Right Side -->
-                <div class="navbar-nav">
-                    {% if user.is_staff %}
-                    <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
-                               data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                <i class="fas fa-lock"></i> Admin
-                            </a>
-                            <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
-                                <a class="dropdown-item" href="{% url 'item-create' %}">
-                                    <i class="fas fa-plus-circle"></i>
-                                    New Item
-                                </a>
-                                <div class="dropdown-divider"></div>
-                                <a class="dropdown-item" href="{% url 'manage-home' %}">
-                                    <i class="fas fa-tools"></i>
-                                    Manage
-                                </a>
-                            </div>
-                        </li>
-                    {% endif %}
+
+            <!-- Navbar Right Side -->
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                </ul>
+
+                <ul class="navbar-nav d-flex">
+
 
                     {% if user.is_authenticated %}
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
-                               data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                <i class="fas fa-user"></i> {{ user.first_name }} {{ user.last_name }}
-                            </a>
-                            <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
-                                <a class="dropdown-item" href="{% url 'profile' %}">
-                                    <i class="fas fa-id-badge"></i>
-                                    Edit Profile
-                                </a>
-                                <div class="dropdown-divider"></div>
-                                <a class="dropdown-item" href="{% url 'logout' %}">
-                                    <i class="fas fa-sign-out-alt"></i>
-                                    Logout
-                                </a>
-                            </div>
-                        </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle my-0 py-0" href="#" id="navbarScrollingDropdown" role="button"
+                           data-bs-toggle="dropdown" aria-expanded="false">
+                            {% if user.profile.image %}
+                                <img class="rounded-circle mh-100 img-responsive inline-block py-0 my-0"
+                                    style="height: 1.7em; display: inline-block; width: 1.7em; vertical-align: middle; padding:0; margin:0;"
+                                    src="{{ user.profile.image.url }}">
+                            {% else %}
+                                <i class="fas fa-user"></i>
+                            {% endif %}
+                            {{ user.first_name }} {{ user.last_name }}
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarScrollingDropdown">
+                            <li><a class="dropdown-item" href="{% url 'user_settings' %}"><i class="fas fa-cogs"></i>
+                                Preferences</a></li>
+                            {% if user.is_staff %}
+                                <li><hr class="dropdown-divider"></li>
+                                <li><h6 class="dropdown-header">Staff</h6></li>
+                                {% if user|check_permission:'is_itemmoderator' %}
+                                    <li><a class="dropdown-item" href="{% url 'item-create' %}"><i class="fas fa-plus-circle"></i>
+                                        New Item</a></li>
+                                {% endif %}
+                                <li><a class="dropdown-item" href="{% url 'manage-home' %}"><i class="fas fa-tools"></i>
+                                    Manage</a></li>
+                            {% endif %}
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{% url 'logout' %}"><i class="fas fa-sign-out-alt"></i>
+                                Logout</a></li>
+                        </ul>
+                    </li>
                     {% else %}
-                        <a class="nav-item nav-link" href="{% url 'login' %}">Login</a>
+                    <a class="nav-item nav-link" href="{% url 'login' %}">Login</a>
                     {% endif %}
-                </div>
-            </div>
+                </ul>
+            </div> <!-- collapse navbar-collapse -->
 
-        </div>
+        </div> <!-- container -->
     </nav>
 
+
 </header>
-    {% block secondheader %}{% endblock secondheader %}
+{% block secondheader %}{% endblock secondheader %}
 
-
-<main role="main" class="container">
+{% block main %}
+<main role="main" class="container mt-3"> <!-- style="margin-left:0;"-->
     <div class="row">
         <div class="col-md-12">
             {% if messages %}
-                {% for message in messages %}
-                <div class="alert alert-{{ message.tags }}">
-                    {{ message|safe }}
-                </div>
-                {% endfor %}
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}" role="alert">
+                {{ message|safe }}
+            </div>
+            {% endfor %}
             {% endif %}
 
             {% block content %}{% endblock %}
         </div>
-        <!--        <div class="col-md-4">-->
-        <!--            <div class="content-section">-->
-        <!--                <h3>Sidebar</h3>-->
-        <!--                <p class='text-muted'>Quick Access stuff-->
-        <!--                <ul class="list-group">-->
-        <!--                    <li class="list-group-item list-group-item-light">List w/ categories</li>-->
-        <!--                    <li class="list-group-item list-group-item-light">List w/ storage locs</li>-->
-        <!--                    <li class="list-group-item list-group-item-light">Exp. setups</li>-->
-        <!--                    <li class="list-group-item list-group-item-light">Labs</li>-->
-        <!--                </ul>-->
-        <!--                </p>-->
-        <!--            </div>-->
-        <!--        </div>-->
     </div>
 </main>
 
-<footer class="mt-5 pt-3 pb-0 text-muted text-center text-small border-top">
-        <small class="mb-1">Equipment Management System for the Physics of Complex Fluids Group at the University of Twente.</small><br>
-        <small class="m-0">Version {% settings_value "EMS_VERSION" %} | <a class="text-muted" href="https://github.com/harmenhoek/pcfems/" target="_blank">About PCFEMS <i class="fas fa-external-link-alt fa-xs" style="vertical-align: +20%"></i></a></small>
+{% block footer %}
+<footer class="mt-5 pt-3 pb-0 mb-3 text-muted text-center text-small border-top">
+    <small class="mb-1">{{ global_preferences.nomenclature__footer }}</small><br>
+    {% if global_preferences.general__show_version %}
+    <small class="m-0">Version {% settings_value "EMS_VERSION" %} | <a class="text-muted"
+                                                                       href="https://github.com/harmenhoek/pcfems/"
+                                                                       target="_blank">About PCFEMS <i
+            class="fas fa-external-link-alt fa-xs" style="vertical-align: +20%"></i></a></small>
+    {% endif %}
 </footer>
+{% endblock footer %}
+
+{% endblock main %}
 
 
-
-<!-- Optional JavaScript -->
-<!-- jQuery first, then Popper.js, then Bootstrap JS -->
 <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
         integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
         crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
         integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
         crossorigin="anonymous"></script>
-<!--<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"-->
-<!--        integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"-->
-<!--        crossorigin="anonymous"></script>-->
 
-{% bootstrap_javascript jquery='full' %}  {# Embed Bootstrap JS+jQuery #}
-{{ form.media }}            {# Adds date-picker required JS and CSS https://pypi.org/project/django-bootstrap-datepicker-plus/ ADD AFTER BOOTSTRAP#}
+{% bootstrap_javascript %} {# Embed Bootstrap JS+jQuery #}
+{{ form.media }} {# Adds date-picker required JS and CSS https://pypi.org/project/django-bootstrap-datepicker-plus/ ADD  AFTER BOOTSTRAP#}
 
 
-<!-- DataTables JS -->
-<!--<script type="text/javascript" src="https://cdn.datatables.net/1.10.22/js/jquery.dataTables.min.js"></script>-->
-<!--<script type="text/javascript" src="https://cdn.datatables.net/1.10.22/js/dataTables.bootstrap4.min.js"></script>-->
-<!--<script type="text/javascript"-->
-<!--        src="https://cdn.datatables.net/responsive/2.2.6/js/dataTables.responsive.min.js"></script>-->
-<script type="text/javascript" src="https://cdn.datatables.net/v/bs4/dt-1.10.23/b-1.6.5/b-colvis-1.6.5/b-print-1.6.5/r-2.2.7/datatables.min.js"></script>
+
+
 <!-- fa-icons -->
 <script src="https://kit.fontawesome.com/e599ec3b64.js" crossorigin="anonymous"></script>
+
+
+
+<!-- Datatables -->
+<script type="text/javascript" src="https://cdn.datatables.net/v/bs4/dt-1.10.23/b-1.6.5/b-colvis-1.6.5/b-print-1.6.5/r-2.2.7/datatables.min.js"></script>
+<!--    <script src="https://code.jquery.com/jquery-3.5.1.js" crossorigin="anonymous"></script>-->
+    <script src="https://cdn.datatables.net/1.10.24/js/jquery.dataTables.min.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.datatables.net/1.10.24/js/dataTables.bootstrap5.min.js" crossorigin="anonymous"></script>
+
 
 <script>
     $(function () {
   $('[data-toggle="tooltip"]').tooltip()
 })
+
+var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+  return new bootstrap.Tooltip(tooltipTriggerEl)
+})
+
+
 </script>
 
 {% block tablescript %}{% endblock tablescript %}
-
-
-<!--
-buttons: [
-    {
-        extend: 'print',
-        messageTop: 'This print was produced using the Print button for DataTables'
-    }
-]
--->
 
 </body>
 </html>

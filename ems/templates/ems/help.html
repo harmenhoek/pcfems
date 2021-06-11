@@ -1,0 +1,145 @@
+<!-- --------------- --> {% if help_section == 'item_detail' %}<!-- --------------- -->
+
+The item-detail page shows all the details of the item, the item-specific logbook and history and shows the
+item actions.<br>
+<br>
+
+<h5>Assigning</h5>
+The main purpose of the EMS is keeping track of the whereabouts of equipment. Tracking a piece of equipment is done by assigning an item to a specific location and optionally a user when in use.<br>
+<br>
+To assign an item:
+<ul>
+<li>press <a class="btn btn-sm btn-primary btn-block" href="#"><i class="fas fa-stamp" aria-hidden="true"></i> Assign To</a> in the Quick Actions menu;</li>
+<li>enter the location (experimental setup) where you plan on using the item and optionally add a user and return date.</li>
+</ul>
+Once assigned, the item will appear as <span class="align-middle badge rounded-pill bg-danger">In use</span>, and the location and user will change to the selected values.<br>
+<br>
+If an item is already assigned, the item can be reassigned by pressing <a class="btn btn-sm btn-outline-primary btn-block" href="#"><i class="fas fa-stamp" aria-hidden="true"></i> Change Assign To</a>, or returned to storage by pressing <a class="btn btn-sm btn-warning btn-block" href="#"><i class="fas fa-warehouse" aria-hidden="true"></i> Return to Storage</a> from the Quick Actions menu. Each item has a specific storage location (that can be changed by updating the item), make sure to return the item to the correct location.
+<br><br>
+<h5>Logbook</h5>
+Each item has a built-in logbook that can be found on the item detail page (see Figure 5). To add a log, select <a class="btn btn-sm btn-outline-success" href="#"><i class="fas fa-plus" aria-hidden="true"></i> Add log</a>. To each log 2 attachments (e.g. specific settings, manuals or pictures) can be added. You can only edit or delete your own logs.
+<br><br>
+<h5>Flagging</h5>
+The goal of flagging is show users something is wrong with the item and to notify a staff member. Examples of flags are ’Needs repair’, ’Needs to be tested’, ’Missing’ or ’Incorrect information’. Flagging is done by selecting Flag on the
+item detail page. To give more details of the problem a comment can be added to the flag. Once flagged, a specific flag icon will show up with the item on the list view and the flag will appear on the item detail page.
+Only flag an item if you are unable to solve the problem yourself!
+<br><br>
+<h5>Update an item</h5>
+All users can update the description, storage location and images by pressing Update item in the Actions menu
+on the item detail page. Staff members can update all details of an item.
+
+<!-- --------------- --> {% elif help_section == 'home' %}<!-- --------------- -->
+
+For the full manual for PCFEMS, see <a href="{% url 'ems-manual' %}" target="_blank"><i class="fas fa-file-pdf d-inline"></i> pcfems.utwente.nl/manual</a>. The help functionality can be turned off in <a href="{% url 'user_settings' %}" target="_blank">user preferences</a>.<br>
+<br>
+The home screen of the EMS applications is the equipment overview page. In the top bar you can find links to the <a href="{% url 'ems-storage' %}" target="_blank">overview of storage locations</a>, <a href="{% url 'manage-home' %}"  target="_blank">staff manage interface</a> (staff members only), and the <a href="{% url 'user_settings' %}" target="_blank">user preferences</a>.
+
+The equipment overview page shows all the items (equipment) currently in the system. The table can be search real-time with the global search bar in the top-right, or using field specific search options in the table. When searching the globally also hidden columns such as the item description will be searched.<br>
+Clicking an item will redirect to the item detail page.<br>
+Note that resizing the web browser window may hide/show additional columns.
+
+The default number of items shown can be changed in the <a href="{% url 'user_settings' %}" target="_blank">user preferences</a>.
+<br><br>
+<h5>Category</h5>
+A category bins items that are similar and makes searching for similar items easier. For example when
+searching for a power supply selecting the Power supplies category shows all power supplies (AC, DC, HV).
+<br><br>
+<h5>Status</h5>
+An item can have one of the following status:
+<ul>
+<li><span class="align-middle badge rounded-pill bg-danger">In use</span><br>
+Item is in use, meaning it is assigned to an experimental setup and possibly to a user. This item can not be
+moved to a different location without changing the assignment.
+</li>
+<li><span class="align-middle badge rounded-pill bg-success">Available</span><br>
+Item is not in use, thus available for use by anyonea and can be found in a specific storage cabinet. See
+</li>
+<li><span class="align-middle badge rounded-pill bg-secondary">No tracking</span><br>
+Item is not tracked, location and user unknown.
+</li>
+</ul>
+<br><br>
+<h5>Location</h5>
+The location of an item consists of two parts, which depend on the item status:
+<ul>
+<li>in use: lab + experimental setup (e.g. <span class="align-middle badge bg-warning">ME106_07_04</span>)</li>
+<li>in storage: lab + cabinet (e.g. <span class="align-middle badge bg-primary">ME112 - General</span>)</li><br>
+</ul>
+If an item has status <span class="align-middle badge bg-secondary">No tracking</span>, the location is Unknown.
+<br><br>
+<h5>Flag</h5>
+Flagging is marking an item for attention or treatment in a specified way. An item can for example be flagged as
+missing, broken or due for inspection. Flagging is meant to bring the item to the attention of a staff member and is
+only meant to be done when you cannot resolve the problem yourself.
+
+<!-- --------------- --> {% elif help_section == 'storage_detail' %}<!-- --------------- -->
+
+
+The location of an item consists of two parts, which depend on the item status:
+<ul>
+<li>in use: lab + experimental setup (e.g. <span class="align-middle badge bg-warning">ME106_07_04</span>)</li>
+<li>in storage: lab + cabinet (e.g. <span class="align-middle badge bg-primary">ME112 - General</span>)</li><br>
+</ul>
+
+The storage screen shows all the storage locations in the EMS. Clicking an item will redirect to the cabinet detail page.<br>
+The main content of a cabinet is set when a cabinet is used for specific types of item (e.g. Labview equipment or function generators). The owner is set when a cabinet is in personal use by a group member.
+
+<!-- --------------- --> {% elif help_section == 'new_item' %}<!-- --------------- -->
+
+When adding an item, add as many details as possible, to improve the findability of the item in the system. All starred
+items are mandatory.
+<br>
+<br>
+These are the available fields:
+<ul>
+<li><b>Title</b> - A short 25-character title describing what the item is. Be as general as possible, but add specific details if space allows to differentiate it from other items. Good titles are: <i>15 MHz function generator, DC power supply. 0-20V, 40MHz analog oscilloscope and 4K USB camera.</i></li>
+
+<li><b>Category</b> - A category bins items that are similar and makes searching for similar items easier. For example when searching for a power supply selecting the <i>Power supplies</i> category shows all power supplies (AC, DC, HV). Find a category that is most specific. For example a multimeter might fit in the <i>General electronics</i> category, but is better binned in the <i>Multimeters</i> category. If you are sure an item might form a new category with other items, this category can be added in the manage environment.</li>
+
+<li><b>Brand</b> - The brand of the item. If the item is homemade, use <i>Homemade</i>. If unknown, use <i>Unknown</i>.</li>
+
+<li><b>Model</b> - The model of the item. If unknown or homemade, use <i>Unknown</i>. Does the item consist of multiple parts (e.g. a proprietary power supply), comma separate the models in this field.</li>
+
+<li><b>Serial</b> - The serial number of the item. Does the item consist of multiple parts (e.g. a proprietary power supply),
+comma separate the serial numbers in this field.</li>
+
+<li><b>Parts</b> - The number of separate parts of the item. For example, a laser might consist of the laser itself, a power
+supply and a remote control. All these 3 parts can be disconnected and all mandatory for the laser to work. This
+item will thus have 3 parts.</li>
+
+<li><b>Description</b> - Add as many details about the item as possible: text written on the item, specs or even descriptions
+and spec sheets copied elsewhere online.</li>
+
+<li><b>Storage Location</b> - Find a storage location with similar items and verify space is available here to storage it.
+Each shelf in a cabinet is a separate storage location. New locations can be added in the manage environment.</li>
+
+<li><b>Image and Image2</b> - Add images of the front and back (connections) of the item. Take photos with a neutral
+background if possible. More images can be added to logbook if needed.</li>
+
+<li><b>Purchased by, Purchased on and Purchased price</b> - Optional fields to specify who bought the item, when and
+at what price.</li>
+
+<li><b>Warranty, Warranty expiration and Next service date</b> - Optional fields for newly purchased items to specify
+any warranty information. Warranty items will show up in the manage environment separately sorted by the next
+service date.</li>
+</ul>
+
+<!-- --------------- --> {% elif help_section == 'cabinet_detail' %}<!-- --------------- -->
+
+The cabinet detail page shows information about a specific cabinet in the lab including items currently in this cabinet and items that are stored in this cabinet but currently in use.<br>
+The main content of a cabinet is set when a cabinet is used for specific types of item (e.g. Labview equipment or function generators). The owner is set when a cabinet is in personal use by a group member.
+
+<!-- --------------- --> {% elif help_section == 'assign' %}<!-- --------------- -->
+
+Assigning is designating an item to a specific location, and optionally a user. When an item is assigned to a location, it is used at this location. If an item is not assigned, it is at a specific storage location. Only items that are tracked can be assigned.<br>
+<br>
+For an assignment, the location is mandatory, the user and return date are option, but recommended.<br>
+<br>
+Once assigned, the item will appear as <span class="align-middle badge rounded-pill bg-danger">In use</span>, and the location and user will change to the selected values.<br>
+
+
+{% else %}
+<i>No help available.</i>
+
+
+{% endif %}

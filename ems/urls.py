@@ -31,9 +31,6 @@ urlpatterns = [
 
     path('manual/', views.manual, name='ems-manual'),
 
-    path('qrgenerator/<int:pk>/', views.qrgenerator, name='ems-qrgenerator'),
-    path('qrbatchgenerator/<int:pk1>/<int:pk2>/', views.qrbatchgenerator, name='ems-qrbatchgenerator'),
-
     path('storage/', LocationListView.as_view(), name='ems-storage'),
     path('storage/cabinet/<int:pk>/', CabinetDetailView.as_view(), name='storage-detail'),
 ]

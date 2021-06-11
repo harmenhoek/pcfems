@@ -1,0 +1,111 @@
+<!-- --------------- --> {% if help_section == "activity" %} <!-- --------------- -->
+
+All the PCFEMS page requests are listed here. These include user requests and anonymous requests. Note that an image load is also counted as a page request.
+
+<!-- --------------- --> {% elif help_section == "user" %} <!-- --------------- -->
+
+There are 2 types of users: <span class="badge rounded-pill bg-info">Staff</span> and <span
+        class="badge rounded-pill bg-secondary">Normal</span>:
+<ul>
+    <li><span class="badge rounded-pill bg-secondary">Normal</span> members can access and use the main functionality of
+        the system (overviews of items and storage locations, viewing item details, assigning, flagging, logging) and
+        can update basic item information (images, storage location, ...). Normal members don't have access to the
+        manage interface.
+    <li><span class="badge rounded-pill bg-info">Staff</span> members can can do the above, but in addition have extra
+        privileges that can be set with the <b>Permissions</b>. Without permissions staff members can only access the
+        Dashboard in Manage and see the Overviews (Open flags, Assigned Items and Items under Warrenty).
+</ul>
+
+<h5 class="pt-2">Permissions</h5>
+Permissions can be set to Staff members to allow these members extra privileges.<br>
+Possible permissions are:
+<ul>
+    <li><span class="badge pill bg-light text-dark">is_admin</span> A system admin can set global system preferences, such as nomenclature and default user settings.</li>
+    <li><span class="badge pill bg-light text-dark">is_itemmoderator</span> An item moderator can add new items, update items fully, delete items, add new flags, categories and location, and export items to csv.</li>
+    <li><span class="badge pill bg-light text-dark">is_usermoderator</span> A user moderator can add and modify users and change user permissions.</li>
+</ul>
+
+Permissions can only be set by a Staff member with the permission to moderate users (<span
+        class="badge pill bg-light text-dark">is_usermoderator</span>).
+
+<!-- --------------- --> {% elif help_section == "location" %} <!-- --------------- -->
+
+Each item in EMS is linked to a location. Each location is build up out of 2 parts:<br>
+    1. Lab <br>
+    2. Setup or Cabinet <br>
+    When an item is in use (assigned to a user) the location is Lab + Setup, when the item is in storage the location
+    is Lab + Cabinet.<br>
+    <br>
+    Below the Labs, Setups and Cabinets can be updated and added individually, EMS takes care of combining these.<br>
+
+    <br>
+    It is currently not possible to delete Labs, Cabinets and Setups.
+
+<!-- --------------- --> {% elif help_section == 'export' %} <!-- --------------- -->
+
+
+<h6>Print QR codes</h6>
+Printing QR codes is a 2-step process: exporting the data from EMS followed by importing the data and printing the labels with the Dymo software.<br>
+<br>
+<ol>
+    <li>
+        Exporting the data can be done in the manage-environment of EMS. Go to Admin → Manage → Export. Select the ID range of items you wish to export (e.g. 10-50, for labels PCF0010-PCF0050), and press Export. 2 csv-files will be exported named export <code>tracking.csv</code> and export <code>notracking.csv</code>.
+    </li><br>
+    <li>
+        Open the Dymo software DYMO Connect for Desktop (tested on Windows 10 with DYMO Connect for Desktop 1.3.2). Open the template <code>pcfems_labels_version20210204_tracking.dymo</code> and select Import data in the top of the screen. Select the csv file export <code>tracking.csv</code> that was just exported, verify you selected the tracking file. Once imported make sure the label size shown in the bottom of the screen matches the labels currently in the printer, and press Print to print the labels.
+    </li><br>
+    <li>
+        Repeat step 2 for the no-tracking items. Use export <code>notracking.csv</code> in combination with <code>pcfems_labels_version20210204_notracking.dymo</code>.
+    </li>
+</ol>
+The Dymo LabelWrinter 450 Turbo was used when writing this manual. Standard label size: Medium Multipurpose
+Labels 30335 | LW 32x57mm SKU: S0722540.
+
+<!-- --------------- --> {% elif help_section == 'cabinets' %}<!-- --------------- -->
+
+The location of an item consists of two parts, which depend on the item status:
+<ul>
+    <li>in use: lab + experimental setup (e.g. <span class="badge rounded-pill bg-primary">ME107 - Condensation</span>)</li>
+    <li>in storage: lab + cabinet (e.g. <span class="badge rounded-pill bg-warning text-dark">ME106 - 01_10</span>)</li>
+</ul>
+<br>
+Cabinets a physically labeled in each lab. A cabinet can have nickname, main content and an owner when one user is using the cabinet for personal storage.
+
+<!-- --------------- --> {% elif help_section == 'category' %}<!-- --------------- -->
+A category bins items that are similar and makes searching for similar items easier. For example when searching for a power supply selecting the <i>Power supplies</i> category shows all power supplies (AC, DC, HV). Find a category that is most specific. For example a multimeter might fit in the <i>General electronics</i> category, but is better binned in the <i>Multimeters</i> category. If you are sure an item might form a new category with other items, this category can be added in the manage environment.
+
+<!-- --------------- --> {% elif help_section == 'flag' %}<!-- --------------- -->
+The goal of flagging is show users something is wrong with the item and to notify a staff member. Examples of flags are ’Needs repair’, ’Needs to be tested’, ’Missing’ or ’Incorrect information’. <br>
+Flagging is done by selecting Flag on the item detail page. To give more details of the problem a comment can be added to the flag. Once flagged, a specific flag icon will show up with the item on the list view and the flag will appear on the item detail page.<br>
+<br>
+Flags have an icon, that can be picked from the <a href="https://fontawesome.com/v5.15/icons?d=gallery&p=2&m=free">Font Awesome (FA) library</a>.
+
+
+<!-- --------------- --> {% elif help_section == 'labs' %}<!-- --------------- -->
+The location of an item consists of two parts, which depend on the item status:
+<ul>
+<li>in use: lab + experimental setup (e.g. <span class="align-middle badge bg-warning">ME106_07_04</span>)</li>
+<li>in storage: lab + cabinet (e.g. <span class="align-middle badge bg-primary">ME112 - General</span>)</li><br>
+</ul>
+Labs thus form the first part of a location.
+
+<!-- --------------- --> {% elif help_section == 'setups' %}<!-- --------------- -->
+The location of an item consists of two parts, which depend on the item status:
+<ul>
+<li>in use: lab + experimental setup (e.g. <span class="align-middle badge bg-warning">ME106_07_04</span>)</li>
+<li>in storage: lab + cabinet (e.g. <span class="align-middle badge bg-primary">ME112 - General</span>)</li><br>
+</ul>
+Setups are thus the locations where items are located that are in use. This could also be an office.
+
+
+<!-- --------------- --> {% elif help_section == 'settings' %}<!-- --------------- -->
+System-wide settings can be changed here. Note that due to caching some changes may take time to appear.
+
+
+
+
+{% else %}
+<i>No help available.</i>
+
+
+{% endif %}

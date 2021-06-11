@@ -1,16 +1,26 @@
 {% extends "ems_manage/manage_base.html" %}
 {% load crispy_forms_tags %}
+{% block tabmanage6_active %}
+active
+{% endblock tabmanage6_active %}
+{% block manage_submenu %}
+
+<h1 class="h2">Add setup</h1>
+<div class="float-end my-2">
+    <a class="btn btn-sm btn-secondary" href="{% url 'manage-setups' %}"><i class="fas fa-arrow-circle-left"></i> Back</a>
+    {% include "ems/help_modal.html" with title="Setups" help_file="ems_manage/help.html" help_section="setups" %}
+</div>
+
+{% endblock manage_submenu %}
+
 {% block content %}
-   <div class="content-section">
       <form method="POST" enctype="multipart/form-data">
            {% csrf_token %}
            <fieldset class="form-group">
-               <legend class="border-bottom mb-4">Add Setup</legend>
                {{ form|crispy }}
            </fieldset>
            <div class="form-group">
-               <button class="btn btn-outline-info" type="submit">Add</button>
+               <button class="btn btn-primary" type="submit">Save setup</button>
            </div>
        </form>
-   </div>
 {% endblock content %}

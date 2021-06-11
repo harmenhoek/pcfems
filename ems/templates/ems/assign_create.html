@@ -5,6 +5,9 @@
       <form method="POST" enctype="multipart/form-data">
            {% csrf_token %}
            <fieldset class="form-group">
+               <div class="float-end">
+                    {% include "ems/help_modal.html" with title="New Item" help_file="ems/help.html" help_section="assign" %}
+               </div>
                <legend class="border-bottom mb-4">{{ button }} Assign To</legend>
                {{ form|crispy }}
            </fieldset>

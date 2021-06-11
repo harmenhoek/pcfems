@@ -2,7 +2,7 @@ from django.db import models
 from django.utils import timezone
 from django.contrib.auth.models import User
 from django.urls import reverse, reverse_lazy  # for redirect after adding item
-from PIL import Image
+from PIL import Image, ExifTags
 import os
 import time
 from simple_history.models import HistoricalRecords
@@ -12,8 +12,53 @@ from django.contrib.contenttypes.models import ContentType
 from django.conf import settings
 
 from django.core.validators import MaxValueValidator, MinValueValidator
+from django.templatetags.static import static
 
 register(User)  # to allow simple_history to track it
+
+from dynamic_preferences.registries import global_preferences_registry
+global_preferences = global_preferences_registry.manager()
+
+
+
+def process_image(path, pk, maxsize, media_folder='item_pics'):
+# Function does 3 things:
+# 1. Rotate image by EXIF (needed since this info is lost by the PIL process)
+# 2. Crop image to thumbnail of maxsize
+# 3. Rename image (since image is already saved, we save the loaded PIL image with new name and remove the old one).
+
+    image = Image.open(path)
+    # Rotate image by EXIF
+    try:
+        for orientation in ExifTags.TAGS.keys():
+            if ExifTags.TAGS[orientation] == 'Orientation':
+                break
+        exif = dict(image._getexif().items())
+
+        if exif[orientation] == 3:
+            image = image.transpose(Image.ROTATE_180)
+        elif exif[orientation] == 6:
+            image = image.transpose(Image.ROTATE_270)
+        elif exif[orientation] == 8:
+            image = image.transpose(Image.ROTATE_90)
+    except:  # image has no EXIF
+        pass
+
+    # Crop image
+    if image.height > maxsize or image.width > maxsize:  # TODO move this to views?!
+        output_size = (maxsize, maxsize)
+        image.thumbnail(output_size)
+
+    # Rename image (since already saved, we delete original one, save a new one)
+    path_dir = os.path.dirname(path)
+    ext = os.path.splitext(path)[1] #.JPG
+    shorthash = hash(time.time())
+    path_new = os.path.join(path_dir, str(pk) + '_' + str(shorthash) + ext)
+    image.save(path_new)
+    os.remove(path)
+    path_new_full: str = os.path.join(media_folder + '/', str(pk) + '_' + str(shorthash) + ext)
+
+    return path_new_full
 
 # set __str__ for user
 def get_first_name(self):
@@ -30,10 +75,9 @@ class Lab(models.Model):
 
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)  # initial save (incl image)
+        maxsize = int(global_preferences['general__image_cabinetlabsetup_maxsize'])
         if self.image:
-            instance = super(Lab, self).save(*args, **kwargs)
-            image = Image.open(self.image.path)
-            image.save(self.image.path, quality=15, optimize=True)
+            self.image = process_image(self.image.path, self.pk, maxsize, media_folder='lab_pics')
             super().save(*args, **kwargs)
 
     def __str__(self):
@@ -48,16 +92,15 @@ class Cabinet(models.Model):
     number = models.CharField(max_length=10)
     nickname = models.CharField(max_length=25, blank=True, null=True)
     main_content = models.CharField(max_length=50, blank=True, null=True)
-    owner = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True, help_text="Cabinet owner is person whose stuff is stored in it.")
+    owner = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True, related_name='cabinet_owner', help_text="Cabinet owner is person whose stuff is stored in it.")
     image = models.ImageField(upload_to='cabinet_pics', blank=True, null=True)
     history = HistoricalRecords()
 
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)  # initial save (incl image)
+        maxsize = int(global_preferences['general__image_cabinetlabsetup_maxsize'])
         if self.image:
-            instance = super(Lab, self).save(*args, **kwargs)
-            image = Image.open(self.image.path)
-            image.save(self.image.path, quality=15, optimize=True)
+            self.image = process_image(self.image.path, self.pk, maxsize, media_folder='cabinet_pics')
             super().save(*args, **kwargs)
 
     def __str__(self):
@@ -66,6 +109,9 @@ class Cabinet(models.Model):
         else:
             extra = ''
         return f"{self.lab.number} - {self.number} {extra}"
+
+    class Meta:
+        ordering = ('lab__number', 'number')
 
 class Setup(models.Model):
     lab = models.ForeignKey(Lab, on_delete=models.CASCADE)
@@ -76,10 +122,9 @@ class Setup(models.Model):
 
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)  # initial save (incl image)
+        maxsize = int(global_preferences['general__image_cabinetlabsetup_maxsize'])
         if self.image:
-            instance = super(Lab, self).save(*args, **kwargs)
-            image = Image.open(self.image.path)
-            image.save(self.image.path, quality=15, optimize=True)
+            self.image = process_image(self.image.path, self.pk, maxsize, media_folder='setup_pics')
             super().save(*args, **kwargs)
 
     def __str__(self):
@@ -94,6 +139,9 @@ class Flag(models.Model):
     def __str__(self):
         return self.flag
 
+    class Meta:
+        ordering = ('flag',)
+
 class Category(models.Model):
     name = models.CharField(max_length=100, help_text='Please verify that no such category already exists.')
     history = HistoricalRecords()
@@ -101,8 +149,25 @@ class Category(models.Model):
     def __str__(self):
         return self.name
 
-    class Meta:
-        verbose_name_plural = "Categories"
+
+# def rotate_image_by_exif(image):
+#     try:
+#         for orientation in ExifTags.TAGS.keys():
+#             if ExifTags.TAGS[orientation] == 'Orientation':
+#                 break
+#         exif = dict(image._getexif().items())
+#
+#         if exif[orientation] == 3:
+#             image = image.transpose(Image.ROTATE_180)
+#         elif exif[orientation] == 6:
+#             image = image.transpose(Image.ROTATE_270)
+#         elif exif[orientation] == 8:
+#             image = image.transpose(Image.ROTATE_90)
+#     except:
+#         pass
+#     return image
+
+
 
 class Item(models.Model):  # inherit from models, all fields below
     # General details
@@ -155,7 +220,7 @@ class Item(models.Model):  # inherit from models, all fields below
     flag = models.ForeignKey(Flag, on_delete=models.SET_NULL, null=True, blank=True)
     flag_comment = models.CharField(max_length=100, null=True, blank=True)
     # flagged_by = models.ForeignKey(User, default=2, on_delete=models.SET_NULL, null=True, blank=True, related_name="flaggedbyuser")
-    image = models.ImageField(default='default.png', upload_to='item_pics', blank=True, null=True)
+    image = models.ImageField(upload_to='item_pics', blank=True, null=True)
     image2 = models.ImageField(upload_to='item_pics', blank=True, null=True)
     history = HistoricalRecords() # excluded_fields=['pub_date']
 
@@ -169,31 +234,28 @@ class Item(models.Model):  # inherit from models, all fields below
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)  # initial save (incl image)
         if self.qrid == '' or self.qrid is None:
-            self.qrid = f"PCF{self.pk:04d}"
+            self.qrid = f"PCF{self.pk:04d}" # TODO make qrid a setting
             super().save(*args, **kwargs)
 
+        # if no image but image2, set image2 to image
+        if self.image2 and not self.image:
+            self.image = self.image2
+            self.image2 = ''
+            super().save(*args, **kwargs)
+
+        maxsize = int(global_preferences['general__image_item_maxsize'])
         if self.image:
-            img = Image.open(self.image.path)
-            maxsize = 1000
-            if img.height > maxsize or img.width > maxsize:  # TODO move this to views?!
-                output_size = (maxsize, maxsize)
-                img.thumbnail(output_size)
-                # rename (TODO what if user uploads small image? Now no rename)
-                path = os.path.dirname(self.image.path)
-                ext = os.path.splitext(self.image.path)[1]
-                shorthash = hash(time.time())
-                file_new = os.path.join(path, str(self.pk) + '_' + str(shorthash) + ext)
-                img.save(file_new)
-                os.remove(self.image.path)
-                file_new_short: str = os.path.join('item_pics/', str(self.pk) + '_' + str(shorthash) + ext)
-                self.image = file_new_short
-                super().save(*args, **kwargs)
+            self.image = process_image(self.image.path, self.pk, maxsize)
+            if self.image2:
+                self.image2 = process_image(self.image2.path, self.pk, maxsize)
+            super().save(*args, **kwargs)
+
         else:
             self.image = 'default.png'
             super().save(*args, **kwargs)
 
 
-class ItemImage(models.Model): # currently not in use
+class ItemImage(models.Model):  # currently not in use
     item = models.ForeignKey(Item, related_name='images', on_delete=models.CASCADE)
     added_by = models.ForeignKey(User, on_delete=models.RESTRICT, limit_choices_to={'is_superuser': False})
     added_on = models.DateTimeField(default=timezone.now)
