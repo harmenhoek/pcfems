@@ -330,3 +330,4 @@ To get all user permissions: user.user_permissions.all()
 - Profile image optional now. If removed, icon is shown.
 - Help for manage/users, assign
 - JS home update: no more 2 empty cells.
+- Removed media from repo.
