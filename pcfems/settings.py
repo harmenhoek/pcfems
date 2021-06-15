@@ -210,7 +210,7 @@ BOOTSTRAP5 = {
 
 DEFAULT_IMAGE = 'default.png'
 
-EMS_VERSION = '1.1'
+EMS_VERSION = '1.1.1'
 
 TIME_ZONE = 'Europe/Amsterdam'
 
