@@ -101,8 +101,35 @@ Setups are thus the locations where items are located that are in use. This coul
 <!-- --------------- --> {% elif help_section == 'settings' %}<!-- --------------- -->
 System-wide settings can be changed here. Note that due to caching some changes may take time to appear.
 
+<!-- --------------- --> {% elif help_section == 'check' %}<!-- --------------- -->
+To verify if the EMS is up-to-date, checks can be performed. Based on several criteria items get a high, medium or low priority for checking.<br><br>
+High priority checks for items:
+    <ul>
+        <li>That are lost (no use location and no storage location).</li>
+        <li>In use not scanned or checked <b>>{{ global_preferences.check__check_highpriority_inweeks }}</b> weeks.</li>
+        <li>In storage not scanned or checked <b>>{{ global_preferences.check__check_highpriority_storage_inweeks }}</b> weeks.</li>
+    </ul>
+Medium priority checks for items:
+    <ul>
+        <li>In use not scanned or between <b>{{ global_preferences.check__check_mediumpriority_inweeks }}</b> and <b>{{ global_preferences.check__check_highpriority_inweeks }}</b> weeks ago.</li>
+        <li>In storage not scanned or between <b>{{ global_preferences.check__check_mediumpriority_storage_inweeks }}</b> and <b>{{ global_preferences.check__check_highpriority_storage_inweeks }}</b> weeks ago.</li>
+    </ul>
+Low priority checks for items:
+    <ul>
+        <li>Without High or Medium Priority that are tracked.</li>
+    </ul>
 
-
+These ranges can be changes in Settings.<br>
+<br>
+An item location is verified by:
+<ul>
+    <li>Pressing <a type="button" class="btn btn-sm btn-success mb-2"><i class="fas fa-check"></i> Verify</a>.</li>
+    <li>Changing the user (by pressing <a type="button" class="btn btn-sm btn-secondary"><i class="far fa-edit"></i> Change</a>) via this screen (not the standard item detail screen).</li>
+    <li>Returning the item to storage (by pressing <a type="button" class="btn btn-sm btn-warning mb-2"><i class="fas fa-warehouse"></i> Return to Storage</a>) via this screen (not the standard item detail screen).</li>
+    <li>Scanning the item QR-code.</li>
+</ul>
+<br>
+<p class="text-muted">This feature was added in January 2022 (version 1.3).</p>
 
 {% else %}
 <i>No help available.</i>

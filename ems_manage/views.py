@@ -16,12 +16,14 @@ from django.shortcuts import render
 from django.urls import reverse_lazy, reverse
 from django.utils import timezone
 from django.utils.decorators import method_decorator
-from django.views.generic import ListView, CreateView, UpdateView, FormView
+from django.views.generic import ListView, CreateView, UpdateView, FormView, DetailView
 from dynamic_preferences.forms import global_preference_form_builder
+from django.db.models import F
 
 from ems.models import Item, Category, Flag, Lab, Setup, Cabinet
 from users.forms import ManageUserUpdateForm
 from .forms import ExportForm
+from ems.views import AssignCreateView
 
 
 # class Settings(TemplateView):
@@ -91,43 +93,76 @@ def export(request):
             pk2 = form.cleaned_data['pk2']
             tracking = strtobool(form.cleaned_data['tracking'])
 
-            if tracking:
-                filename = 'export_tracking.csv'
-            else:
-                filename = 'export_notracking.csv'
-
-            from datetime import date
-            import csv
-            from django.http import HttpResponse
-            import os
-
-            response = HttpResponse(content_type='text/csv')
-            response['Content-Disposition'] = f'attachment; filename={filename}'
-            writer = csv.writer(response)
-            writer.writerow(['id', 'brand', 'model', 'serial', 'tracking', 'parts', 'part', 'version', 'date', 'url'])
-
-
-            for pk in range(pk1, pk2 + 1):
-                try:
-                    item = get_object_or_404(Item, pk=pk)
-                    if tracking == item.tracking:
-                        for part in range(item.parts):
-                            urlitem = reverse('item-detail', kwargs={'pk': item.pk})
-                            urlhost = request.build_absolute_uri('/')
-                            urlfull = os.path.join(urlhost, *urlitem.split(os.sep))
-                            url = f"{urlfull}?v={item.version}"
-
-                            # id, brand, model, serial, tracking, parts, part, version, date, url
-                            writer.writerow([item.qrid, item.brand, item.model, item.serial, int(item.tracking == True), item.parts, part+1, item.version, date.today(), url])
-                except:
-                    pass
-
+            urlhost = request.build_absolute_uri('/')
+            response = create_export_file(urlhost, [pk1, pk2], tracking, inputrange=True)
             return response
 
     else:
         form = ExportForm()
 
-    return render(request, 'ems_manage/export.html', {'form': form})
+
+    outofdate_items_tracking = Item.objects.filter(tracking=True).exclude(labelstatus__isnull=True).values_list('pk', flat=True).count()
+    outofdate_items_notracking = Item.objects.filter(tracking=False).exclude(labelstatus__isnull=True).values_list('pk', flat=True).count()
+
+    return render(request, 'ems_manage/export.html', {'form': form, 'outofdate_items_tracking': outofdate_items_tracking, 'outofdate_items_notracking': outofdate_items_notracking})
+
+def create_export_file(urlhost, pks, tracking=None, inputrange=False):
+    # Function creates a csv file with the exported items.
+    # Special case: pk1 == pk2 --> regardless of tracking it will be exported.
+
+    if inputrange:
+        pks = range(pks[0], pks[1] + 1)
+
+    if tracking:
+        filename = 'export_tracking.csv'
+    else:
+        filename = 'export_notracking.csv'
+
+    from datetime import date
+    import csv
+    from django.http import HttpResponse
+    import os
+
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = f'attachment; filename={filename}'
+    writer = csv.writer(response)
+    writer.writerow(['id', 'brand', 'model', 'serial', 'tracking', 'parts', 'part', 'version', 'date', 'url'])
+
+    for pk in pks:
+        try:
+            item = get_object_or_404(Item, pk=pk)
+            if tracking == item.tracking:
+                for part in range(item.parts):
+                    urlitem = reverse('item-detail', kwargs={'pk': item.pk})
+                    urlfull = os.path.join(urlhost, *urlitem.split(os.sep))
+                    url = f"{urlfull}?v={item.version}"
+
+                    # id, brand, model, serial, tracking, parts, part, version, date, url
+                    writer.writerow(
+                        [item.qrid, item.brand, item.model, item.serial, int(item.tracking == True), item.parts,
+                         part + 1, item.version, date.today(), url])
+        except:
+            pass
+
+    return response
+
+
+@staff_member_required
+def export_single(request, pk):
+    urlhost = request.build_absolute_uri('/')
+    response = response = create_export_file(urlhost, [pk])
+    return response
+
+def export_outdated(request, track):
+    pks = Item.objects.exclude(labelstatus__isnull=True).values_list('pk', flat=True)
+    urlhost = request.build_absolute_uri('/')
+    response = create_export_file(urlhost, pks, tracking=track)
+    # update labelstatus to None to mark labels up-to-date.
+    for pk in pks:
+        item = get_object_or_404(Item, pk=pk)
+        item.labelstatus = None
+        item.save()
+    return response
 
 @method_decorator(staff_member_required, name='dispatch')
 class ManageViewNew(LoginRequiredMixin, ListView):
@@ -195,33 +230,74 @@ class ManageView(LoginRequiredMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        from django.db.models import Count, F
 
-        context['assgineditems'] = Item.objects.all().filter(status=False).order_by('date_return')
-        context['warrantyitems'] = Item.objects.all().filter(warranty=True).order_by('warranty_expiration')
-        context['scanneditems'] = Item.objects.all().order_by('last_scanned')[:100]
+        # context['cntitems_peruser'] = Item.objects.filter(status=True, tracking=True).order_by('user').count()
 
-        # Open flags
-        # we can get the open flags from Item, but the history contains the person that flagged it and when.
 
-        openflags = Item.objects.all().filter(flag__isnull=False)  # get items with open flag
+        # GRAPH --> pie diagram items available, in use, untracked
+        context['cntitems_available'] = Item.objects.filter(status=True).filter(tracking=True).count() # status False = inuse
+        context['cntitems_notracking'] = Item.objects.filter(tracking=False).count()
+        context['cntitems_usepersonal'] = Item.objects.filter(status=False).filter(tracking=True).filter(user__isnull=False).count()
+        context['cntitems_usegeneral'] = Item.objects.filter(status=False).filter(tracking=True).filter(user__isnull=True).count()
+        context['cntitems_total'] = Item.objects.all().count()
 
-        openflags_extra = []
+        # GRAPH --> items in each lab
+        context['cntitems_loc_storage'] = Item.objects.filter(status=True, tracking=True, storage_location__isnull=False)\
+            .annotate(locname=F('storage_location__lab__number'))\
+            .values('locname')\
+            .annotate(total=Count('storage_location'))
+        context['cntitems_loc_inuse'] = Item.objects.filter(status=False, tracking=True, location__isnull=False) \
+            .annotate(locname=F('location__lab__number')) \
+            .values('locname')\
+            .annotate(total=Count('location'))
+        context['cntitems_lost'] = Item.objects.filter(status=True, tracking=True, storage_location__isnull=True).count()
+
+        cnt_items_loc_both = context['cntitems_loc_storage'].union(context['cntitems_loc_inuse']).order_by('-total')  # merge querysets
+        # rewrite querysets: [{'locname':'ME105', 'total':10}, {'locname':'ME105', 'total':5}] [{'ME105':10},{'ME105':5}]
+        new = [{i['locname']: i['total']} for i in list(cnt_items_loc_both)]
+        # merge dicts: [{'ME105':10},{'ME105':5}] --> [{'ME105':15}]
+        from collections import Counter
+        c = Counter()
+        for d in new:
+            c.update(d)
+        context['summed'] = dict(c)
+
+
+        # GRAPH --> items per user
+        context['cntitems_user_inuse'] = Item.objects.filter(status=False, tracking=True, location__isnull=False, user__isnull=False) \
+            .annotate(nameuser=F('user__first_name')) \
+            .values('nameuser') \
+            .annotate(nameuserlast=F('user__last_name')) \
+            .annotate(nameusername=F('user__username')) \
+            .annotate(total=Count('location'))\
+            .order_by('-total')
+
+        # pass it as a list of dicts: [{firstname: [total, username, lastname]}, etc]
+        context['cntitems_peruser'] = [{i['nameuser']: [str(i['total']), i['nameusername'], i['nameuserlast']]} for i in list(context['cntitems_user_inuse'])]
+
+        # GRAPH --> items in time
+        from django.db.models.functions import (TruncDate, TruncDay, TruncHour, TruncMinute, TruncSecond)
+        from datetime import datetime
         import numpy as np
-        for item in openflags:  # iterate over the items with open flags
-            id = item.id
-            history = Item.history.filter(id=id).order_by('history_id')  # for each of these items, get full history
-            flag_ids = [i.flag_id for i in history]  # get list of the flag_id of that item (eg. 2 4 4 4 4)
-            history_ids = [i.history_id for i in history]  # get similar list with history_ids (unique)
-            # get locations in flag_ids list where the flag_id changed, e.g. [2 4 4 3 3] will give [1 3], from that get
-            # last one, thus [3] (most recent flag change, since we order by history_id)
-            history_flagged_loc = np.where(np.roll(flag_ids, 1) != flag_ids)[0][-1]
-            history_flagged_id = history_ids[history_flagged_loc]  # get corresponding history_id
+        items_intime = Item.objects\
+            .filter(added_on__isnull=False) \
+            .annotate(added_on_date=TruncDate('added_on')) \
+            .order_by('added_on_date')\
+            .values('added_on_date')\
+            .annotate(dcount=Count('added_on_date'))
 
-            # since history_id is unique we can get corresponding history_user and history_date from history
-            openflags_extra.append({'flagged_by': history.get(history_id=history_flagged_id).history_user,
-                                    'flagged_on': history.get(history_id=history_flagged_id).history_date})
+        # bit complicated solution, but datetime.date is not a datetime.datetime type, and thus is direct conversion to epoch not possible
+        timestamp_epoch = [datetime.strptime(i['added_on_date'].strftime("%Y-%m-%d"), "%Y-%m-%d").timestamp()*1000 for i in items_intime]
+        context['xdata'] = timestamp_epoch + [datetime.now().timestamp()*1000]
+        ydata = list(np.cumsum([i['dcount'] for i in items_intime]))
+        context['ydata'] = ydata + [ydata[-1]]
 
-        context['openflags'] = zip(openflags, openflags_extra)
+
+        # context['warrantyitems'] = Item.objects.all().filter(warranty=True).order_by('warranty_expiration')
+        # context['scanneditems'] = Item.objects.all().order_by('last_scanned')[:100]
+
+
         return context
 
 @method_decorator(staff_member_required, name='dispatch') #only staff can add new
@@ -478,3 +554,135 @@ class UserUpdateView(PermissionRequiredMixin, SuccessMessageMixin, LoginRequired
         else:
             return HttpResponseRedirect(reverse('manage-users'))
 
+
+class CheckDetailView(LoginRequiredMixin, ListView):
+    model = Item
+    template_name = 'ems_manage/check.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        from datetime import datetime, timedelta
+
+        from dynamic_preferences.registries import global_preferences_registry
+        global_preferences = global_preferences_registry.manager()
+        check_highpriority_inweeks = global_preferences['check__check_highpriority_inweeks']
+        check_mediumpriority_inweeks = global_preferences['check__check_mediumpriority_inweeks']
+        check_highpriority_storage_inweeks = global_preferences['check__check_highpriority_storage_inweeks']
+        check_mediumpriority_storage_inweeks = global_preferences['check__check_mediumpriority_storage_inweeks']
+
+        # <-------------- time_threshold ------------- time_threshold_2 --------------- now >
+        #   item_prio_1_1                item_prio_2_1                   item_prio_3_1
+        # FOR ITEMS IN STORAGE SIMILAR RANGE, BUT WITH DIFFERENT VALUES
+
+        time_threshold = datetime.now() - timedelta(weeks=check_highpriority_inweeks)
+        time_threshold_storage = datetime.now() - timedelta(weeks=check_highpriority_storage_inweeks)
+        items_prio1_1 = Item.objects.filter(status=False, tracking=True, last_scanned__lt=time_threshold)  # items more than time_threshold scanned ago, in use
+        items_prio1_2 = Item.objects.filter(status=True, tracking=True, storage_location__isnull=True)  # lost items
+        items_prio1_3 = Item.objects.filter(status=True, tracking=True, last_scanned__lt=time_threshold_storage) # items more than time_threshold scanned ago, in storage
+        # items_prio1_4 = Item.objects.filter(user__is_active==False)
+        items_prio1 = items_prio1_1 | items_prio1_2 | items_prio1_3
+        context['items_prio1'] = items_prio1
+        context['items_prio1_priotype'] = zip(
+            ["Standard (in use)" for i in range(items_prio1_1.count())] +
+            ["Standard (storage)" for i in range(items_prio1_3.count())] +
+            ["Item Lost" for i in range(items_prio1_2.count())],
+            ["warning" for i in range(items_prio1_1.count())] +
+            ["warning" for i in range(items_prio1_3.count())] +
+            ["danger" for i in range(items_prio1_2.count())])
+
+        time_threshold_2 = time_threshold + timedelta(weeks=check_mediumpriority_inweeks)
+        time_threshold_2_storage = datetime.now() - timedelta(weeks=check_mediumpriority_storage_inweeks)
+        items_prio2_1 = Item.objects.filter(tracking=True, status=False, last_scanned__range=(time_threshold, time_threshold_2)).exclude(id__in=items_prio1)  # items between time_threshold and time_threshold_2
+        items_prio2_2 = Item.objects.filter(tracking=True, status=True, last_scanned__range=(time_threshold_storage, time_threshold_2_storage)).exclude(id__in=items_prio1)  # items between time_threshold and time_threshold_2
+        items_prio2 = items_prio2_1 | items_prio2_2
+        context['items_prio2'] = items_prio2
+        context['items_prio2_priotype'] = zip(
+            ["Standard (in use)" for i in range(items_prio2_1.count())] +
+            ["Standard (storage)" for i in range(items_prio2_2.count())],
+            ["secondary" for i in range(items_prio2_1.count())] +
+            ["secondary" for i in range(items_prio2_2.count())])
+
+        items_prio3_1 = Item.objects.filter(tracking=True, status=False).exclude(id__in=items_prio1 | items_prio2)  # items less than time_threshold_2 ago
+        items_prio3_2 = Item.objects.filter(tracking=True, status=True).exclude(id__in=items_prio1 | items_prio2)  # items less than time_threshold_storage_2 ago
+        items_prio3 = items_prio3_1 | items_prio3_2
+        context['items_prio3'] = items_prio3
+        context['items_prio3_priotype'] = zip(
+            ["No check needed" for i in range(items_prio3_1.count())] +
+            ["No check needed" for i in range(items_prio3_2.count())],
+            ["success" for i in range(items_prio3_1.count())] +
+            ["success" for i in range(items_prio3_2.count())])
+
+
+        return context
+
+@permission_required('users.is_itemmoderator')
+@staff_member_required
+def check_assignremove(request, pk):
+    item = get_object_or_404(Item, pk=pk)
+
+    if item.storage_location is None:  # no storage location set, this must be done first before item can be stored.
+        from ems.forms import AddStorageLocationForm
+        if request.method == 'POST':
+            form = AddStorageLocationForm(request.POST)
+            if form.is_valid():
+                item.storage_location = form.cleaned_data['storage_location']
+        else:
+            form = AddStorageLocationForm()
+            return render(request, 'ems/storagelocation_form.html', {'form': form})
+
+    messages.success(request,
+                     f'Item <b>{item.brand} {item.model}</b> (assigned to {item.user} at {item.location}) was <b>unassigned.</b> Make sure it is in storage cabinet <b>{item.storage_location}</b>.')
+    item.status = True
+    item.user = None
+    item.date_return = timezone.now()
+    item.last_scanned = timezone.now()
+    item.save()
+
+    return HttpResponseRedirect(reverse('manage-check'))
+
+@permission_required('users.is_itemmoderator')
+@staff_member_required
+def check_assignremove(request, pk):  #rewritten entire function, because not class based view ...
+    item = get_object_or_404(Item, pk=pk)
+
+    if item.storage_location is None:  # no storage location set, this must be done first before item can be stored.
+        from ems.forms import AddStorageLocationForm
+        if request.method == 'POST':
+            form = AddStorageLocationForm(request.POST)
+            if form.is_valid():
+                item.storage_location = form.cleaned_data['storage_location']
+        else:
+            form = AddStorageLocationForm()
+            return render(request, 'ems/storagelocation_form.html', {'form': form})
+
+    messages.success(request,
+                     f'Item <b>{item.brand} {item.model}</b> (assigned to {item.user} at {item.location}) was <b>unassigned.</b> Make sure it is in storage cabinet <b>{item.storage_location}</b>.')
+    item.status = True
+    item.user = None
+    item.date_return = timezone.now()
+    item.last_scanned = timezone.now()
+    item.save()
+
+    return HttpResponseRedirect(reverse('manage-check'))
+
+@permission_required('users.is_itemmoderator')
+@staff_member_required
+def check_verify(request, pk):
+    item = get_object_or_404(Item, pk=pk)
+    item.last_scanned = timezone.now()
+    item.save()
+    messages.success(request, f'Item <b>{item.brand} {item.model}</b> ({item.qrid}) is <b>verified</b>.')
+    return HttpResponseRedirect(reverse('manage-check'))
+
+@method_decorator(staff_member_required, name='dispatch')
+class CheckAssignCreateView(AssignCreateView):  # inherit CBV from ems.views
+    success_url = reverse_lazy('manage-check')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['button'] = 'Update and verify'
+        return context
+
+    def form_valid(self, form):
+        form.instance.last_scanned = timezone.now()
+        return super().form_valid(form)

@@ -3,7 +3,8 @@ from . import views  # imports the functions from views.py
 from .views import UsersView, FlagsView, CategoriesView, UserCreateView, UserUpdateView, UsersActivityView, \
     CategoryCreateView, CategoryUpdateView, FlagsCreateView, FlagsUpdateView, LabCreateView, \
     LabUpdateView, SetupCreateView, SetupUpdateView, CabinetCreateView, CabinetUpdateView, ManageView, ManageViewNew, \
-    Settings, LabView, SetupView, CabinetView, OverviewOpenFlags, OverviewAssignedItems, OverviewItemsWarranty
+    Settings, LabView, SetupView, CabinetView, OverviewOpenFlags, OverviewAssignedItems, OverviewItemsWarranty, \
+    CheckDetailView, CheckAssignCreateView
 
 urlpatterns = [
     path('', ManageView.as_view(), name='manage-home'),
@@ -44,5 +45,13 @@ urlpatterns = [
     path('item/<int:pk>/warranty/remove/', views.warrantyremove, name='manage-warranty-remove'),
 
     path('export/', views.export, name='manage-export'),
+    path('export_single/<int:pk>/', views.export_single, name='manage-export-single'),
+    path('export_outdated/<int:track>/', views.export_outdated, name='manage-export-outdated'),
     path('settings/', Settings.as_view(), name='manage-settings'),
+
+    path('check/', CheckDetailView.as_view(), name='manage-check'),
+    path('item/<int:pk>/assign/remove', views.check_assignremove, name='manage-check-item-assign-remove'),
+    path('item/<int:pk>/verify', views.check_verify, name='manage-check-item-verify'),
+    path('item/<int:pk>/verify', views.check_verify, name='manage-check-item-verify'),
+    path('item/<int:pk>/assign/new', CheckAssignCreateView.as_view(), name='manage-check-item-assign'),
 ]

@@ -14,20 +14,32 @@ active
 
 {% endblock manage_submenu %}
 {% block content %}
-    {% load ems_customfilters %}
+{% load ems_customfilters %}
 
 <div class="row">
-        <div class="col col-12">
-    <form method="POST" enctype="multipart/form-data">
-        {% csrf_token %}
-    <fieldset class="form-group">
-           {{ form|crispy }}
-       </fieldset>
-       <div class="form-group">
-           <button class="btn btn-outline-info" type="submit">Export</button>
-       </div>
-    </form>
+    <div class="col col-12">
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            <fieldset class="form-group">
+                {{ form|crispy }}
+            </fieldset>
+            <div class="form-group">
+                <button class="btn btn-outline-info" type="submit">Export</button>
+            </div>
+        </form>
+    </div>
 </div>
+<p>Note: exporting this way will not mark outdated and new items as up-to-date.</p>
 
+<hr class="my-3">
+
+<div>
+    <h2 style="display: inline-block">Export out-of-date and new labels</h2>
+</div>
+<div>
+    <a class="btn btn-outline-info {% if not outofdate_items_tracking %}disabled{% endif %}" href="{% url 'manage-export-outdated' 1 %}" role="button">Tracking ({{ outofdate_items_tracking }})</a>
+    <a class="btn btn-outline-info {% if not outofdate_items_notracking %}disabled{% endif %}" href="{% url 'manage-export-outdated' 0 %}" role="button">No tracking ({{ outofdate_items_notracking }})</a>
+    <p>Note: exporting this way will mark these items as up-to-date. Make sure you print the labels. </p>
+</div>
 
 {% endblock content %}

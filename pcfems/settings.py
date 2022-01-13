@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'ems.apps.EmsConfig',
     'users.apps.UsersConfig',
     'ems_manage.apps.EmsManageConfig',
+    'orders.apps.OrdersConfig',
 ]
 
 MIDDLEWARE = [
@@ -210,7 +211,7 @@ BOOTSTRAP5 = {
 
 DEFAULT_IMAGE = 'default.png'
 
-EMS_VERSION = '1.1.1'
+EMS_VERSION = '1.2'
 
 TIME_ZONE = 'Europe/Amsterdam'
 
@@ -239,10 +240,10 @@ DYNAMIC_PREFERENCES = {
     'SECTION_KEY_SEPARATOR': '__',
 
     # Use this to disable caching of preference. This can be useful to debug things
-    'ENABLE_CACHE': True,
+    'ENABLE_CACHE': False,
 
     # Use this to disable checking preferences names. This can be useful to debug things
-    'VALIDATE_NAMES': True,
+    'VALIDATE_NAMES': False,
 }
 
 

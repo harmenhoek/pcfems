@@ -58,7 +58,6 @@ active
                     <td>{# {{ item|check_permission:'is_flagmoderator' }} #}
                         {% for perm in item|get_all_permissions %}
                             <span class="badge pill bg-light text-dark" data-bs-toggle="tooltip" data-bs-placement="bottom" title="{{ perm.1 }}">{{ perm.0 }}</span>
-
                         {% endfor %}
 
                     </td>

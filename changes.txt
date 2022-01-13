@@ -253,6 +253,7 @@ To get all user permissions: user.user_permissions.all()
     - Caching is automatically used for settings.
     - All these settings can be changed in Manage/Settings using a form_class. Had to look at source code to get this working. Use get_form_class to actually save the data (just form_class does not call the right functions).
     - In templates use {% if global_preferences.item__show_logbook %} to get value of setting, like <section>__<name>.
+            2022-01-13: I think it should be {{ global_preferences.general__default_sort_col }}
     NOTE: user settings still using own model.
     - Access settings in views:
         from dynamic_preferences.registries import global_preferences_registry
@@ -340,3 +341,25 @@ Version 1.1.1
 - On live version, mt-0 is needed in body to align header properly.
 
 COMMITED Version 1.1.1
+
+2022-01-07
+- Welcome back. Updated pip packages except:
+    Django --> Django 4 is out, but 3.2 is LTS, which is supported till mid-2023
+    django-bootstrap-datepicker-plus --> requires Django 4
+ DO NOT UPDATE THESE PACKAGES.
+ Updated requirements.txt accordingly.
+
+2022-01-10
+- Worked on manage.html. Last year I already made a starts on some statistics. I continued that a bit. Now 4 graphs.
+- Added 'Export Label' function to Action menu on item-detail, to only export that item. In ems_manage/views I put the export procedure in a function create_export_file, which also handles export requests for ems_manage/export.
+- Added 'Export out-of-date labels and new labels' to manage export, which export all outdated labels (or never printed for that matter).
+
+2022-01-11
+- Export out of date labels updated. 2 buttons for tracking and notracking. It shows the number of items that are exported. Tested and works.
+- Bugfix: labelstatus was not updated to current date if version was updated.
+
+2022-01-13
+- Added Checking environment in manage. 3 priorities for checking: High, Medium and Low. See help for criteria. Filtering happens with queries. Added settings in Settings for this. The buttons on this page will set labelstatus to current date, to show it has been checked. Normally the Assign To and Add to Storage don't do this! Only via this checking environment.
+
+TODO on Safari help button is not alinging poperly on home.
+TODO resize and rotate all existing images / write code for that.

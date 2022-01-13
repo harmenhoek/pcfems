@@ -321,6 +321,9 @@ class AssignCreateView(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
         context['button'] = 'Update'
         return context
 
+
+
+
 @login_required
 def assignremove(request, pk):
     item = get_object_or_404(Item, pk=pk)
@@ -339,7 +342,9 @@ def assignremove(request, pk):
     item.user = None
     item.date_return = timezone.now()
     item.save()
-    return HttpResponseRedirect(reverse('item-detail', args=(pk,)))  # get pk from the url
+
+    return HttpResponseRedirect(reverse('item-detail', args=(pk,)))
+
 
 
 @login_required
@@ -373,6 +378,7 @@ class ItemStaffUpdateView(PermissionRequiredMixin, SuccessMessageMixin, LoginReq
         form.instance.updated_by = self.request.user
         if {'brand', 'model', 'serial', 'tracking', 'parts'}.intersection(set(form.changed_data)):
             form.instance.version = self.object.version + 1
+            form.instance.labelstatus = timezone.now()
         if 'tracking' in form.changed_data:
             form.instance.user = None
             form.instance.date_inuse = None

@@ -1,6 +1,6 @@
 # blog/dynamic_preferences_registry.py
 
-from dynamic_preferences.types import BooleanPreference, StringPreference, ChoicePreference, IntegerPreference, LongStringPreference
+from dynamic_preferences.types import BooleanPreference, StringPreference, ChoicePreference, IntegerPreference, LongStringPreference, DurationPreference
 from dynamic_preferences.preferences import Section
 from dynamic_preferences.registries import global_preferences_registry
 
@@ -12,6 +12,7 @@ item = Section('item')
 user = Section('user')
 message = Section('message')
 nomenclature = Section('nomenclature')
+check = Section('check')
 
 # All preference types: https://github.com/agateblue/django-dynamic-preferences/blob/develop/dynamic_preferences/types.py
 
@@ -236,4 +237,46 @@ class UseLocationNamePlural(StringPreference):
     name = 'uselocation_name_plural'
     verbose_name = "Plural name of in-use locations throughout the system."
     default = "Setups"
+    required = True
+
+from datetime import timedelta
+
+# @global_preferences_registry.register
+# class CheckHighPriorityWeeks(DurationPreference):
+#     section = check
+#     name = 'check_highpriority_weeks'
+#     verbose_name = "Number of weeks unchecked when item becomes high priority."
+#     default = timedelta(weeks=23)
+#     required = True
+
+@global_preferences_registry.register
+class CheckHighPriorityInWeeks(IntegerPreference):
+    section = check
+    name = 'check_highpriority_inweeks'
+    verbose_name = "Number of weeks unchecked when item becomes high priority."
+    default = 24
+    required = True
+
+@global_preferences_registry.register
+class CheckMediumPriorityInWeeks(IntegerPreference):
+    section = check
+    name = 'check_mediumpriority_inweeks'
+    verbose_name = "Number of weeks unchecked when item becomes medium priority (up to high priority duration)."
+    default = 12
+    required = True
+
+@global_preferences_registry.register
+class CheckHighPriorityStorageInWeeks(IntegerPreference):
+    section = check
+    name = 'check_highpriority_storage_inweeks'
+    verbose_name = "Number of weeks unchecked when item in storage becomes high priority."
+    default = 48
+    required = True
+
+@global_preferences_registry.register
+class CheckMediumPriorityStorageInWeeks(IntegerPreference):
+    section = check
+    name = 'check_mediumpriority_storage_inweeks'
+    verbose_name = "Number of weeks unchecked when item in storagebecomes medium priority (up to high priority duration)."
+    default = 24
     required = True

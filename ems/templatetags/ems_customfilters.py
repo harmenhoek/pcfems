@@ -3,6 +3,7 @@ from datetime import date
 import math
 import os
 from django.conf import settings
+from datetime import datetime
 
 register = template.Library()
 
@@ -91,3 +92,32 @@ def get_all_permissions(user):
         return ""
     else:
         return zip(perms_codename, perms_name)
+
+@register.filter(name='zip')
+def zip_lists(a, b):
+  return zip(a, b)
+
+@register.filter(expects_localtime=True)
+def weeks_since(value, arg=None):
+    try:
+        tzinfo = getattr(value, 'tzinfo', None)
+        value = date(value.year, value.month, value.day)
+    except AttributeError:
+        # Passed value wasn't a date object
+        return value
+    except ValueError:
+        # Date arguments out of range
+        return value
+    today = datetime.now(tzinfo).date()
+    delta = value - today
+    if abs(delta.days * 7) == 1:
+        day_str = " week"
+    else:
+        day_str = " weeks"
+
+    if delta.days * 7 < 1:
+        fa_str =" ago"
+    else:
+        fa_str = " from now"
+
+    return str(round(abs(delta.days / 7))) + day_str + fa_str

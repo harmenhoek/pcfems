@@ -51,6 +51,8 @@
                                       <li><a class="dropdown-item" href="{% url  'item-staffupdate' object.id %}"><i class="fas fa-edit"></i> Full update</a></li>
                                       <li><a class="dropdown-item" href="{% url  'item-delete' object.id %}"><i class="fas fa-trash"></i> Delete</a></li>
                                   {% endif %}
+                                  <li><a class="dropdown-item" href="{% url  'manage-export-single' object.id %}"><i class="fas fa-download"></i> Export label</a></li>
+
                                   <li><a class="dropdown-item" href="{% url  'item-history' object.id %}"><i class="fas fa-history"></i> Full history</a></li>
                                   {% endif %}
                               </ul>

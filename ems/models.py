@@ -170,11 +170,9 @@ class Category(models.Model):
 
 
 class Item(models.Model):  # inherit from models, all fields below
-    # General details
-    # id or pk automatically created
     qrid = models.SlugField(max_length=10, null=True, blank=True)
     version = models.IntegerField(null=True, blank=True, default=1)
-    labelstatus = models.DateTimeField(default=None, null=True, blank=True)
+    labelstatus = models.DateTimeField(default=timezone.now, null=True, blank=True)  # is None if label version matched db, is date of scanning when scanned but out of date.
 
     brand = models.CharField(max_length=100)
     model = models.CharField(max_length=100, help_text="If multiple parts (e.g. proprietary power supply) with multiple models, comma separate models.")
